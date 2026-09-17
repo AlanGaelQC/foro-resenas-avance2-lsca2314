@@ -61,10 +61,51 @@ CODIGO_DOCKER=$?
 # porque la evidencia de que el bucket no es publico y la base esta cifrada
 # esta justamente ahi. Un reporte que solo lista fallos no demuestra que se
 # haya comprobado lo importante.
+# Checkov trata --file y --directory como modos alternativos. Se generan tres
+# JSON y despues se combinan; mezclar ambos modos en una llamada hacia que el
+# resultado incluyera Terraform pero omitiera CKV_DOCKER_3.
+JSON_TF="$DIR_REPORTES/05_iac_terraform.json"
+JSON_API="$DIR_REPORTES/05_iac_docker_api.json"
+JSON_MODERADOR="$DIR_REPORTES/05_iac_docker_moderador.json"
+
 timeout "$TIEMPO_LIMITE_ETAPA" checkov \
-  --directory infra/ --file Dockerfile --file Dockerfile.moderador \
-  --soft-fail --output json > "$REPORTE_JSON" 2>/dev/null
-CODIGO_JSON=$?
+  --directory infra/ --framework terraform \
+  --soft-fail --output json > "$JSON_TF" 2>/dev/null
+CODIGO_JSON_TF=$?
+
+timeout "$TIEMPO_LIMITE_ETAPA" checkov \
+  --file Dockerfile --framework dockerfile \
+  --soft-fail --output json > "$JSON_API" 2>/dev/null
+CODIGO_JSON_API=$?
+
+timeout "$TIEMPO_LIMITE_ETAPA" checkov \
+  --file Dockerfile.moderador --framework dockerfile \
+  --soft-fail --output json > "$JSON_MODERADOR" 2>/dev/null
+CODIGO_JSON_MODERADOR=$?
+
+python3 - "$JSON_TF" "$JSON_API" "$JSON_MODERADOR" "$REPORTE_JSON" <<'PYTHON'
+import json
+import sys
+
+bloques = []
+for ruta in sys.argv[1:-1]:
+    with open(ruta, encoding="utf-8") as entrada:
+        datos = json.load(entrada)
+    if isinstance(datos, list):
+        bloques.extend(datos)
+    else:
+        bloques.append(datos)
+
+with open(sys.argv[-1], "w", encoding="utf-8") as salida:
+    json.dump(bloques, salida)
+PYTHON
+CODIGO_COMBINACION_JSON=$?
+
+CODIGO_JSON=0
+if [[ "$CODIGO_JSON_TF" -ne 0 || "$CODIGO_JSON_API" -ne 0 \
+   || "$CODIGO_JSON_MODERADOR" -ne 0 || "$CODIGO_COMBINACION_JSON" -ne 0 ]]; then
+  CODIGO_JSON=1
+fi
 
 if [[ ! -s "$REPORTE_JSON" ]]; then
   registrar_estado "$ETAPA" "$NOMBRE" "$HERRAMIENTA" "$ESTADO_ERROR" "$CODIGO_JSON" "$BLOQUEANTE" \

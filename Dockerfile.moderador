@@ -8,11 +8,17 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /aplicacion
 
+RUN apt-get update \
+ && apt-get upgrade -y \
+ && rm -rf /var/lib/apt/lists/*
+
 RUN groupadd --gid 10002 moderador \
  && useradd --uid 10002 --gid moderador --create-home --shell /usr/sbin/nologin moderador
 
 COPY app/moderador/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --no-cache-dir --upgrade \
+      pip==26.2.1 setuptools==84.0.0 wheel==0.48.0 \
+ && python -m pip install --no-cache-dir -r requirements.txt
 
 COPY app/moderador/ ./
 RUN chown -R moderador:moderador /aplicacion

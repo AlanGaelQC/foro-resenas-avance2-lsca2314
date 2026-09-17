@@ -15,6 +15,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /aplicacion
 
+# El digest fija el punto de partida, pero los repositorios de Debian pueden
+# publicar correcciones despues. Se aplican en la construccion y se elimina el
+# indice de apt para no conservar cache innecesaria en la imagen final.
+RUN apt-get update \
+ && apt-get upgrade -y \
+ && rm -rf /var/lib/apt/lists/*
+
 # Usuario sin privilegios: si alguien logra ejecutar codigo dentro del
 # contenedor, no lo hace como root.
 RUN groupadd --gid 10001 foro \
@@ -23,7 +30,9 @@ RUN groupadd --gid 10001 foro \
 # Las dependencias se copian e instalan antes que el codigo para aprovechar la
 # cache de capas: cambiar una linea de la app no reinstala todo.
 COPY app/api/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --no-cache-dir --upgrade \
+      pip==26.2.1 setuptools==84.0.0 wheel==0.48.0 \
+ && python -m pip install --no-cache-dir -r requirements.txt
 
 COPY app/api/ ./
 RUN chown -R foro:foro /aplicacion
