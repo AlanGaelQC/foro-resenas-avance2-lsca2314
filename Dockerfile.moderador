@@ -1,6 +1,6 @@
 # Imagen del servicio de moderacion (pieza tecnica distintiva).
 # Mismo endurecimiento que la API: version fija, sin root, HEALTHCHECK, sin secretos.
-FROM python:3.11-slim
+FROM python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
