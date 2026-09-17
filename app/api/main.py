@@ -310,18 +310,27 @@ async def comentar(
     if hilo is None or hilo.estado != ESTADO_PUBLICADO:
         return JSONResponse({"error": "El hilo no existe."}, status_code=404)
 
-    # DEFECTO CONTROLADO PARA LA CORRIDA ROJA: se publica el comentario sin
-    # consultar al moderador, simulando un atajo introducido por rendimiento.
+    # Los comentarios pasan por la misma revision que las resenas: son la via
+    # mas facil de meter contenido al foro. Si el moderador tarda, la peticion
+    # falla con 503 (decidir_estado ya aplica su propio timeout); lo que no se
+    # hace nunca es publicar sin revisar.
+    try:
+        veredicto = await moderacion.decidir_estado(cuerpo)
+    except moderacion.ErrorDeModeracion as error:
+        return JSONResponse({"error": str(error)}, status_code=503)
+
     comentario = Comentario(
         hilo_id=hilo.id,
         autor_id=usuario.id,
         cuerpo=cuerpo.strip(),
-        estado=ESTADO_PUBLICADO,
-        motivo_moderacion=None,
+        estado=veredicto.estado,
+        motivo_moderacion=veredicto.motivo,
     )
     sesion.add(comentario)
     sesion.commit()
 
+    if veredicto.estado == ESTADO_RECHAZADO:
+        return _redirigir("/mis-publicaciones")
     return _redirigir(f"/hilos/{hilo.id}")
 
 
