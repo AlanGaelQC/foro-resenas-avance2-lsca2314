@@ -1,0 +1,100 @@
+============================================================
+ Pipeline de seguridad - Foro y resenas (Avance 2)
+============================================================
+ Fecha (UTC)   : 2026-09-17T09:32:21Z
+ Commit        : cdac3ad597a9a3cb971d523079e21d0b0531d943 (main, limpio)
+ Equipo        : Linux 6.18.44-99.149.amzn2023.x86_64 x86_64
+ Host          : ip-172-31-26-173.ec2.internal
+ Python        : Python 3.11.16
+ Aplicacion    : http://localhost:8080
+ Modo          : completo
+============================================================
+
+------------------------------------------------------------
+[Etapa 01] Secretos en codigo e historial  (herramienta: gitleaks)
+  Umbral de bloqueo: 0 secretos detectados (cualquier hallazgo bloquea)
+------------------------------------------------------------
+  -> OK: sin hallazgos por encima del umbral (codigo 0).
+     Reporte: /home/ec2-user/foro-resenas-avance2/reportes/01_secretos.txt
+
+------------------------------------------------------------
+[Etapa 02] Dependencias vulnerables (SCA)  (herramienta: pip-audit)
+  Umbral de bloqueo: 0 vulnerabilidades conocidas en requirements de api y moderador
+------------------------------------------------------------
+  -> OK: sin hallazgos por encima del umbral (codigo 0).
+     Reporte: /home/ec2-user/foro-resenas-avance2/reportes/02_dependencias.txt
+
+------------------------------------------------------------
+[Etapa 03] Patrones inseguros en Python (SAST)  (herramienta: bandit)
+  Umbral de bloqueo: 0 hallazgos con severidad >= MEDIA y confianza >= MEDIA (-ll -ii)
+------------------------------------------------------------
+[main]	INFO	profile include tests: None
+[main]	INFO	profile exclude tests: None
+[main]	INFO	cli include tests: None
+[main]	INFO	cli exclude tests: None
+[main]	INFO	running on Python 3.11.16
+[text]	INFO	Text output written to file: /home/ec2-user/foro-resenas-avance2/reportes/03_sast_bandit.txt
+  -> OK: sin hallazgos por encima del umbral (codigo 0).
+     Reporte: /home/ec2-user/foro-resenas-avance2/reportes/03_sast_bandit.txt
+
+------------------------------------------------------------
+[Etapa 04] Reglas propias del foro (SAST dirigido)  (herramienta: semgrep)
+  Umbral de bloqueo: 0 hallazgos de severidad ERROR con reglas_semgrep_foro.yml
+------------------------------------------------------------
+  -> HALLAZGO: supera el umbral, este control bloquea (codigo 1).
+     Reporte: /home/ec2-user/foro-resenas-avance2/reportes/04_sast_semgrep.txt
+
+------------------------------------------------------------
+[Etapa 05] Configuracion de infraestructura y contenedores (IaC)  (herramienta: checkov)
+  Umbral de bloqueo: 0 checks fallidos salvo excepciones justificadas en pipeline/excepciones_checkov.txt
+------------------------------------------------------------
+  -> OK: sin hallazgos por encima del umbral (codigo 0).
+     Reporte: /home/ec2-user/foro-resenas-avance2/reportes/05_iac.txt
+
+------------------------------------------------------------
+[Etapa 06] Vulnerabilidades de las imagenes de contenedor  (herramienta: trivy)
+  Umbral de bloqueo: 0 vulnerabilidades HIGH/CRITICAL con parche disponible en las dos imagenes
+------------------------------------------------------------
+  -> OK: sin hallazgos por encima del umbral (codigo 0).
+     Reporte: /home/ec2-user/foro-resenas-avance2/reportes/06_imagen.txt
+
+------------------------------------------------------------
+[Etapa 07] Inventario de componentes (SBOM CycloneDX)  (herramienta: cyclonedx-py)
+  Umbral de bloqueo: SBOM CycloneDX valido, con >= 1 componente, para los dos servicios
+------------------------------------------------------------
+  -> OK: sin hallazgos por encima del umbral (codigo 0).
+     Reporte: /home/ec2-user/foro-resenas-avance2/reportes/07_sbom.txt
+
+------------------------------------------------------------
+[Etapa 08] Flujos de negocio y autorizacion en ejecucion  (herramienta: pruebas_flujo.py (httpx))
+  Umbral de bloqueo: todas las pruebas de flujo deben pasar (0 fallos tolerados)
+------------------------------------------------------------
+  -> HALLAZGO: supera el umbral, este control bloquea (codigo 1).
+     Reporte: /home/ec2-user/foro-resenas-avance2/reportes/08_pruebas_flujo.txt
+
+============================================================
+ Consolidacion de las etapas
+============================================================
+ETAPA  CONTROL                                        ESTADO           BLOQUEA
+-----  ---------------------------------------------- ---------------- -------
+01     Secretos en codigo e historial                 OK               si
+02     Dependencias vulnerables (SCA)                 OK               si
+03     Patrones inseguros en Python (SAST)            OK               si
+04     Reglas propias del foro (SAST dirigido)        HALLAZGO         si
+05     Configuracion de infraestructura y contenedore OK               si
+06     Vulnerabilidades de las imagenes               OK               si
+07     Inventario de componentes (SBOM)               OK               si
+08     Flujos de negocio y autorizacion en ejecucion  HALLAZGO         si
+
+Motivos del bloqueo:
+  - Etapa 04 (Reglas propias del foro (SAST dirigido)): HALLAZGO - 1 hallazgos ERROR y 0 WARNING con reglas propias
+  - Etapa 08 (Flujos de negocio y autorizacion en ejecucion): HALLAZGO - 1 pruebas de flujo fallaron
+
+============================================================
+ DESPLIEGUE BLOQUEADO
+ 2 control(es) obligatorio(s) no estan en verde.
+ No se promueve nada hasta corregir la causa.
+============================================================
+ Veredicto guardado en: /home/ec2-user/foro-resenas-avance2/reportes/veredicto.json
+ Reportes por etapa en: /home/ec2-user/foro-resenas-avance2/reportes/
+ Copia archivada de esta corrida: /home/ec2-user/foro-resenas-avance2/reportes/corridas/20260917T093325117171776Z-bloqueado/
