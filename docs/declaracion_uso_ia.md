@@ -61,18 +61,19 @@ mi responsabilidad.
 
 ## 5. Qué aprendí y qué puedo defender
 
-Aprendí que un pipeline confiable no solo debe encontrar fallos: también debe
-bloquear cuando una herramienta falla o cuando falta la evidencia de una
-etapa. Puedo explicar la función de los ocho controles, sus umbrales y por qué
-terminan en un solo veredicto. También puedo defender por qué RDS no tiene
-acceso público y solo acepta PostgreSQL desde el security group de la EC2, por
-qué el bucket S3 es privado y cifrado, por qué los contenedores no usan root y
-por qué todo comentario debe pasar por el servicio de moderación antes de
-publicarse. La parte más difícil fue distinguir entre un hallazgo real del
-producto y un componente de construcción detectado dentro de la imagen; lo
-resolví reduciendo la superficie de la imagen final en vez de ocultar el
-resultado de Trivy.
+Durante la ejecución comprobé que un pipeline confiable debe bloquear cuando
+encuentra un hallazgo, cuando una herramienta falla y cuando falta la evidencia
+de una etapa. Comprendí a nivel general la función de los ocho controles y cómo
+terminan en un solo veredicto; antes de la defensa oral repasaré sus nombres
+exactos, sus umbrales y sus justificaciones para explicarlos con precisión.
 
+También comprendí por qué RDS no tiene acceso público y recibe PostgreSQL desde
+el security group de la EC2, por qué el bucket S3 es privado y cifrado, por qué
+los contenedores no usan root y por qué los comentarios pasan por el moderador
+antes de publicarse. La parte más difícil fue distinguir entre un hallazgo del
+producto y un componente de construcción dentro de la imagen; la solución fue
+reducir la superficie de la imagen final en lugar de ocultar el resultado de
+Trivy.
 ## 6. Declaración
 
 Declaro que entiendo el código y las decisiones que entrego, que puedo
