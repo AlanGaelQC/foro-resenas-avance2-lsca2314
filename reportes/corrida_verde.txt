@@ -1,8 +1,8 @@
 ============================================================
  Pipeline de seguridad - Foro y resenas (Avance 2)
 ============================================================
- Fecha (UTC)   : 2026-09-17T19:58:16Z
- Commit        : 2e59c797781581f03c671d89ccdd85a9e6d60610 (main, CON CAMBIOS SIN CONFIRMAR)
+ Fecha (UTC)   : 2026-09-17T21:28:00Z
+ Commit        : 865ab50379a6be3835bf4f6418e12929f05c0349 (main, limpio)
  Equipo        : Linux 6.18.44-99.149.amzn2023.x86_64 x86_64
  Host          : ip-172-31-26-173.ec2.internal
  Python        : Python 3.11.16
@@ -92,4 +92,4 @@ ETAPA  CONTROL                                        ESTADO           BLOQUEA
 ============================================================
  Veredicto guardado en: /home/ec2-user/foro-resenas-avance2/reportes/veredicto.json
  Reportes por etapa en: /home/ec2-user/foro-resenas-avance2/reportes/
- Copia archivada de esta corrida: /home/ec2-user/foro-resenas-avance2/reportes/corridas/20260917T195921989402174Z-permitido/
+ Copia archivada de esta corrida: /home/ec2-user/foro-resenas-avance2/reportes/corridas/20260917T212846465903564Z-permitido/
