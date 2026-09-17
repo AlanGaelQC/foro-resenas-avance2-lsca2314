@@ -58,6 +58,17 @@ Cada corrida queda archivada en `reportes/corridas/<fecha>-<veredicto>/` junto
 con el commit analizado, para que la evidencia de la corrida roja no se pierda
 al remediar.
 
+En la entrega se conservan ambos inventarios: `sbom_cyclonedx.json` para la API
+y `sbom_cyclonedx_moderador.json` para el moderador. El segundo incluye
+`pydantic`, dependencia que no aparece en el inventario de la API.
+
+## Riesgos residuales confirmados en la auditoría
+
+| Riesgo | Decisión para este avance |
+|---|---|
+| La exclusión de Gitleaks también cubre `.env` anidados, archivos `.env` históricos y `reportes/`; podría ocultar un secreto futuro | La auditoría del historial confirmó que el repositorio entregado no contiene ningún `.env` ni secretos. Corregir el alcance queda como mejora posterior para conservar comparable el ciclo rojo→verde ya ejecutado |
+| El entorno QA publica HTTP en el puerto 8080 y usa `COOKIE_SEGURA=false` | La cookie está firmada, pero no tiene protección de transporte. Producción requiere terminación TLS y `COOKIE_SEGURA=true` |
+
 ## Qué decidí NO cubrir, y por qué
 
 | Control descartado | Por qué no está |

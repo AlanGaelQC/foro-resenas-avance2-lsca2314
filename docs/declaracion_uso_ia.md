@@ -42,9 +42,11 @@ mi responsabilidad.
    Instalé ambos componentes, verifiqué sus hashes y confirmé el motor con una
    ejecución real antes de construir la aplicación.
 3. Gitleaks detectó los secretos necesarios del `.env` de ejecución. En lugar
-   de versionarlos o ignorar el riesgo, ajusté el control para excluir solamente
-   ese archivo y verificar por separado que esté ignorado por Git, no rastreado
-   y protegido con permisos `600`.
+   de versionarlos, ajusté el control para verificar que el `.env` de la raíz
+   estuviera ignorado por Git, no rastreado y protegido con permisos `600`.
+   La auditoría posterior mostró que la exclusión también alcanza `.env`
+   anidados y archivos históricos; comprobé que mi repositorio no contiene
+   ninguno y lo dejé documentado como riesgo residual.
 4. Checkov no estaba reuniendo correctamente los resultados de Terraform y de
    los dos Dockerfile. Separé los análisis y consolidé sus salidas para que los
    checks obligatorios tuvieran evidencia explícita.
@@ -74,8 +76,9 @@ resultado de Trivy.
 ## 6. Declaración
 
 Declaro que entiendo el código y las decisiones que entrego, que puedo
-explicarlas y defenderlas, y que las evidencias incluidas
-(`reportes/corrida_roja.txt`, `reportes/corrida_verde.txt`, capturas y video)
-son resultados reales obtenidos en mi propio entorno.
+explicarlas y defenderlas, y que solo presentaré como evidencia resultados
+reales obtenidos en mi propio entorno. En el repositorio ya están las corridas
+roja y verde y los SBOM; las capturas y el video se consideran evidencia
+únicamente después de producirlos y revisarlos.
 
 Firma: Alan Gael Quintanilla Clemente · Fecha: 17 de septiembre de 2026

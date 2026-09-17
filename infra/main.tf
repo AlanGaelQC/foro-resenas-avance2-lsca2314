@@ -140,7 +140,7 @@ resource "aws_db_subnet_group" "base_datos" {
 }
 
 resource "aws_db_instance" "foro" {
-  identifier     = "${var.nombre_proyecto}-base"
+  identifier     = "${var.nombre_proyecto}-${var.entorno}"
   engine         = "postgres"
   engine_version = var.version_motor
   instance_class = var.clase_instancia_base

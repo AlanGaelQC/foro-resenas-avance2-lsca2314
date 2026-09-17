@@ -10,6 +10,12 @@ variable "nombre_proyecto" {
   default     = "foro-resenas"
 }
 
+variable "entorno" {
+  description = "Entorno que forma parte del nombre de los recursos."
+  type        = string
+  default     = "qa"
+}
+
 variable "nombre_bucket" {
   description = "Nombre global del bucket de adjuntos (debe ser unico en AWS)."
   type        = string

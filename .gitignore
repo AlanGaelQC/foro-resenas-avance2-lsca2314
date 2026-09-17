@@ -27,13 +27,17 @@ __pycache__/
 *.db
 foro_desarrollo.db
 
-# Reportes de trabajo del pipeline. Las dos corridas que SI se entregan
-# (corrida_roja.txt y corrida_verde.txt) estan exceptuadas mas abajo.
+# Reportes de trabajo del pipeline. Solo se entregan las dos corridas, los dos
+# SBOM y el detalle minimo que permite auditar la corrida roja.
 reportes/*
 !reportes/.gitkeep
 !reportes/corrida_roja.txt
 !reportes/corrida_verde.txt
 !reportes/sbom_cyclonedx.json
+!reportes/sbom_cyclonedx_moderador.json
+!reportes/evidencia_roja/
+!reportes/evidencia_roja/04_sast_semgrep.txt
+!reportes/evidencia_roja/08_pruebas_flujo.txt
 
 # Sistema operativo y editores.
 .DS_Store

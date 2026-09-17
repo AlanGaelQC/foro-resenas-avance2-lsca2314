@@ -97,6 +97,16 @@ docker compose ps        # los dos servicios, el moderador en healthy
 
 La aplicación queda en `http://<ip-de-tu-instancia>:8080`.
 
+### Limitaciones conocidas del entorno QA
+
+La demostración usa HTTP directo en el puerto 8080 porque el Learner Lab no
+tiene terminación TLS configurada. Por ello `COOKIE_SEGURA=false`: la cookie
+está firmada, pero el navegador no exige transportarla por HTTPS. Producción
+requiere HTTPS y `COOKIE_SEGURA=true`.
+
+La conexión a PostgreSQL usa `sslmode=require`, que cifra el transporte pero no
+verifica por sí solo la identidad del servidor como lo haría `verify-full`.
+
 ## Infraestructura como código
 
 `infra/*.tf` describe el bucket y la base: bloqueo de acceso público en sus
