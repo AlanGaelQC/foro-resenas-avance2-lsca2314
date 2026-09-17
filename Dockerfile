@@ -32,7 +32,11 @@ RUN groupadd --gid 10001 foro \
 COPY app/api/requirements.txt ./requirements.txt
 RUN python -m pip install --no-cache-dir --upgrade \
       pip==26.2.1 setuptools==84.0.0 wheel==0.48.0 \
- && python -m pip install --no-cache-dir -r requirements.txt
+ && python -m pip install --no-cache-dir -r requirements.txt \
+ && python -m pip uninstall -y setuptools wheel \
+ && rm -rf /usr/local/lib/python3.11/site-packages/pip \
+           /usr/local/lib/python3.11/site-packages/pip-*.dist-info \
+           /usr/local/bin/pip /usr/local/bin/pip3 /usr/local/bin/pip3.11
 
 COPY app/api/ ./
 RUN chown -R foro:foro /aplicacion
