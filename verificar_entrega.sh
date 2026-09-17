@@ -1,118 +1,128 @@
-#!/usr/bin/env bash
-# ============================================================================
-#  VERIFICADOR PROPIO - NO es el verificar_entrega.sh del profesor
-# ============================================================================
-#  El documento del Avance 2 menciona un verificar_entrega.sh que se entrega
-#  junto con la plantilla de repositorio. Esa plantilla no llego con el
-#  material, asi que este archivo es una version propia, escrita a partir de la
-#  tabla de entregables del documento. Cuando aparezca el verificador oficial,
-#  usa ese: el tuyo no lo sustituye.
+#!/bin/bash
+# Verificador de la ENTREGA del Avance 2 del Reto - LSCA2314
 #
-#  Comprueba que la entrega este completa. No califica la calidad.
+# No revisa la calidad de tu aplicacion (eso lo califica el docente con la
+# rubrica). Revisa que tu entrega este COMPLETA: que existan las piezas
+# obligatorias, que no hayas dejado plantillas sin llenar y que tengas la
+# evidencia de tu pipeline en rojo y en verde.
 #
-#  Uso:  bash verificar_entrega.sh
-# ============================================================================
-
-set -uo pipefail
-
-RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$RAIZ"
+# Correlo desde la raiz de tu repositorio antes de entregar.
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$DIR" || exit 1
 
 TOTAL=0
-BIEN=0
-FALTANTES=()
+OK=0
 
-revisar() {
-  # revisar <descripcion> <condicion>
-  TOTAL=$((TOTAL + 1))
-  if eval "$2" > /dev/null 2>&1; then
+check() {
+  TOTAL=$((TOTAL+1))
+  if eval "$2"; then
     echo "  [OK] $1"
-    BIEN=$((BIEN + 1))
+    OK=$((OK+1))
   else
-    echo "  [  ] $1"
-    FALTANTES+=("$1")
+    echo "  [ ] $1"
   fi
 }
 
-echo "============================================================"
-echo " Verificacion de la entrega - Avance 2 (verificador propio)"
-echo "============================================================"
-echo ""
-echo "Codigo y orquestacion"
-revisar "app/ con el codigo de la aplicacion"          "[ -d app/api ] && [ -d app/moderador ]"
-revisar "Dockerfile de la API"                          "[ -f Dockerfile ]"
-revisar "Dockerfile del segundo servicio"               "[ -f Dockerfile.moderador ]"
-revisar "docker-compose.yml con dos servicios propios"  "grep -q 'moderador:' docker-compose.yml && grep -q 'api:' docker-compose.yml"
-revisar "Imagen base con version fija (no :latest)"     "! grep -qE '^FROM .*:latest' Dockerfile Dockerfile.moderador"
-revisar "Los contenedores no corren como root"          "grep -q '^USER ' Dockerfile && grep -q '^USER ' Dockerfile.moderador"
-revisar "Los dos Dockerfile tienen HEALTHCHECK"         "grep -q 'HEALTHCHECK' Dockerfile && grep -q 'HEALTHCHECK' Dockerfile.moderador"
-revisar "Endpoint /salud en el codigo"                  "grep -rq '/salud' app/api"
+echo "=================================================="
+echo " Verificacion de entrega - Avance 2 del Reto"
+echo "=================================================="
 
 echo ""
-echo "Infraestructura como codigo"
-revisar "infra/ con archivos .tf"                       "ls infra/*.tf"
-revisar "El .tf describe el bucket de S3"               "grep -rq 'aws_s3_bucket' infra/"
-revisar "El .tf describe la base de datos"              "grep -rq 'aws_db_instance' infra/"
-revisar "RDS cifrada en el .tf"                         "grep -rq 'storage_encrypted *= *true' infra/"
-revisar "RDS sin acceso publico en el .tf"              "grep -rq 'publicly_accessible *= *false' infra/"
-revisar "Bloqueo de acceso publico del bucket"          "grep -rq 'aws_s3_bucket_public_access_block' infra/"
+echo "--- Aplicacion ---"
+check "Hay codigo de aplicacion en app/" \
+  "[ -n \"\$(find app -type f ! -name '.gitkeep' 2>/dev/null)\" ]"
+check "Existe docker-compose.yml (o compose.yaml)" \
+  "[ -f docker-compose.yml ] || [ -f docker-compose.yaml ] || [ -f compose.yaml ]"
+
+COMPOSE=""
+for f in docker-compose.yml docker-compose.yaml compose.yaml; do
+  [ -f "$f" ] && COMPOSE="$f" && break
+done
+
+SERVICIOS=0
+if [ -n "$COMPOSE" ]; then
+  SERVICIOS=$(awk '
+    /^services:/ {dentro=1; next}
+    /^[a-zA-Z_-]+:/ {dentro=0}
+    dentro && /^  [a-zA-Z0-9_-]+:/ {n++}
+    END {print n+0}
+  ' "$COMPOSE")
+fi
+check "El compose define al menos 2 servicios (encontrados: $SERVICIOS)" \
+  "[ \"$SERVICIOS\" -ge 2 ]"
+
+check "Existe al menos un Dockerfile" \
+  "[ -n \"\$(find . -name 'Dockerfile*' -not -path './venv/*' 2>/dev/null)\" ]"
+check "Existe un endpoint /salud en el codigo" \
+  "grep -rq '/salud' app/ 2>/dev/null"
 
 echo ""
-echo "Credenciales fuera del repositorio"
-revisar ".gitignore excluye .env"                       "grep -qE '^\.env$' .gitignore"
-revisar "No hay un .env versionado"                     "! git ls-files --error-unmatch .env"
-revisar "Existe .env.ejemplo como plantilla"            "[ -f .env.ejemplo ]"
-revisar "El .gitignore excluye el estado de Terraform"  "grep -q 'tfstate' .gitignore"
+echo "--- Infraestructura como codigo ---"
+check "Hay al menos un archivo .tf en infra/" \
+  "[ -n \"\$(find infra -name '*.tf' 2>/dev/null)\" ]"
+check "El IaC menciona el bucket de S3" \
+  "grep -rqi 's3' infra/ 2>/dev/null"
+check "El IaC menciona la base de datos (RDS)" \
+  "grep -rqi 'db_instance\|rds' infra/ 2>/dev/null"
 
 echo ""
-echo "Pipeline"
-revisar "pipeline/ con los scripts de control"          "ls pipeline/*.sh"
-revisar "Orquestador con la decision final"             "[ -f pipeline/orquestador.sh ]"
-revisar "El orquestador imprime un veredicto unico"     "grep -q 'DESPLIEGUE BLOQUEADO' pipeline/orquestador.sh && grep -q 'DESPLIEGUE PERMITIDO' pipeline/orquestador.sh"
-revisar "Reglas propias de analisis estatico"           "[ -f pipeline/reglas_semgrep_foro.yml ]"
-revisar "Excepciones de IaC justificadas por escrito"   "[ -s pipeline/excepciones_checkov.txt ]"
+echo "--- Pipeline propio ---"
+check "Hay archivos de pipeline en pipeline/" \
+  "[ -n \"\$(find pipeline -type f ! -name '.gitkeep' 2>/dev/null)\" ]"
+check "Evidencia de la corrida en ROJO (reportes/corrida_roja.txt)" \
+  "[ -s reportes/corrida_roja.txt ]"
+check "La corrida roja efectivamente bloquea" \
+  "grep -qi 'bloquead' reportes/corrida_roja.txt 2>/dev/null"
+check "Evidencia de la corrida en VERDE (reportes/corrida_verde.txt)" \
+  "[ -s reportes/corrida_verde.txt ]"
+check "La corrida verde efectivamente permite" \
+  "grep -qi 'permitid' reportes/corrida_verde.txt 2>/dev/null"
 
 echo ""
-echo "Evidencias"
-revisar "reportes/corrida_roja.txt"                     "[ -s reportes/corrida_roja.txt ]"
-revisar "La corrida roja realmente bloquea"             "grep -q 'DESPLIEGUE BLOQUEADO' reportes/corrida_roja.txt"
-revisar "reportes/corrida_verde.txt"                    "[ -s reportes/corrida_verde.txt ]"
-revisar "La corrida verde realmente permite"            "grep -q 'DESPLIEGUE PERMITIDO' reportes/corrida_verde.txt"
-revisar "SBOM en formato CycloneDX"                     "[ -s reportes/sbom_cyclonedx.json ] && grep -q 'CycloneDX' reportes/sbom_cyclonedx.json"
-
-echo ""
-echo "Documentacion"
-revisar "docs/README.md"                                "[ -s docs/README.md ]"
-revisar "docs/diagrama_arquitectura.png"                "[ -s docs/diagrama_arquitectura.png ]"
-revisar "docs/ADR-001-decisiones-tecnicas.md"           "[ -s docs/ADR-001-decisiones-tecnicas.md ]"
-revisar "docs/tabla_decisiones_pipeline.md"             "[ -s docs/tabla_decisiones_pipeline.md ]"
-revisar "docs/declaracion_uso_ia.md"                    "[ -s docs/declaracion_uso_ia.md ]"
-revisar "Video o enlace al video"                       "[ -s docs/enlace_video.txt ] || ls video/* "
-
-echo ""
-echo "Plantillas sin terminar"
-revisar "Ningun [COMPLETAR] en docs/README.md"          "! grep -q 'COMPLETAR' docs/README.md"
-revisar "Ningun [COMPLETAR] en el ADR"                  "! grep -q 'COMPLETAR' docs/ADR-001-decisiones-tecnicas.md"
-revisar "Ningun [COMPLETAR] en la tabla de decisiones"  "! grep -q 'COMPLETAR' docs/tabla_decisiones_pipeline.md"
-revisar "Declaracion de uso de IA sin [COMPLETAR]"      "! grep -q 'COMPLETAR' docs/declaracion_uso_ia.md"
-revisar "Enlace del video puesto"                       "! grep -q 'COMPLETAR' docs/enlace_video.txt"
-
-echo ""
-echo "============================================================"
-echo " Resultado: $BIEN / $TOTAL"
-echo "============================================================"
-
-if [[ "$BIEN" -eq "$TOTAL" ]]; then
-  echo " La entrega esta completa. Falta lo que este verificador no puede"
-  echo " comprobar: que el bucket y la base existan de verdad en tu cuenta,"
-  echo " y que el video muestre lo que dice mostrar."
-  exit 0
+echo "--- SBOM ---"
+SBOM="$(find . -name 'sbom*.json' -not -path './venv/*' 2>/dev/null | head -1)"
+check "Existe un archivo de SBOM" "[ -n \"$SBOM\" ]"
+if [ -n "$SBOM" ]; then
+  check "El SBOM es CycloneDX valido" \
+    "python3 -c \"import json,sys;d=json.load(open('$SBOM'));sys.exit(0 if d.get('bomFormat')=='CycloneDX' else 1)\" 2>/dev/null"
 fi
 
-echo " Pendientes:"
-for faltante in "${FALTANTES[@]}"; do
-  echo "   - $faltante"
-done
 echo ""
-echo " Lo que aparece aqui como pendiente simplemente no esta entregado."
-exit 1
+echo "--- Documentacion ---"
+check "docs/README.md existe" "[ -f docs/README.md ]"
+check "docs/ADR-001-decisiones-tecnicas.md existe" "[ -f docs/ADR-001-decisiones-tecnicas.md ]"
+check "docs/tabla_decisiones_pipeline.md existe" "[ -f docs/tabla_decisiones_pipeline.md ]"
+check "docs/declaracion_uso_ia.md existe" "[ -f docs/declaracion_uso_ia.md ]"
+check "Hay un diagrama de arquitectura en docs/" \
+  "[ -n \"\$(find docs -iname 'diagrama*' \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.svg' -o -iname '*.pdf' \) 2>/dev/null)\" ]"
+
+PENDIENTES=$(grep -rl '\[COMPLETAR\]' docs/ 2>/dev/null | wc -l)
+check "Ningun documento quedo con [COMPLETAR] (archivos pendientes: $PENDIENTES)" \
+  "[ \"$PENDIENTES\" -eq 0 ]"
+
+echo ""
+echo "--- Video ---"
+check "Hay video en video/ o el enlace en docs/enlace_video.txt" \
+  "[ -n \"\$(find video -type f ! -name '.gitkeep' 2>/dev/null)\" ] || { [ -f docs/enlace_video.txt ] && ! grep -q '\[COMPLETAR\]' docs/enlace_video.txt; }"
+
+echo ""
+echo "--- Higiene del repositorio ---"
+check "El archivo .env NO esta en el repositorio" "[ ! -f .env ]"
+check ".gitignore protege el .env" "grep -q '^\.env' .gitignore 2>/dev/null"
+check "No hay carpeta venv/ subida al repositorio" "[ ! -d venv ]"
+
+echo ""
+echo "=================================================="
+echo " Resultado: $OK / $TOTAL"
+echo "=================================================="
+
+if [ "$OK" -eq "$TOTAL" ]; then
+  echo "Tu entrega esta completa. Recuerda que esto NO califica la calidad"
+  echo "de tu aplicacion ni de tus justificaciones: eso lo revisa el docente"
+  echo "con la rubrica. Sube el enlace de tu repositorio y el documento de"
+  echo "evidencias a la plataforma."
+  exit 0
+else
+  echo "Faltan piezas de la entrega. Revisa la lista de arriba."
+  exit 1
+fi
