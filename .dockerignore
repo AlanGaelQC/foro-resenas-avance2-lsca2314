@@ -1,0 +1,11 @@
+.git
+.env
+.herramientas
+reportes
+ejemplo_corridas_simulacion
+__pycache__
+*.pyc
+*.db
+docs
+infra
+pipeline

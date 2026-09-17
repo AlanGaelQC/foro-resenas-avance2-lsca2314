@@ -1,0 +1,20 @@
+# Excepciones de la etapa 05 (checkov).
+#
+# Formato: un ID de check por linea, seguido de su justificacion.
+# Todo check fallido que NO aparezca aqui bloquea el despliegue.
+#
+# Estos ocho son los checks que realmente fallaron al correr checkov sobre este
+# proyecto. Ninguno tiene que ver con acceso publico ni con cifrado: esos pasan
+# y su evidencia queda listada al final de reportes/05_iac.txt.
+#
+# Revisa esta lista cuando cambie infra/ o los Dockerfile: una excepcion que ya
+# no aplica es una puerta abierta que nadie vuelve a mirar.
+
+CKV_AWS_157   RDS Multi-AZ. Alta disponibilidad en dos zonas duplica el costo de la base y el Avance 2 no pide continuidad de servicio. Riesgo residual: una caida de zona deja el foro sin base hasta restaurar respaldo.
+CKV_AWS_353   RDS Performance Insights. Es una herramienta de diagnostico de rendimiento, no un control de seguridad, y suma costo en una db.t3.micro de laboratorio.
+CKV_AWS_118   RDS Enhanced Monitoring. Exige un rol IAM propio (monitoring_role_arn); AWS Academy no permite crear roles nuevos. Se compensa con enabled_cloudwatch_logs_exports, que si esta activo.
+CKV2_AWS_30   Query Logging de PostgreSQL. Requiere un parameter group personalizado. Los logs del motor ya se exportan a CloudWatch; registrar todas las consultas ademas guardaria texto de las resenas en los logs.
+CKV_AWS_18    S3 access logging. Necesita un segundo bucket solo para registros. El acceso a los adjuntos ya pasa por la aplicacion, que identifica al usuario, y las llamadas a S3 quedan en CloudTrail a nivel de cuenta. Riesgo residual: no hay registro por objeto dentro del bucket.
+CKV_AWS_144   S3 replicacion entre regiones. Exige una segunda region y duplica almacenamiento; el Avance 2 trabaja en una sola region de AWS Academy.
+CKV2_AWS_62   S3 event notifications. El proyecto no reacciona a eventos del bucket: los adjuntos se procesan en la peticion que los sube.
+CKV_AWS_145   S3 cifrado con KMS. El bucket usa SSE-S3 (AES256), que cumple el requisito de cifrado en reposo del Avance 2. Una llave KMS propia agrega gestion y costo sin cambiar el riesgo en este alcance.

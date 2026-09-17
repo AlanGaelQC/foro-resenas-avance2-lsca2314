@@ -1,0 +1,57 @@
+# Configuracion de gitleaks para el foro de resenas.
+#
+# Se parte del conjunto de reglas por defecto de gitleaks y se agregan dos
+# reglas propias para los secretos que este proyecto realmente maneja: la
+# contrasena de la base RDS y la llave de firma de sesiones.
+#
+# Las excepciones (allowlist) son deliberadamente estrechas: se permiten los
+# marcadores del archivo de ejemplo, no valores reales.
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "foro-url-base-datos-con-contrasena"
+description = "Cadena de conexion a la base con contrasena incrustada"
+# La contrasena no puede contener < ni >: asi un marcador de plantilla como
+# <contrasena-de-tu-rds> deja de coincidir. Se corrige la regla en vez de
+# silenciar el hallazgo: una excepcion escondida taparia tambien un secreto real.
+regex = '''(?i)(postgresql|postgres|mysql)(\+\w+)?://[^:\s]+:[^@\s<>]{3,}@'''
+tags = ["base-datos", "credencial"]
+
+  [rules.allowlist]
+  description = "Marcadores del archivo de ejemplo"
+  regexTarget = "line"
+  regexes = [
+    '''<[a-z-]+>''',
+    '''CAMBIA_ESTE_VALOR''',
+  ]
+
+[[rules]]
+id = "foro-clave-sesion-en-codigo"
+description = "Llave de firma de sesiones escrita en el codigo o en un .env versionado"
+# Con o sin comillas: en un .env no las lleva.
+regex = '''(?i)CLAVE_SESION\s*[:=]\s*["']?[A-Za-z0-9_\-+/=]{16,}["']?'''
+tags = ["sesion", "credencial"]
+
+  [rules.allowlist]
+  description = "Marcador del archivo de ejemplo"
+  regexTarget = "line"
+  regexes = [
+    '''CAMBIA_ESTE_VALOR''',
+  ]
+
+[allowlist]
+description = "Marcadores de ejemplo y artefactos del propio pipeline"
+paths = [
+  '''\.herramientas/''',
+  '''reportes/''',
+  '''\.git/''',
+]
+regexes = [
+  # Marcadores del archivo de ejemplo: no son valores reales.
+  '''CAMBIA_ESTE_VALOR''',
+  '''<contrasena-de-tu-rds>''',
+  '''<host-de-tu-rds>''',
+  '''usuario:contrasena@servidor''',
+]

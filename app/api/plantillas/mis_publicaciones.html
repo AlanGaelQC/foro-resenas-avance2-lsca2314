@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}Mis publicaciones{% endblock %}
+{% block contenido %}
+<h1>Mis publicaciones</h1>
+<p class="meta">Aqui aparece lo que el moderador rechazo, con el motivo.</p>
+
+<h2>Resenas</h2>
+{% for hilo in hilos %}
+  <div class="tarjeta {{ 'rechazado' if hilo.estado == 'rechazado' else 'publicado' }}">
+    <h3>{{ hilo.titulo }}</h3>
+    <p class="meta">Estado: {{ hilo.estado }}{% if hilo.motivo_moderacion %} · {{ hilo.motivo_moderacion }}{% endif %}</p>
+    <p>{{ hilo.cuerpo }}</p>
+  </div>
+{% else %}
+  <p>Aun no publicas resenas.</p>
+{% endfor %}
+
+<h2>Comentarios</h2>
+{% for comentario in comentarios %}
+  <div class="tarjeta {{ 'rechazado' if comentario.estado == 'rechazado' else 'publicado' }}">
+    <p class="meta">Estado: {{ comentario.estado }}{% if comentario.motivo_moderacion %} · {{ comentario.motivo_moderacion }}{% endif %}</p>
+    <p>{{ comentario.cuerpo }}</p>
+  </div>
+{% else %}
+  <p>Aun no escribes comentarios.</p>
+{% endfor %}
+{% endblock %}

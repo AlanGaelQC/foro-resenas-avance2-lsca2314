@@ -1,0 +1,6 @@
+# El moderador se mantiene con el minimo de dependencias a proposito: es el
+# servicio que decide si algo se publica, asi que cada libreria extra aqui es
+# superficie de ataque sobre esa decision.
+fastapi==0.141.1
+uvicorn[standard]==0.53.0
+pydantic==2.13.5

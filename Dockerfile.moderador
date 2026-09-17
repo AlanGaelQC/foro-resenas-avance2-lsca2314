@@ -1,0 +1,26 @@
+# Imagen del servicio de moderacion (pieza tecnica distintiva).
+# Mismo endurecimiento que la API: version fija, sin root, HEALTHCHECK, sin secretos.
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /aplicacion
+
+RUN groupadd --gid 10002 moderador \
+ && useradd --uid 10002 --gid moderador --create-home --shell /usr/sbin/nologin moderador
+
+COPY app/moderador/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY app/moderador/ ./
+RUN chown -R moderador:moderador /aplicacion
+
+USER moderador
+EXPOSE 8001
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD python -c "import sys,urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8001/salud', timeout=3).status == 200 else 1)"
+
+CMD ["uvicorn", "main:aplicacion", "--host", "0.0.0.0", "--port", "8001"]

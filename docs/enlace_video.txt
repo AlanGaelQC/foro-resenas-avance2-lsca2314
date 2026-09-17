@@ -1,0 +1,64 @@
+VIDEO DE DEMOSTRACION - AVANCE 2
+Foro y resenas - LSCA2314
+
+Enlace: [COMPLETAR: pega aqui el enlace de tu video, con permiso de lectura
+para el profesor]
+
+Duracion: entre 3 y 5 minutos. Sin edicion ni produccion.
+
+
+GUION SUGERIDO (el orden lo pide la consigna)
+=============================================
+
+Minuto 0:00 - 0:20  ·  Presentacion
+  - Di tu nombre, el tema (Foro y resenas) y cual es tu pieza tecnica
+    distintiva: el servicio de moderacion en su propio contenedor.
+
+Minuto 0:20 - 1:30  ·  La aplicacion, una accion completa de principio a fin
+  - Registra un usuario nuevo e inicia sesion.
+  - Publica una resena limpia CON imagen adjunta. Muestra que aparece en la
+    portada y que el enlace del adjunto abre la imagen.
+  - Publica una resena con contenido prohibido (por ejemplo: "esto es una
+    estafa y son unos imbecil"). Muestra que NO aparece en la portada y que en
+    /mis-publicaciones sale marcada como rechazada CON el motivo.
+  - Este es el momento donde se demuestra la pieza distintiva: dilo en voz
+    alta mientras pasa.
+
+Minuto 1:30 - 2:00  ·  Los contenedores levantados
+  - docker compose ps        (los dos servicios, el moderador en healthy)
+  - Senala que el moderador NO publica puertos al exterior.
+  - Opcional, muy efectivo: docker compose logs moderador, para que se vea la
+    peticion que la API le hizo al publicar.
+
+Minuto 2:00 - 2:45  ·  S3 y RDS en la consola de AWS
+  - S3: entra al bucket, muestra el objeto bajo adjuntos/ que se acaba de
+    crear, y las pestanas de Permissions (acceso publico bloqueado) y
+    Properties (cifrado activado).
+  - RDS: muestra la instancia, que Public access = No y que Encryption esta
+    activado.
+  - Di explicitamente: "este objeto se creo cuando publique la resena de hace
+    un minuto", que es lo que demuestra uso real y no solo existencia.
+
+Minuto 2:45 - 4:30  ·  El pipeline bloqueando y despues permitiendo
+  - Muestra reportes/corrida_roja.txt: la tabla de consolidacion, la etapa que
+    quedo en HALLAZGO y el mensaje DESPLIEGUE BLOQUEADO.
+  - Explica en una frase cual fue el hallazgo real y por que ese control existe.
+  - Muestra el cambio que lo remedia (git diff o el archivo corregido).
+  - Muestra reportes/corrida_verde.txt con DESPLIEGUE PERMITIDO.
+  - Si te alcanza el tiempo: echo $? despues de correr el pipeline, para que se
+    vea que el codigo de salida es el que decide.
+
+Minuto 4:30 - 5:00  ·  Cierre
+  - Una frase sobre por que elegiste los umbrales que elegiste.
+  - Menciona que la corrida roja y la verde estan archivadas en
+    reportes/corridas/ con su commit.
+
+
+ANTES DE GRABAR
+===============
+  [ ] .env cargado y los dos contenedores arriba (docker compose ps)
+  [ ] Bucket y base creados, con datos reales ya guardados
+  [ ] Las dos corridas ya generadas (no las corras en vivo: tardan)
+  [ ] Consola de AWS abierta en otra pestana, ya autenticada
+  [ ] Cierra lo que no quieras que salga en pantalla
+  [ ] NO muestres el contenido de .env, ni llaves, ni el tfvars

@@ -1,0 +1,143 @@
+# Reglas propias del foro de resenas.
+#
+# Estas reglas no son genericas: cada una defiende una invariante concreta de
+# ESTA aplicacion. Son la respuesta a "¿por que esta etapa?" que pide la
+# rubrica. Van en un archivo local para que semgrep corra sin depender del
+# registro en linea (y por tanto sin depender de la red de la instancia).
+
+rules:
+  # ---------------------------------------------------------------------------
+  # La invariante central del tema 4: nada se publica sin pasar por moderacion.
+  # El unico modulo autorizado a devolver el estado 'publicado' es
+  # app/api/moderacion.py, que lo hace a partir del veredicto del servicio.
+  # Cualquier otro archivo que ponga ese estado a mano se esta saltando al
+  # moderador, que es justamente la pieza distintiva del proyecto.
+  # ---------------------------------------------------------------------------
+  - id: foro-publicacion-sin-moderacion
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Se asigna el estado 'publicado' fuera de app/api/moderacion.py. Todo
+      contenido debe publicarse con el veredicto de moderacion.decidir_estado();
+      asignar el estado a mano evade el servicio de moderacion.
+    paths:
+      include:
+        - "app/**/*.py"
+      exclude:
+        - "app/api/moderacion.py"
+        - "app/api/modelos.py"
+    patterns:
+      - pattern-either:
+          - pattern: $OBJETO.estado = ESTADO_PUBLICADO
+          - pattern: $OBJETO.estado = "publicado"
+          - pattern: $FUNCION(..., estado=ESTADO_PUBLICADO, ...)
+          - pattern: $FUNCION(..., estado="publicado", ...)
+
+  # ---------------------------------------------------------------------------
+  # El cuerpo de una resena y de un comentario es texto libre de un usuario
+  # registrado. Si ese texto entra en una consulta por concatenacion, el foro
+  # regala la base de datos completa.
+  # ---------------------------------------------------------------------------
+  - id: foro-sql-concatenado
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Consulta SQL construida con concatenacion o f-string. Usa consultas
+      parametrizadas de SQLAlchemy: el contenido del foro lo escribe el usuario.
+    paths:
+      include:
+        - "app/**/*.py"
+    patterns:
+      - pattern-either:
+          - pattern: $SESION.execute(f"...")
+          - pattern: $SESION.execute("..." + $VARIABLE)
+          - pattern: text(f"...")
+          - pattern: text("..." + $VARIABLE)
+
+  # ---------------------------------------------------------------------------
+  # Si la llamada al moderador no lleva timeout, un moderador colgado deja la
+  # peticion esperando para siempre: la publicacion queda en el limbo y el
+  # servidor se queda sin trabajadores. El fallo debe ser rapido y explicito.
+  # ---------------------------------------------------------------------------
+  - id: foro-llamada-http-sin-timeout
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Llamada HTTP sin timeout explicito. El cliente del moderador debe fallar
+      rapido en vez de quedarse esperando indefinidamente.
+    paths:
+      include:
+        - "app/**/*.py"
+    patterns:
+      - pattern-either:
+          - pattern: httpx.AsyncClient(...)
+          - pattern: httpx.Client(...)
+      - pattern-not: httpx.AsyncClient(..., timeout=$TIEMPO, ...)
+      - pattern-not: httpx.Client(..., timeout=$TIEMPO, ...)
+
+  # ---------------------------------------------------------------------------
+  # Las contrasenas del foro se derivan con scrypt. Un hash rapido (MD5, SHA1)
+  # convierte una fuga de la tabla de usuarios en contrasenas en claro.
+  # ---------------------------------------------------------------------------
+  - id: foro-hash-debil-para-credenciales
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Hash debil (MD5/SHA1) en el codigo. Para credenciales usa scrypt, como en
+      app/api/seguridad.py.
+    patterns:
+      - pattern-either:
+          - pattern: hashlib.md5(...)
+          - pattern: hashlib.sha1(...)
+
+  # ---------------------------------------------------------------------------
+  # Los adjuntos deben subirse siempre por almacenamiento.subir_adjunto(), que
+  # valida tipo, extension y tamano antes de tocar S3. Un put_object suelto en
+  # otro modulo se salta esa validacion.
+  # ---------------------------------------------------------------------------
+  - id: foro-subida-s3-sin-validacion
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Subida directa a S3 fuera de app/api/almacenamiento.py. Usa
+      subir_adjunto(), que valida tipo, extension y tamano del archivo.
+    paths:
+      include:
+        - "app/**/*.py"
+      exclude:
+        - "app/api/almacenamiento.py"
+    patterns:
+      - pattern-either:
+          - pattern: $CLIENTE.put_object(...)
+          - pattern: $CLIENTE.upload_fileobj(...)
+
+  # ---------------------------------------------------------------------------
+  # El contenido del foro se renderiza en HTML. Marcarlo como seguro desactiva
+  # el escape automatico de Jinja2 y abre XSS almacenado: un comentario con
+  # <script> se ejecutaria en el navegador de cada lector.
+  # ---------------------------------------------------------------------------
+  - id: foro-plantilla-sin-escape
+    languages: [generic]
+    severity: ERROR
+    message: >-
+      Filtro |safe en una plantilla. El contenido del foro lo escribe el
+      usuario: desactivar el escape automatico habilita XSS almacenado.
+    paths:
+      include:
+        - "*.html"
+    pattern-regex: \|\s*safe
+
+  # ---------------------------------------------------------------------------
+  # Depuracion encendida en produccion filtra trazas con rutas, consultas y a
+  # veces variables de entorno.
+  # ---------------------------------------------------------------------------
+  - id: foro-depuracion-encendida
+    languages: [python]
+    severity: WARNING
+    message: >-
+      Modo de depuracion activado. En el entorno de la entrega debe estar
+      apagado: las trazas exponen detalle interno de la aplicacion.
+    patterns:
+      - pattern-either:
+          - pattern: FastAPI(..., debug=True, ...)
+          - pattern: uvicorn.run(..., reload=True, ...)

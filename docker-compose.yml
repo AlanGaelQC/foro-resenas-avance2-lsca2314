@@ -1,0 +1,68 @@
+# Orquestacion de los dos contenedores propios del proyecto.
+#
+# 'api' y 'moderador' son servicios separados, con su propia imagen y su propio
+# proceso: la moderacion no es una funcion dentro de la API, es una llamada de
+# red a otro contenedor. Esa separacion es el requisito del tema 4.
+#
+# El moderador NO publica puertos al exterior: solo es alcanzable desde la red
+# interna de compose. Si estuviera expuesto, cualquiera podria consultarlo o
+# saturarlo desde fuera de la instancia.
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: foro-resenas-api:local
+    env_file:
+      - .env
+    environment:
+      URL_MODERADOR: http://moderador:8001
+    ports:
+      # 8080 en la instancia -> 8000 en el contenedor. Es el unico puerto que
+      # el security group necesita abrir para la demostracion.
+      - "8080:8000"
+    depends_on:
+      moderador:
+        condition: service_healthy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    mem_limit: 640m
+    cpus: 0.75
+    networks:
+      - red_foro
+
+  moderador:
+    build:
+      context: .
+      dockerfile: Dockerfile.moderador
+    image: foro-resenas-moderador:local
+    environment:
+      # Configuracion de reglas, no secretos: puede vivir aqui sin problema.
+      LEXICO_PROHIBIDO: "idiota,estafa,fraude,basura,imbecil"
+      MAX_ENLACES: "2"
+      LONGITUD_MINIMA: "10"
+    expose:
+      - "8001"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    mem_limit: 256m
+    cpus: 0.25
+    networks:
+      - red_foro
+
+networks:
+  red_foro:
+    driver: bridge

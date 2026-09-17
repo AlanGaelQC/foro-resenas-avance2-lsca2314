@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Resenas publicadas</h1>
+{% if promedio %}<p class="meta">Calificacion promedio del foro: {{ promedio }} / 5</p>{% endif %}
+
+{% if usuario %}
+<div class="tarjeta">
+  <h2>Publicar una resena</h2>
+  <form action="/hilos" method="post" enctype="multipart/form-data">
+    <label>Titulo <input type="text" name="titulo" required maxlength="160"></label>
+    <label>Tu resena <textarea name="cuerpo" rows="4" required></textarea></label>
+    <label>Calificacion
+      <select name="calificacion">
+        {% for n in [5, 4, 3, 2, 1] %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Imagen (opcional, JPG/PNG/WEBP) <input type="file" name="adjunto" accept="image/*"></label>
+    <button type="submit">Enviar a revision</button>
+  </form>
+  <p class="meta">Toda resena pasa primero por el servicio de moderacion.</p>
+</div>
+{% else %}
+<p><a href="/entrar">Inicia sesion</a> para publicar.</p>
+{% endif %}
+
+{% for hilo in hilos %}
+  <div class="tarjeta publicado">
+    <h3><a href="/hilos/{{ hilo.id }}">{{ hilo.titulo }}</a></h3>
+    <p class="meta">{{ hilo.calificacion }}/5 · por {{ hilo.autor.nombre }} · {{ hilo.creado_en.strftime('%Y-%m-%d %H:%M') }}</p>
+    <p>{{ hilo.cuerpo }}</p>
+    {% if hilo.clave_s3 %}<p><a href="/adjunto/{{ hilo.id }}">Ver imagen adjunta</a></p>{% endif %}
+  </div>
+{% else %}
+  <p>Todavia no hay resenas publicadas.</p>
+{% endfor %}
+{% endblock %}

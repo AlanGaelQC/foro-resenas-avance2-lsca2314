@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block titulo %}Entrar{% endblock %}
+{% block contenido %}
+<h1>Iniciar sesion</h1>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form action="/entrar" method="post">
+  <label>Correo <input type="email" name="correo" required></label>
+  <label>Contrasena <input type="password" name="contrasena" required></label>
+  <button type="submit">Entrar</button>
+</form>
+<p class="meta">¿Sin cuenta? <a href="/registro">Registrarme</a></p>
+{% endblock %}

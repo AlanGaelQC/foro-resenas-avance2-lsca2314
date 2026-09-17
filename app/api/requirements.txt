@@ -1,0 +1,12 @@
+# Versiones fijadas (verificadas al instalarlas, no copiadas de memoria).
+# Fijarlas es lo que hace reproducible el escaneo de dependencias: si el pin
+# cambia, pip-audit vuelve a evaluar y el pipeline lo nota.
+fastapi==0.141.1
+uvicorn[standard]==0.53.0
+SQLAlchemy==2.0.54
+psycopg2-binary==2.9.13
+boto3==1.43.95
+Jinja2==3.1.6
+python-multipart==0.0.32
+itsdangerous==2.2.0
+httpx==0.28.1

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titulo %}Registro{% endblock %}
+{% block contenido %}
+<h1>Crear cuenta</h1>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form action="/registro" method="post">
+  <label>Correo <input type="email" name="correo" required></label>
+  <label>Nombre <input type="text" name="nombre" required maxlength="80"></label>
+  <label>Contrasena (minimo 10 caracteres) <input type="password" name="contrasena" required minlength="10"></label>
+  <button type="submit">Registrarme</button>
+</form>
+<p class="meta">¿Ya tienes cuenta? <a href="/entrar">Entrar</a></p>
+{% endblock %}

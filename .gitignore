@@ -1,0 +1,41 @@
+# Secretos: nunca al repositorio.
+.env
+.env.*
+!.env.ejemplo
+
+# Estado y planes de Terraform: el archivo de estado guarda la contrasena de la
+# base en claro, y el plan puede guardarla tambien.
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.*
+infra/*.tfvars
+infra/*.tfvars.json
+infra/*.tfplan
+infra/crash.log
+
+# Herramientas del pipeline instaladas localmente.
+.herramientas/
+venv/
+.venv/
+
+# Artefactos de Python.
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Base de datos local de desarrollo (no es la RDS del entregable).
+*.db
+foro_desarrollo.db
+
+# Reportes de trabajo del pipeline. Las dos corridas que SI se entregan
+# (corrida_roja.txt y corrida_verde.txt) estan exceptuadas mas abajo.
+reportes/*
+!reportes/.gitkeep
+!reportes/corrida_roja.txt
+!reportes/corrida_verde.txt
+!reportes/sbom_cyclonedx.json
+
+# Sistema operativo y editores.
+.DS_Store
+.idea/
+.vscode/

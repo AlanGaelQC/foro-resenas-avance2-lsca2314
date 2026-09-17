@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}{{ hilo.titulo }}{% endblock %}
+{% block contenido %}
+<div class="tarjeta publicado">
+  <h1>{{ hilo.titulo }}</h1>
+  <p class="meta">{{ hilo.calificacion }}/5 · por {{ hilo.autor.nombre }} · {{ hilo.creado_en.strftime('%Y-%m-%d %H:%M') }}</p>
+  <p>{{ hilo.cuerpo }}</p>
+  {% if hilo.clave_s3 %}<p><a href="/adjunto/{{ hilo.id }}">Ver imagen adjunta</a></p>{% endif %}
+</div>
+
+<h2>Comentarios</h2>
+{% for comentario in comentarios %}
+  <div class="tarjeta">
+    <p class="meta">{{ comentario.autor.nombre }} · {{ comentario.creado_en.strftime('%Y-%m-%d %H:%M') }}</p>
+    <p>{{ comentario.cuerpo }}</p>
+  </div>
+{% else %}
+  <p>Sin comentarios todavia.</p>
+{% endfor %}
+
+{% if usuario %}
+<div class="tarjeta">
+  <form action="/hilos/{{ hilo.id }}/comentarios" method="post">
+    <label>Tu comentario <textarea name="cuerpo" rows="3" required></textarea></label>
+    <button type="submit">Enviar a revision</button>
+  </form>
+</div>
+{% else %}
+<p><a href="/entrar">Inicia sesion</a> para comentar.</p>
+{% endif %}
+<p><a href="/">Volver</a></p>
+{% endblock %}
