@@ -44,6 +44,10 @@ tags = ["sesion", "credencial"]
 [allowlist]
 description = "Marcadores de ejemplo y artefactos del propio pipeline"
 paths = [
+  # El .env raiz es configuracion de ejecucion y contiene secretos reales por
+  # necesidad. La etapa 01 verifica por separado que este ignorado, no este
+  # rastreado por Git y tenga permisos 600 antes de excluirlo del contenido.
+  '''(^|/)\.env$''',
   '''\.herramientas/''',
   '''reportes/''',
   '''\.git/''',
