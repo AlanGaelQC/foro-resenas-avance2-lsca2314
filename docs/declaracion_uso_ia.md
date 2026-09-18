@@ -74,6 +74,7 @@ antes de publicarse. La parte más difícil fue distinguir entre un hallazgo del
 producto y un componente de construcción dentro de la imagen; la solución fue
 reducir la superficie de la imagen final en lugar de ocultar el resultado de
 Trivy.
+
 ## 6. Declaración
 
 Declaro que entiendo el código y las decisiones que entrego, que puedo
