@@ -22,6 +22,8 @@ bash pipeline/orquestador.sh
 
 El orquestador ejecuta ocho etapas y crea `reportes/veredicto.json` y `reportes/corridas/<fecha>-<veredicto>/`. Guarda fuera del directorio que sobrescribe la siguiente corrida el nombre exacto de esa carpeta y el commit. Un retorno 1 puede significar **HALLAZGO** o **ERROR_OPERATIVO**: identifica cuál en los reportes. Un escáner que no corrió no demuestra la XSS.
 
+**Evidencia observada en QA, 2026-09-25 21:55–21:57 UTC:** sobre el commit vulnerable `215be19`, la corrida completa devolvió código 0 y `PERMITIDO`: las ocho etapas figuraron `OK`, incluidas 04 y 08. Archivo: `reportes/corridas/20260925T215712762170233Z-permitido/`. Esto acredita una brecha de cobertura del pipeline previo, **no** la seguridad del parche. El veredicto anotó `arbol: CON CAMBIOS SIN CONFIRMAR` aunque `git status` estaba limpio antes y después: el orquestador borraba temporalmente los SBOM versionados antes de medir el árbol y la etapa 07 los regeneraba idénticos. La corrección del registro se incorpora en un commit posterior; no se altera la evidencia histórica de esta corrida.
+
 | Orden | Checkout en la rama local | Qué observar y registrar |
 |---|---|---|
 | 1 | `git switch --detach 215be19` | Parche del profesor vivo. Corre el **pipeline original** antes de añadir detección. Registra si pasa por una brecha real o se bloquea por otra causa. No promuevas aunque diga PERMITIDO. |

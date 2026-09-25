@@ -43,6 +43,16 @@ declare -A GUIONES_ETAPAS=(
 
 cd "$RAIZ_PROYECTO"
 
+# Medir el arbol ANTES de borrar los reportes de la corrida anterior. Los SBOM
+# se versionan para la entrega: el borrado temporal de esos archivos no es un
+# cambio del candidato y la etapa 07 los regenera de forma reproducible.
+COMMIT="$(git rev-parse HEAD 2>/dev/null || echo 'sin repositorio git')"
+RAMA="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'n/d')"
+SUCIO="limpio"
+if git status --porcelain 2>/dev/null | grep -q .; then
+  SUCIO="CON CAMBIOS SIN CONFIRMAR"
+fi
+
 # SOLO_CONSOLIDAR=1 corre unicamente la logica de decision sobre los archivos de
 # estado que ya existan, sin ejecutar ninguna etapa. Sirve para probar la puerta
 # (pipeline/probar_puerta.sh). No es una via para aprobar sin controles: si no
@@ -60,13 +70,6 @@ else
     "$DIR_REPORTES"/0[1-8]_*.json \
     "$DIR_REPORTES"/veredicto.json \
     "$DIR_REPORTES"/sbom_cyclonedx*.json
-fi
-
-COMMIT="$(git rev-parse HEAD 2>/dev/null || echo 'sin repositorio git')"
-RAMA="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'n/d')"
-SUCIO="limpio"
-if git status --porcelain 2>/dev/null | grep -q .; then
-  SUCIO="CON CAMBIOS SIN CONFIRMAR"
 fi
 
 echo "============================================================"
@@ -96,10 +99,18 @@ for etapa in "${ETAPAS_ESPERADAS[@]}"; do
   bash "$guion" || true
 done
 
+# Si un control genero cambios persistentes (por ejemplo, un SBOM distinto al
+# versionado), el veredicto tambien registra que el arbol dejo de ser limpio.
+# Conservamos SUCIO si ya habia modificaciones antes de ejecutar las etapas.
+if git status --porcelain 2>/dev/null | grep -q .; then
+  SUCIO="CON CAMBIOS SIN CONFIRMAR"
+fi
+
 echo ""
 echo "============================================================"
 echo " Consolidacion de las etapas"
 echo "============================================================"
+echo " Arbol al terminar: $SUCIO"
 printf "%-6s %-46s %-16s %s\n" "ETAPA" "CONTROL" "ESTADO" "BLOQUEA"
 printf "%-6s %-46s %-16s %s\n" "-----" "----------------------------------------------" "----------------" "-------"
 
