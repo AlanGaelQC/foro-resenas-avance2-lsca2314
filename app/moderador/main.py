@@ -108,11 +108,10 @@ def vista_previa(peticion: PeticionVistaPrevia) -> HTMLResponse:
     moderador lo inspeccione. Endpoint interno: la API lo alcanza por la red de
     Docker tras autenticar y autorizar; el puerto 8001 no se publica.
 
-    ESTADO ACTUAL (Fase 1, corrida roja): usa formato.formatear_vulnerable(), que
-    reproduce el parche del profesor sin escapar el contenido del usuario (XSS,
-    CWE-79). La remediacion (Fase 4) cambia esta linea por formatear_seguro().
+    La Fase 1 usaba formatear_vulnerable() y reproducia el XSS (CWE-79).
+    La ruta activa de esta fase emplea formatear_seguro() y conserva el marcado.
     """
-    cuerpo = formato.formatear_vulnerable(peticion.texto)
+    cuerpo = formato.formatear_seguro(peticion.texto)
     return HTMLResponse(content=f'<div class="vista-previa-moderador">{cuerpo}</div>')
 
 
