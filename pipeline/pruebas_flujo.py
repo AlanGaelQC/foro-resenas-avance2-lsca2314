@@ -1,4 +1,5 @@
 """Pruebas HTTP de la aplicacion real para la etapa 08 del pipeline."""
+import os
 import re
 import secrets
 import sys
@@ -9,6 +10,13 @@ import httpx
 
 URL_BASE = (sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8080").rstrip("/")
 TIEMPO_ESPERA = 10.0
+# Correo del moderador de prueba. Debe coincidir con un correo listado en la
+# variable de entorno MODERADORES del despliegue de QA para que T10b/c/d puedan
+# ejercer la vista previa autorizada.
+MODERADOR_PRUEBA = os.environ.get("MODERADOR_PRUEBA", "moderador.prueba@example.com")
+# Contrasena de la cuenta de moderador preaprovisionada en QA (misma que la app
+# usa para sembrarla, MODERADOR_PASS). No se registra por el formulario publico.
+MODERADOR_PASS = os.environ.get("MODERADOR_PASS", "")
 resultados: list[tuple[str, bool, str]] = []
 
 
@@ -101,6 +109,8 @@ def main() -> int:
     )
 
     marca_sucia = ""
+    id_xss = None
+    marca_xss = ""
     with httpx.Client(timeout=TIEMPO_ESPERA, follow_redirects=False) as usuario_a:
         _, codigo_registro, codigo_ingreso = crear_usuario(usuario_a, contrasena)
         registrar(
@@ -155,7 +165,7 @@ def main() -> int:
         )
 
         marca_xss = uuid.uuid4().hex[:10]
-        carga_xss = f"<script>alert('{marca_xss}')</script> muy buena atencion en general"
+        carga_xss = f"<script>alert('{marca_xss}')</script> **muy buena** atencion en general"
         respuesta_xss = usuario_a.post(
             f"{URL_BASE}/hilos",
             data={"titulo": f"Prueba render {marca_xss}", "cuerpo": carga_xss, "calificacion": "4"},
@@ -247,6 +257,87 @@ def main() -> int:
             and "sesion_foro" in usuario_b.cookies
             and marca_sucia not in publicaciones_b,
         )
+
+        # T10 - Un correo de moderador esta RESERVADO: el registro publico lo
+        # rechaza, para que nadie se autoasigne el rol registrandolo primero.
+        reserva = usuario_b.post(
+            f"{URL_BASE}/registro",
+            data={
+                "correo": MODERADOR_PRUEBA,
+                "nombre": "Intruso",
+                "contrasena": secrets.token_urlsafe(24),
+            },
+        )
+        registrar(
+            "T10 El registro publico rechaza los correos de moderador",
+            reserva.status_code == 403,
+            f"http {reserva.status_code} (se esperaba 403)",
+        )
+
+        # T10b - Autorizacion: un usuario comun NO puede abrir la vista previa de
+        # una resena. Debe recibir 403 aunque tenga sesion. Usa la resena con
+        # XSS que escribio el usuario A (id_xss).
+        objetivo = id_xss or 1
+        acceso_no_mod = usuario_b.post(
+            f"{URL_BASE}/moderacion/resenas/{objetivo}/vista-previa"
+        )
+        registrar(
+            "T10b Un usuario comun no accede a la vista previa del moderador",
+            acceso_no_mod.status_code == 403,
+            f"http {acceso_no_mod.status_code} (se esperaba 403)",
+        )
+
+    # --- Vista previa del moderador con DOS identidades ---------------------
+    # El moderador es una cuenta preaprovisionada (correo en MODERADORES,
+    # contrasena en MODERADOR_PASS). NO se registra por el formulario publico. El
+    # moderador previsualiza la resena con <script> que escribio OTRO usuario
+    # (el usuario A, id_xss): ese es el vector real (XSS almacenado).
+    if not MODERADOR_PASS:
+        registrar(
+            "T10c Vista previa del moderador (XSS, dos identidades)",
+            False,
+            "falta configurar MODERADOR_PASS para la cuenta de moderador de prueba",
+        )
+    elif id_xss is None:
+        registrar(
+            "T10c Vista previa del moderador (XSS, dos identidades)",
+            False,
+            "no se pudo crear la resena objetivo del usuario A",
+        )
+    else:
+        with httpx.Client(timeout=TIEMPO_ESPERA, follow_redirects=False) as moderador:
+            ingreso_mod = moderador.post(
+                f"{URL_BASE}/entrar",
+                data={"correo": MODERADOR_PRUEBA, "contrasena": MODERADOR_PASS},
+            )
+            sesion_mod_ok = (
+                ingreso_mod.status_code == 303 and "sesion_foro" in moderador.cookies
+            )
+            registrar(
+                "T10c El moderador preaprovisionado inicia sesion",
+                sesion_mod_ok,
+                f"ingreso={ingreso_mod.status_code} "
+                f"(cuenta {MODERADOR_PRUEBA} debe existir en QA)",
+            )
+
+            previa = moderador.post(
+                f"{URL_BASE}/moderacion/resenas/{id_xss}/vista-previa"
+            )
+            cuerpo_previa = previa.text if previa.status_code == 200 else ""
+            # Seguridad: el <script> del usuario A debe volver ESCAPADO, no crudo.
+            # Rojo (formatear_vulnerable): falla. Verde (formatear_seguro): pasa.
+            registrar(
+                "T10d La vista previa NO ejecuta el contenido del autor (XSS almacenado)",
+                previa.status_code == 200
+                and "<script>" not in cuerpo_previa
+                and f"&lt;script&gt;alert('{marca_xss}')&lt;/script&gt;" in cuerpo_previa,
+                f"http {previa.status_code}",
+            )
+            # Formato: la remediacion conserva la negrita pedida por el producto.
+            registrar(
+                "T10e La vista previa conserva el formato enriquecido (negrita)",
+                "<b>muy buena</b>" in cuerpo_previa,
+            )
 
     total = len(resultados)
     fallidas = [nombre for nombre, paso, _ in resultados if not paso]

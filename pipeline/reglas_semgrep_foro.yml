@@ -128,6 +128,30 @@ rules:
     pattern-regex: \|\s*safe
 
   # ---------------------------------------------------------------------------
+  # Entrega Final - tema 4: la vista previa del moderador NO debe renderizar el
+  # contenido del usuario sin escapar. formatear_vulnerable() reproduce el
+  # parche del profesor y devuelve HTML sin escape (XSS, CWE-79). El unico
+  # renderizador permitido en produccion es formatear_seguro(), que escapa el
+  # texto antes de aplicar el marcado. Esta regla cubre el caso que la regla
+  # de plantillas (*.html) no ve, porque la vista previa se arma en Python con
+  # HTMLResponse y no usa el filtro |safe.
+  # ---------------------------------------------------------------------------
+  - id: foro-vista-previa-sin-escape
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Se usa formatear_vulnerable() (parche sin corregir): devuelve el contenido
+      del usuario como HTML sin escapar. Usa formatear_seguro(), que escapa el
+      texto antes de aplicar negrita y saltos.
+    paths:
+      include:
+        - "app/**/*.py"
+    patterns:
+      - pattern-either:
+          - pattern: formato.formatear_vulnerable(...)
+          - pattern: formatear_vulnerable(...)
+
+  # ---------------------------------------------------------------------------
   # Depuracion encendida en produccion filtra trazas con rutas, consultas y a
   # veces variables de entorno.
   # ---------------------------------------------------------------------------

@@ -35,6 +35,26 @@ fi
 
 cd "$RAIZ_PROYECTO"
 
+# La cuenta de moderador de prueba se aprovisiona con MODERADOR_PASS (misma que
+# usa la app). Las pruebas T10c-e la necesitan para iniciar sesion. En una QA
+# configurada solo por .env, esa variable vive en el contenedor de la API, no en
+# el shell del pipeline: se toma aqui del .env, SIN imprimirla en el reporte.
+if [[ -z "${MODERADOR_PASS:-}" && -f "$RAIZ_PROYECTO/.env" ]]; then
+  MODERADOR_PASS="$(grep -E '^MODERADOR_PASS=' "$RAIZ_PROYECTO/.env" | head -1 | cut -d= -f2-)"
+  export MODERADOR_PASS
+fi
+if [[ -z "${MODERADOR_PRUEBA:-}" && -f "$RAIZ_PROYECTO/.env" ]]; then
+  MODERADOR_PRUEBA="$(grep -E '^MODERADOR_PRUEBA=' "$RAIZ_PROYECTO/.env" | head -1 | cut -d= -f2-)"
+  # Si no esta en el .env, pruebas_flujo.py usa su valor por defecto.
+  [[ -n "$MODERADOR_PRUEBA" ]] && export MODERADOR_PRUEBA
+fi
+# El primer correo de MODERADORES del .env es el que se usa como moderador de
+# prueba si no se fijo MODERADOR_PRUEBA explicitamente.
+if [[ -z "${MODERADOR_PRUEBA:-}" && -f "$RAIZ_PROYECTO/.env" ]]; then
+  _primer_moderador="$(grep -E '^MODERADORES=' "$RAIZ_PROYECTO/.env" | head -1 | cut -d= -f2- | cut -d, -f1 | tr -d ' ')"
+  [[ -n "$_primer_moderador" ]] && export MODERADOR_PRUEBA="$_primer_moderador"
+fi
+
 timeout "$TIEMPO_LIMITE_ETAPA" "$INTERPRETE" pipeline/pruebas_flujo.py "$URL_APLICACION" \
   > "$REPORTE" 2>&1
 CODIGO=$?
