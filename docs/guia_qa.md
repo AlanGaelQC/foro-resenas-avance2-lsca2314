@@ -26,6 +26,8 @@ El orquestador ejecuta ocho etapas y crea `reportes/veredicto.json` y `reportes/
 
 **Evidencia observada en QA, 2026-09-25 22:17–22:18 UTC:** sobre `84443a4` y con la aplicación vulnerable aún en ejecución, la corrida completa devolvió código 1 y `BLOQUEADO`: 04 marcó un `ERROR` de Semgrep y 08 falló solo en T10d (17/18 pruebas pasaron; el moderador inició sesión y obtuvo la vista previa de la reseña guardada por otra persona). Archivo: `reportes/corridas/20260925T221825549474340Z-bloqueado/`. El veredicto también conserva el defecto temporal del campo `arbol` descrito arriba. No se promueve este commit.
 
+**Contención comprobada en QA, 2026-09-25 22:26:37 UTC:** con la versión vulnerable aún desplegada, se respaldó el entorno en un archivo privado fuera del repositorio, se dejó `MODERADORES=` vacío y se recreó `api`. Los contenedores quedaron sanos; la cuenta del moderador inició sesión (HTTP 303) y la solicitud de vista previa obtuvo HTTP 403. Conservar la captura de esta comprobación. Primero instala y verifica la imagen remediada de `moderador`; solo entonces restaura la lista y recrea `api` para recuperar la vista previa.
+
 | Orden | Checkout en la rama local | Qué observar y registrar |
 |---|---|---|
 | 1 | `git switch --detach 215be19` | Parche del profesor vivo. Corre el **pipeline original** antes de añadir detección. Registra si pasa por una brecha real o se bloquea por otra causa. No promuevas aunque diga PERMITIDO. |

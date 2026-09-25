@@ -6,16 +6,21 @@
 
 ## 1. Contención inmediata (frenar el sangrado)
 
-Acción que se aplicaría **ahora mismo**, antes de tener el arreglo de código
-listo, para que el endpoint vulnerable no siga expuesto en QA:
+Acción aplicada en QA antes de habilitar el arreglo de código, para que el
+endpoint vulnerable dejara de estar disponible:
 
 - **Restringir el acceso al endpoint.** La vista previa exige estar en la lista
   `MODERADORES`; como contención adicional se puede vaciar esa lista
   temporalmente (`MODERADORES=`), con lo que la API responde 403 a todos y no hay
   a quién servirle el render vulnerable hasta que exista la corrección. Es
   reversible por configuración y no toca el código.
-- Registrar inicio, responsable y comprobación de que el endpoint quedó
-  inaccesible.
+- El 2026-09-25 a las 22:26:37 UTC, Alan guardó una copia privada del archivo
+  de entorno fuera del repositorio, vació únicamente `MODERADORES` y recreó
+  el contenedor `api`. Los dos servicios quedaron sanos. Con la cuenta
+  moderadora ya aprovisionada, el inicio de sesión devolvió HTTP 303 y
+  `POST /moderacion/resenas/1/vista-previa` devolvió HTTP 403. La comprobación
+  se documentó con captura de la terminal. El archivo de respaldo conserva
+  permisos 600 y no se incluye en el repositorio ni en las capturas.
 
 **Qué NO es contención suficiente:** dejar el endpoint apagado de forma
 permanente no satisface la remediación —el requisito pide conservar la
