@@ -1,8 +1,7 @@
 # Clasificación del hallazgo — Entrega Final
 
-> **Estado:** borrador construido a partir del análisis del código. Los valores
-> marcados `[pendiente-corrida QA]` se completan con la salida real del pipeline
-> cuando se ejecute en QA; no se inventan.
+> **Estado:** hallazgo reproducido en la instancia QA el 2026-09-25. Remediación
+> y corrida verde pendientes de ejecutar en QA; no se presentan como hechos.
 
 ## Identificación
 
@@ -19,8 +18,8 @@
 **Cross-Site Scripting (XSS) almacenado, CWE-79.** Un usuario ordinario publica
 una reseña cuyo cuerpo contiene `<script>…</script>`. Ese cuerpo se guarda. Cuando
 un **moderador** abre la vista previa de esa reseña (por `resena_id`), el servicio
-de moderación la renderiza a HTML **sin escapar**, y el script del atacante se
-ejecuta en el navegador del moderador —un actor con más capacidad—. Es
+de moderación la renderiza a HTML **sin escapar**, por lo que el script del
+atacante puede ejecutarse en su navegador —un actor con más capacidad—. Es
 almacenado (no reflejado): el contenido malicioso vive en la base y lo
 desencadena un tercero (el moderador) al verlo.
 
@@ -59,8 +58,22 @@ No. La detección es real:
    general de XSS; una concatenación directa en `HTMLResponse` no coincidiría. Por
    eso la vía que gobierna es la DAST.
 
-`[pendiente-corrida QA]` etapa que detuvo el pipeline completo, código de salida
-y ruta del reporte de la corrida roja real sobre QA (con la app y la BD arriba).
+**Corrida roja real en QA (2026-09-25 22:17–22:18 UTC):** el pipeline completo
+sobre `84443a479c5a52c8efaab8ac49e2679f058d7b39` devolvió código **1** y
+`BLOQUEADO`. La etapa **04** detectó un hallazgo `ERROR` de Semgrep; la etapa
+**08** falló solo en T10d (17 de 18 pruebas pasaron). T10c confirmó que la cuenta
+moderadora inició sesión y T10e que la vista conservaba la negrita; T10d obtuvo
+HTTP 200 pero no el escape exigido del `<script>` procedente de otra cuenta.
+Los controles 01, 02, 03, 05, 06 y 07 terminaron `OK`. Archivos:
+`reportes/corridas/20260925T221825549474340Z-bloqueado/04_sast_semgrep.txt`,
+`08_pruebas_flujo.txt` y `veredicto.json` en la misma carpeta. La prueba HTTP
+inspecciona la respuesta, **no ejecuta JavaScript en un navegador real**; esa
+es una limitación de la evidencia.
+
+El campo `arbol: CON CAMBIOS SIN CONFIRMAR` de esta corrida se debe al borrado
+temporal de los SBOM versionados antes de que el orquestador consultara Git;
+los regeneró la etapa 07. Ese defecto del registro se corrigió en un commit
+posterior, sin alterar la corrida histórica.
 
 ## Nota sobre la cobertura previa
 
