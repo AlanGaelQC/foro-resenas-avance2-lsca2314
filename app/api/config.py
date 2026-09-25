@@ -68,6 +68,32 @@ if ENTORNO != "desarrollo" and not ALMACENAMIENTO_ACTIVO:
 URL_MODERADOR = _opcional("URL_MODERADOR", "http://moderador:8001")
 TIMEOUT_MODERADOR_SEG = float(_opcional("TIMEOUT_MODERADOR_SEG", "5"))
 
+# --- Moderadores (Entrega Final: vista previa enriquecida) --------------------
+# Lista de correos autorizados a usar la vista previa del moderador, separados
+# por comas. No es un rol en la base: es configuracion por entorno, igual que el
+# resto de la app. Un usuario con sesion valida cuyo correo NO este aqui recibe
+# 403. Asi "moderador" no es algo que el formulario publico de registro pueda
+# otorgarse a si mismo.
+MODERADORES = frozenset(
+    correo.strip().lower()
+    for correo in _opcional("MODERADORES", "").split(",")
+    if correo.strip()
+)
+
+# Contrasena con la que se aprovisiona la cuenta de cada correo en MODERADORES al
+# arrancar. Los correos de moderador quedan RESERVADOS: el registro publico los
+# rechaza. Si hay moderadores configurados, esta contrasena es OBLIGATORIA, debe
+# ser distinta del marcador y tener al menos 10 caracteres: copiar el .env de
+# ejemplo sin sustituirla crearia una cuenta moderadora con contrasena conocida.
+MODERADOR_PASS = _opcional("MODERADOR_PASS", "")
+if MODERADORES:
+    if not MODERADOR_PASS or MODERADOR_PASS == "CAMBIA_ESTE_VALOR" or len(MODERADOR_PASS) < 10:
+        raise ErrorDeConfiguracion(
+            "Hay MODERADORES configurados pero MODERADOR_PASS falta, es el marcador "
+            "de ejemplo o es demasiado corta. Define una contrasena real (>=10 "
+            "caracteres) para la cuenta de moderador."
+        )
+
 # --- Sesiones -----------------------------------------------------------------
 # Sin valor por defecto: una llave de firma predecible permite falsificar la
 # cookie de sesion y suplantar a cualquier usuario del foro.

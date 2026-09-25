@@ -16,7 +16,16 @@ from sqlalchemy.orm import Session
 
 import almacenamiento
 import moderacion
-from config import ENTORNO, COOKIE_SEGURA, HORAS_SESION, MAX_BYTES_ADJUNTO, URL_BASE_DATOS
+from config import (
+    ENTORNO,
+    COOKIE_SEGURA,
+    ErrorDeConfiguracion,
+    HORAS_SESION,
+    MAX_BYTES_ADJUNTO,
+    MODERADORES,
+    MODERADOR_PASS,
+    URL_BASE_DATOS,
+)
 from db import obtener_sesion, crear_tablas
 from modelos import Comentario, ESTADO_PUBLICADO, ESTADO_RECHAZADO, Hilo, Usuario
 from seguridad import (
@@ -36,6 +45,52 @@ _PLANTILLAS = Jinja2Templates(directory=str(Path(__file__).parent / "plantillas"
 @aplicacion.on_event("startup")
 def preparar_base():
     crear_tablas()
+    _sembrar_moderadores()
+
+
+def _sembrar_moderadores():
+    """
+    Aprovisiona la(s) cuenta(s) de moderador de forma administrativa, no por el
+    registro publico.
+
+    Para cada correo de MODERADORES:
+      - Si no existe: se crea con MODERADOR_PASS.
+      - Si existe y su credencial coincide con MODERADOR_PASS: es nuestra cuenta
+        sembrada, se deja como esta (idempotente).
+      - Si existe pero su credencial NO coincide: es una cuenta preexistente que
+        alguien creo antes del allowlist (un okupa). NO se le concede el permiso
+        en silencio: se DETIENE el arranque, para que se resuelva a mano.
+
+    Asi el allowlist no autoriza a una cuenta cuya procedencia no es la siembra.
+    """
+    if not MODERADOR_PASS or not MODERADORES:
+        return
+    from db import SesionLocal
+
+    sesion = SesionLocal()
+    try:
+        for correo in MODERADORES:
+            existe = sesion.scalar(select(Usuario).where(Usuario.correo == correo))
+            if existe is None:
+                sesion.add(
+                    Usuario(
+                        correo=correo,
+                        nombre="Moderador",
+                        credencial=derivar_credencial(MODERADOR_PASS),
+                    )
+                )
+            elif not verificar_credencial(MODERADOR_PASS, existe.credencial):
+                raise ErrorDeConfiguracion(
+                    f"El correo de moderador {correo} ya existe con una credencial "
+                    f"que no fue sembrada por esta configuracion. No se le concede "
+                    f"el permiso de moderador. Revisa y resuelve esa cuenta antes "
+                    f"de activar el allowlist en esta base."
+                )
+        sesion.commit()
+    except SQLAlchemyError:
+        sesion.rollback()
+    finally:
+        sesion.close()
 
 
 # --- Utilidades de sesion -----------------------------------------------------
@@ -49,6 +104,17 @@ def usuario_actual(peticion: Request, sesion: Session) -> Usuario | None:
 
 def _exigir_sesion(peticion: Request, sesion: Session) -> Usuario | None:
     return usuario_actual(peticion, sesion)
+
+
+def _es_moderador(usuario: Usuario | None) -> bool:
+    """
+    Autorizacion de moderador: sesion valida Y correo en la lista MODERADORES.
+
+    Una sesion iniciada por si sola NO basta: se comprueba la pertenencia en el
+    servidor. La lista viene de configuracion por entorno, no de un campo que el
+    registro publico pueda asignarse.
+    """
+    return usuario is not None and usuario.correo.lower() in MODERADORES
 
 
 def _redirigir(destino: str) -> RedirectResponse:
@@ -117,6 +183,16 @@ def registrar(
             "registro.html",
             {"error": "La contrasena debe tener al menos 10 caracteres."},
             status_code=400,
+        )
+    # Los correos de moderador estan RESERVADOS: se aprovisionan por via
+    # administrativa (arranque), no por este formulario. Sin esto, quien
+    # registrara primero un correo del allowlist obtendria acceso de moderador.
+    if correo in MODERADORES:
+        return _PLANTILLAS.TemplateResponse(
+            peticion,
+            "registro.html",
+            {"error": "Ese correo esta reservado."},
+            status_code=403,
         )
     usuario = Usuario(
         correo=correo,
@@ -332,6 +408,42 @@ async def comentar(
     if veredicto.estado == ESTADO_RECHAZADO:
         return _redirigir("/mis-publicaciones")
     return _redirigir(f"/hilos/{hilo.id}")
+
+
+# --- Vista previa enriquecida del moderador (Entrega Final, tema 4) -----------
+
+@aplicacion.post("/moderacion/resenas/{resena_id}/vista-previa", response_class=HTMLResponse)
+async def vista_previa_moderador(
+    resena_id: int,
+    peticion: Request,
+    sesion: Session = Depends(obtener_sesion),
+):
+    """
+    Muestra al moderador una resena con formato enriquecido (negrita, saltos)
+    para inspeccionarla. Solo para moderadores autorizados.
+
+    La API es la frontera de autenticacion: comprueba que quien pide es
+    moderador, carga la resena guardada (escrita por cualquier usuario) y pide el
+    render al servicio de moderacion por la red interna. Asi el contenido de un
+    atacante, ya almacenado, llega a la vista del moderador: es el vector real
+    del defecto (XSS almacenado, CWE-79).
+    """
+    usuario = usuario_actual(peticion, sesion)
+    if not _es_moderador(usuario):
+        # 403 tanto para anonimo como para usuario comun: la vista del moderador
+        # no la abre cualquiera con sesion.
+        return JSONResponse(
+            {"error": "Solo un moderador autorizado puede usar la vista previa."},
+            status_code=403,
+        )
+    hilo = sesion.get(Hilo, resena_id)
+    if hilo is None:
+        return JSONResponse({"error": "La resena no existe."}, status_code=404)
+    try:
+        html_previa = await moderacion.render_vista_previa(hilo.cuerpo)
+    except moderacion.ErrorDeModeracion as error:
+        return JSONResponse({"error": str(error)}, status_code=503)
+    return HTMLResponse(content=html_previa)
 
 
 # --- Lo que no paso la moderacion --------------------------------------------

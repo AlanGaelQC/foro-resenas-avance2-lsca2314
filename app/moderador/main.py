@@ -16,7 +16,10 @@ import os
 import re
 
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
+
+import formato
 
 aplicacion = FastAPI(title="Servicio de moderacion", docs_url=None, redoc_url=None)
 
@@ -92,6 +95,25 @@ def revisar(texto: str, titulo: str = "") -> RespuestaModeracion:
 @aplicacion.post("/moderar", response_model=RespuestaModeracion)
 def moderar(peticion: PeticionModeracion) -> RespuestaModeracion:
     return revisar(peticion.texto, peticion.titulo)
+
+
+class PeticionVistaPrevia(BaseModel):
+    texto: str = Field(default="", max_length=20000)
+
+
+@aplicacion.post("/vista-previa", response_class=HTMLResponse)
+def vista_previa(peticion: PeticionVistaPrevia) -> HTMLResponse:
+    """
+    Renderiza el contenido de una resena con formato enriquecido para que el
+    moderador lo inspeccione. Endpoint interno: la API lo alcanza por la red de
+    Docker tras autenticar y autorizar; el puerto 8001 no se publica.
+
+    ESTADO ACTUAL (Fase 1, corrida roja): usa formato.formatear_vulnerable(), que
+    reproduce el parche del profesor sin escapar el contenido del usuario (XSS,
+    CWE-79). La remediacion (Fase 4) cambia esta linea por formatear_seguro().
+    """
+    cuerpo = formato.formatear_vulnerable(peticion.texto)
+    return HTMLResponse(content=f'<div class="vista-previa-moderador">{cuerpo}</div>')
 
 
 @aplicacion.get("/salud")

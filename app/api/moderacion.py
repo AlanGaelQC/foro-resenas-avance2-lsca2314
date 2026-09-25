@@ -60,6 +60,26 @@ async def decidir_estado(texto: str, titulo: str = "") -> ResultadoModeracion:
     raise ErrorDeModeracion(f"Decision no reconocida del moderador: {decision!r}")
 
 
+async def render_vista_previa(texto: str) -> str:
+    """
+    Pide al servicio de moderacion el HTML de la vista previa enriquecida de una
+    resena. La API es la frontera de autenticacion: solo llega aqui despues de
+    comprobar que quien pide es un moderador autorizado. El servicio de
+    moderacion no publica puerto: se alcanza por la red interna de Docker.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT_MODERADOR_SEG) as cliente:
+            respuesta = await cliente.post(
+                f"{URL_MODERADOR}/vista-previa", json={"texto": texto}
+            )
+            respuesta.raise_for_status()
+    except httpx.HTTPError as error:
+        raise ErrorDeModeracion(
+            f"El servicio de moderacion no pudo renderizar la vista previa: {error}"
+        ) from error
+    return respuesta.text
+
+
 async def revisar_conexion() -> str:
     """Comprueba que el moderador responde. Se usa en /salud."""
     try:
