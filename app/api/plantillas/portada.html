@@ -23,14 +23,29 @@
 <p><a href="/entrar">Inicia sesion</a> para publicar.</p>
 {% endif %}
 
-{% for hilo in hilos %}
+{% for v in vista_hilos %}
   <div class="tarjeta publicado">
-    <h3><a href="/hilos/{{ hilo.id }}">{{ hilo.titulo }}</a></h3>
-    <p class="meta">{{ hilo.calificacion }}/5 · por {{ hilo.autor.nombre }} · {{ hilo.creado_en.strftime('%Y-%m-%d %H:%M') }}</p>
-    <p>{{ hilo.cuerpo }}</p>
-    {% if hilo.clave_s3 %}<p><a href="/adjunto/{{ hilo.id }}">Ver imagen adjunta</a></p>{% endif %}
+    <h3><a href="/hilos/{{ v.hilo.id }}">{{ v.hilo.titulo }}</a></h3>
+    <p class="meta">{{ v.hilo.calificacion }}/5 · por {{ v.hilo.autor.nombre }} · {{ v.hilo.creado_en.strftime('%Y-%m-%d %H:%M') }}</p>
+    <p>{{ v.extracto }}</p>
+    {% if v.hilo.clave_s3 %}<p><a href="/adjunto/{{ v.hilo.id }}">Ver imagen adjunta</a></p>{% endif %}
+
+    {% if v.comentarios_muestra %}
+      <div class="comentarios-muestra">
+        <p class="meta">Comentarios ({{ v.total_comentarios }}):</p>
+        {% for c in v.comentarios_muestra %}
+          <p class="comentario-previo"><span class="meta">{{ c.autor.nombre }}:</span> {{ c.cuerpo }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <p><a href="/hilos/{{ v.hilo.id }}">Ver resena y {{ v.total_comentarios }} comentario(s) &rarr;</a></p>
   </div>
 {% else %}
   <p>Todavia no hay resenas publicadas.</p>
 {% endfor %}
+<nav aria-label="Páginas de reseñas">
+  {% if pagina > 1 %}<a href="/?pagina={{ pagina - 1 }}">&larr; Anteriores</a>{% endif %}
+  {% if hay_siguiente %}<a href="/?pagina={{ pagina + 1 }}">Siguientes &rarr;</a>{% endif %}
+</nav>
 {% endblock %}

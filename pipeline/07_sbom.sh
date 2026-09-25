@@ -52,10 +52,14 @@ VALIDACION="$(python3 - "$SBOM" "$SBOM_MODERADOR" <<'PYTHON'
 import json
 import sys
 
+# Cada SBOM se valida POR SEPARADO: formato CycloneDX, specVersion presente,
+# raiz de componentes que sea lista, y al menos un componente con nombre y
+# version. Un servicio con SBOM vacio o corrupto invalida la etapa aunque el
+# otro tenga componentes: no se suma para enmascarar un servicio sin inventario.
 total = 0
 for ruta in sys.argv[1:]:
     try:
-        with open(ruta) as archivo:
+        with open(ruta, encoding="utf-8") as archivo:
             documento = json.load(archivo)
     except Exception:
         print("INVALIDO 0")
@@ -63,7 +67,20 @@ for ruta in sys.argv[1:]:
     if documento.get("bomFormat") != "CycloneDX":
         print("INVALIDO 0")
         raise SystemExit(0)
-    total += len(documento.get("components", []))
+    if not documento.get("specVersion"):
+        print("INVALIDO 0")
+        raise SystemExit(0)
+    componentes = documento.get("components")
+    if not isinstance(componentes, list) or len(componentes) < 1:
+        print("INVALIDO 0")
+        raise SystemExit(0)
+    # Cada componente debe ser un objeto con nombre y version (no un string
+    # suelto ni un objeto vacio).
+    for componente in componentes:
+        if not isinstance(componente, dict) or not componente.get("name") or not componente.get("version"):
+            print("INVALIDO 0")
+            raise SystemExit(0)
+    total += len(componentes)
 
 print("VALIDO", total)
 PYTHON

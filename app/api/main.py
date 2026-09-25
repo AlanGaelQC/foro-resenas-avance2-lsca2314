@@ -7,12 +7,12 @@ como rechazada -> comentarios sobre la resena, que pasan por la misma revision.
 """
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, File, Form, Request, UploadFile
+from fastapi import Depends, FastAPI, File, Form, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 import almacenamiento
 import moderacion
@@ -256,19 +256,97 @@ def salir():
 
 # --- Listado de resenas -------------------------------------------------------
 
+EXTRACTO_MAX = 240          # caracteres del extracto de la resena en el feed
+COMENTARIOS_EN_FEED = 3     # comentarios de muestra por tarjeta (estilo Reddit)
+RESENAS_POR_PAGINA = 12
+
+
+def _extracto(texto: str, limite: int = EXTRACTO_MAX) -> str:
+    """Recorta el cuerpo para el feed sin cortar a mitad de palabra."""
+    texto = texto.strip()
+    if len(texto) <= limite:
+        return texto
+    return texto[:limite].rsplit(" ", 1)[0] + "…"
+
+
 @aplicacion.get("/", response_class=HTMLResponse)
-def portada(peticion: Request, sesion: Session = Depends(obtener_sesion)):
-    hilos = sesion.scalars(
-        select(Hilo).where(Hilo.estado == ESTADO_PUBLICADO).order_by(Hilo.creado_en.desc())
+def portada(peticion: Request, pagina: int = Query(default=1, ge=1), sesion: Session = Depends(obtener_sesion)):
+    hilos_consultados = sesion.scalars(
+        select(Hilo)
+        .where(Hilo.estado == ESTADO_PUBLICADO)
+        .order_by(Hilo.creado_en.desc(), Hilo.id.desc())
+        .offset((pagina - 1) * RESENAS_POR_PAGINA)
+        .limit(RESENAS_POR_PAGINA + 1)
+        .options(selectinload(Hilo.autor))
     ).all()
+    hay_siguiente = len(hilos_consultados) > RESENAS_POR_PAGINA
+    hilos = hilos_consultados[:RESENAS_POR_PAGINA]
     promedio = sesion.scalar(
         select(func.avg(Hilo.calificacion)).where(Hilo.estado == ESTADO_PUBLICADO)
     )
+
+    ids_hilos = [hilo.id for hilo in hilos]
+
+    # Conteo de comentarios publicados por hilo en UNA sola consulta agrupada,
+    # en vez de una consulta por hilo (evita N+1).
+    conteos = {}
+    if ids_hilos:
+        filas = sesion.execute(
+            select(Comentario.hilo_id, func.count(Comentario.id))
+            .where(
+                Comentario.hilo_id.in_(ids_hilos),
+                Comentario.estado == ESTADO_PUBLICADO,
+            )
+            .group_by(Comentario.hilo_id)
+        ).all()
+        conteos = {hilo_id: total for hilo_id, total in filas}
+
+    # ROW_NUMBER selecciona hasta tres comentarios POR RESENA en la base de
+    # datos. No se cargan todos los comentarios solo para descartarlos después.
+    muestras = {hilo_id: [] for hilo_id in ids_hilos}
+    if ids_hilos:
+        orden_comentarios = (Comentario.creado_en.desc(), Comentario.id.desc())
+        clasificacion = (
+            select(
+                Comentario.id.label("comentario_id"),
+                func.row_number().over(
+                    partition_by=Comentario.hilo_id,
+                    order_by=orden_comentarios,
+                ).label("posicion"),
+            )
+            .where(
+                Comentario.hilo_id.in_(ids_hilos),
+                Comentario.estado == ESTADO_PUBLICADO,
+            )
+            .subquery()
+        )
+        comentarios = sesion.scalars(
+            select(Comentario)
+            .join(clasificacion, Comentario.id == clasificacion.c.comentario_id)
+            .where(clasificacion.c.posicion <= COMENTARIOS_EN_FEED)
+            .order_by(Comentario.creado_en.desc(), Comentario.id.desc())
+            .options(selectinload(Comentario.autor))
+        ).all()
+        for comentario in comentarios:
+            muestras[comentario.hilo_id].append(comentario)
+
+    vista_hilos = [
+        {
+            "hilo": hilo,
+            "extracto": _extracto(hilo.cuerpo),
+            "comentarios_muestra": list(reversed(muestras[hilo.id])),  # ascendente
+            "total_comentarios": conteos.get(hilo.id, 0),
+        }
+        for hilo in hilos
+    ]
+
     return _PLANTILLAS.TemplateResponse(
         peticion,
         "portada.html",
         {
-            "hilos": hilos,
+            "vista_hilos": vista_hilos,
+            "pagina": pagina,
+            "hay_siguiente": hay_siguiente,
             "promedio": round(promedio, 2) if promedio else None,
             "usuario": usuario_actual(peticion, sesion),
         },

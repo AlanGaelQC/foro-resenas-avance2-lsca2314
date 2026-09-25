@@ -247,6 +247,38 @@ def main() -> int:
             and "X-Amz-" in adjunto.headers.get("location", ""),
         )
 
+        # T11 - Feed publico: con 4 comentarios, la portada muestra a lo sumo 3 y
+        # el total correcto. Se crea un hilo limpio y 4 comentarios validos.
+        marca_feed = uuid.uuid4().hex[:8]
+        r_feed = usuario_a.post(
+            f"{URL_BASE}/hilos",
+            data={
+                "titulo": f"Feed {marca_feed}",
+                "cuerpo": "Resena limpia para probar el feed publico con comentarios.",
+                "calificacion": "5",
+            },
+        )
+        id_feed = id_desde_redireccion(r_feed)
+        marcas_c = []
+        if id_feed:
+            for i in range(4):
+                mc = f"{marca_feed}c{i}"
+                marcas_c.append(mc)
+                usuario_a.post(
+                    f"{URL_BASE}/hilos/{id_feed}/comentarios",
+                    data={"cuerpo": f"comentario de prueba numero {i} {mc}"},
+                )
+        portada_feed = httpx.get(URL_BASE, timeout=TIEMPO_ESPERA).text
+        mostrados = sum(1 for mc in marcas_c if mc in portada_feed)
+        registrar(
+            "T11 El feed muestra <=3 comentarios por resena y el total correcto",
+            id_feed is not None
+            and mostrados <= 3
+            and f"Comentarios (4)" in portada_feed
+            and marcas_c[0] not in portada_feed,  # el mas viejo no se muestra
+            f"comentarios mostrados en portada: {mostrados}",
+        )
+
     with httpx.Client(timeout=TIEMPO_ESPERA, follow_redirects=False) as usuario_b:
         _, codigo_registro_b, codigo_ingreso_b = crear_usuario(usuario_b, contrasena)
         publicaciones_b = usuario_b.get(f"{URL_BASE}/mis-publicaciones").text
