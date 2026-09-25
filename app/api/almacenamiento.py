@@ -18,6 +18,7 @@ from config import (
     BUCKET_S3,
     EXTENSIONES_ADJUNTO_PERMITIDAS,
     MAX_BYTES_ADJUNTO,
+    PREFIJO_S3,
     REGION_AWS,
     TIPOS_ADJUNTO_PERMITIDOS,
 )
@@ -87,7 +88,7 @@ def subir_adjunto(contenido: bytes, extension: str, tipo_contenido: str) -> str:
     if not ALMACENAMIENTO_ACTIVO:
         raise ErrorDeAlmacenamiento("BUCKET_S3 no esta configurado.")
     # El nombre del archivo lo controla el usuario: no se reutiliza como clave.
-    clave = f"adjuntos/{uuid.uuid4().hex}{extension}"
+    clave = f"{PREFIJO_S3}{uuid.uuid4().hex}{extension}"
     try:
         _cliente().put_object(
             Bucket=BUCKET_S3,

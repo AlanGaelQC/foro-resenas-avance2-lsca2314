@@ -59,6 +59,11 @@ if ENTORNO != "desarrollo" and not URL_BASE_DATOS.startswith(
 # --- Almacenamiento de objetos (S3) ------------------------------------------
 BUCKET_S3 = _opcional("BUCKET_S3")
 REGION_AWS = _opcional("REGION_AWS", "us-east-1")
+# Conserva las claves existentes de QA. Produccion puede usar otro prefijo
+# dentro del mismo bucket, si el Learner Lab permite compartirlo.
+PREFIJO_S3 = _opcional("PREFIJO_S3", "adjuntos/")
+if not PREFIJO_S3 or PREFIJO_S3.startswith("/") or not PREFIJO_S3.endswith("/") or ".." in PREFIJO_S3:
+    raise ErrorDeConfiguracion("PREFIJO_S3 debe ser una ruta relativa terminada en /.")
 # Cuando esta vacio, la app opera sin adjuntos (modo degradado explicito).
 ALMACENAMIENTO_ACTIVO = bool(BUCKET_S3)
 if ENTORNO != "desarrollo" and not ALMACENAMIENTO_ACTIVO:

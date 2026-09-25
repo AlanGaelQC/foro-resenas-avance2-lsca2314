@@ -1,3 +1,5 @@
+> **Entrega Final:** documentación vigente en [README principal](../README.md) y [guía de QA](guia_qa.md). Esta página conserva los detalles del Avance 2.
+
 # Foro y reseñas
 
 LSCA2314 · Herramientas de Tecnologías de Información · El Reto, Avance 2

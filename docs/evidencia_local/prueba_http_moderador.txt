@@ -1,0 +1,64 @@
+Evidencia de prueba HTTP local (SQLite, sin AWS) del flujo de la vista previa del
+moderador. Dos servicios FastAPI reales levantados: api (8000) y moderador (8001).
+NO sustituye la corrida del pipeline completo en QA; prueba el comportamiento HTTP
+del defecto y su remediacion end-to-end con dos identidades.
+Fecha: 2026-09-25.
+
+============================================================
+1) FLUJO DEL MODERADOR CON DOS IDENTIDADES (prueba manual dirigida)
+============================================================
+
+ESTADO ROJO (moderador con formatear_vulnerable):
+  [reserva]  registrar el correo de moderador -> 403  (correo reservado)
+  [usuarioA] publica resena con <script> y **negrita** -> 303 (id=1)
+  [usuarioB comun] POST /moderacion/resenas/1/vista-previa -> 403 (no es moderador)
+  [moderador preaprovisionado] login -> 303
+  [moderador] vista previa -> 200
+     <script> CRUDO presente: True      <-- XSS confirmada (CWE-79)
+     negrita <b>muy buena</b>: True
+
+REMEDIACION (vista local de Claude: llamada en main.py; el commit del proyecto
+tambien agrega el renderizador seguro en formato.py):
+  - cuerpo = formato.formatear_vulnerable(peticion.texto)
+  + cuerpo = formato.formatear_seguro(peticion.texto)
+
+ESTADO VERDE (moderador con formatear_seguro), misma peticion via API:
+  [moderador] vista previa -> 200
+     <script> CRUDO presente: False              <-- XSS remediada
+     &lt;script&gt; escapado presente: True
+     negrita <b>muy buena</b> conservada: True   <-- funcionalidad intacta
+     cuerpo: <div class="vista-previa-moderador">&lt;script&gt;alert('...')&lt;/script&gt; <b>muy buena</b> atencion</div>
+
+============================================================
+2) SUITE COMPLETA pipeline/pruebas_flujo.py (estado ROJO, sin AWS)
+============================================================
+Resultado observado (entorno=desarrollo, sin RDS ni S3 reales):
+
+  [FALLA] T1  QA usa PostgreSQL/RDS y alcanza S3       (esperado: no hay QA/S3 aqui)
+  [PASA ] T1b El servicio moderador esta disponible
+  [PASA ] T2  Un anonimo no puede publicar (401)
+  [PASA ] T3  Registro e inicio de sesion
+  [PASA ] T4  El contenido aprobado aparece en la portada
+  [PASA ] T5  El moderador impide contenido prohibido
+  [PASA ] T5b El autor ve el rechazo y su motivo
+  [PASA ] T6  El contenido se publica escapado (vista normal)
+  [PASA ] T6b El moderador rechaza tambien comentarios
+  [PASA ] T7  Rechaza calificacion fuera de rango (400)
+  [FALLA] T8b Adjunto valido en S3            (esperado: no hay S3 aqui)
+  [PASA ] T11 El feed muestra <=3 comentarios y el total (mostrados: 3)
+  [PASA ] T9  Un usuario no ve rechazos de otro
+  [PASA ] T10 El registro publico rechaza correos de moderador (403)
+  [PASA ] T10b Un usuario comun no accede a la vista previa (403)
+  [PASA ] T10c El moderador preaprovisionado inicia sesion
+  [FALLA] T10d La vista previa NO ejecuta el <script> del autor
+               <-- FALLA EN ROJO A PROPOSITO: es la deteccion de la XSS.
+                   En verde (formatear_seguro) PASA, como muestra la seccion 1.
+  [PASA ] T10e La vista previa conserva la negrita
+
+Notas:
+- T1 y T8b fallan aqui porque este entorno local no es QA ni tiene S3/RDS reales;
+  en QA pasan (asi lo hicieron en el Avance 2). No son defectos del andamio.
+- T10d es la prueba que bloquea en rojo y pasa en verde: es el corazon del
+  ejercicio rojo->verde, demostrado por HTTP en la seccion 1.
+- Esto NO es la corrida del pipeline completo (8 etapas) en QA; eso queda
+  pendiente de la instancia con Docker + BD + S3.
