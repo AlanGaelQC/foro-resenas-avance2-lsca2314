@@ -54,6 +54,7 @@ fi
 
 PEOR_CODIGO=0
 HUBO_ERROR=0
+declare -a IDS_ESCANEADAS=()
 
 for imagen in "$IMAGEN_API" "$IMAGEN_MODERADOR"; do
   echo "=== trivy image $imagen ===" >> "$REPORTE"
@@ -63,6 +64,14 @@ for imagen in "$IMAGEN_API" "$IMAGEN_MODERADOR"; do
     HUBO_ERROR=1
     continue
   fi
+
+  ID_ESCANEADO="$(docker image inspect --format '{{.Id}}' "$imagen" 2>/dev/null)" || {
+    echo "  No se pudo obtener Image ID de $imagen" >> "$REPORTE"
+    HUBO_ERROR=1
+    continue
+  }
+  IDS_ESCANEADAS+=("$ID_ESCANEADO")
+  echo "Image ID escaneado: $ID_ESCANEADO" >> "$REPORTE"
 
   timeout "$TIEMPO_LIMITE_ETAPA" trivy image \
     --severity HIGH,CRITICAL \
@@ -81,6 +90,16 @@ for imagen in "$IMAGEN_API" "$IMAGEN_MODERADOR"; do
   esac
 done
 
+# Impide que una etiqueta cambie de imagen mientras se ejecuta el escaneo.
+if [[ "$HUBO_ERROR" -eq 0 && "${#IDS_ESCANEADAS[@]}" -eq 2 ]]; then
+  ACTUAL_API="$(docker image inspect --format '{{.Id}}' "$IMAGEN_API" 2>/dev/null)" || HUBO_ERROR=1
+  ACTUAL_MOD="$(docker image inspect --format '{{.Id}}' "$IMAGEN_MODERADOR" 2>/dev/null)" || HUBO_ERROR=1
+  if [[ "$HUBO_ERROR" -eq 0 && ( "$ACTUAL_API" != "${IDS_ESCANEADAS[0]}" || "$ACTUAL_MOD" != "${IDS_ESCANEADAS[1]}" ) ]]; then
+    echo "Cambio de Image ID durante el escaneo: no se aprueban esas imagenes." >> "$REPORTE"
+    HUBO_ERROR=1
+  fi
+fi
+
 if [[ "$HUBO_ERROR" -eq 1 ]]; then
   ESTADO="$ESTADO_ERROR"
   DETALLE="trivy no pudo evaluar alguna imagen (codigo $PEOR_CODIGO)"
@@ -90,6 +109,20 @@ elif [[ "$PEOR_CODIGO" -eq 1 ]]; then
 else
   ESTADO="$ESTADO_OK"
   DETALLE="Imagenes sin HIGH/CRITICAL corregibles"
+fi
+
+# La promocion valida estos Image IDs contra los que realmente se exportan.
+# El orquestador borra el registro al inicio de cada corrida y archiva el nuevo.
+if [[ "$ESTADO" == "$ESTADO_OK" ]]; then
+  python3 - "$DIR_REPORTES/06_image_ids.json" "$IMAGEN_API" "${IDS_ESCANEADAS[0]}" "$IMAGEN_MODERADOR" "${IDS_ESCANEADAS[1]}" "$(git rev-parse HEAD)" <<'PYTHON'
+import json
+import sys
+ruta, etiqueta_api, id_api, etiqueta_mod, id_mod, commit = sys.argv[1:]
+with open(ruta, "w", encoding="utf-8") as salida:
+    json.dump({"commit": commit, "api": {"tag": etiqueta_api, "image_id": id_api},
+               "moderador": {"tag": etiqueta_mod, "image_id": id_mod}}, salida, indent=2)
+    salida.write("\n")
+PYTHON
 fi
 
 registrar_estado "$ETAPA" "$NOMBRE" "$HERRAMIENTA" "$ESTADO" "$PEOR_CODIGO" "$BLOQUEANTE" \
