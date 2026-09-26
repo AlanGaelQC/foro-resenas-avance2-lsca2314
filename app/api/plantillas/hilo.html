@@ -1,32 +1,59 @@
 {% extends "base.html" %}
 {% block titulo %}{{ hilo.titulo }}{% endblock %}
+{% block estilos %}
+<style>
+  .detalle { max-width:840px; margin:0 auto; }
+  .volver { display:inline-block; margin-bottom:22px; font-size:.89rem; font-weight:750; text-decoration:none; }
+  .detalle .tarjeta { padding:clamp(22px,4vw,38px); }
+  .cabecera-detalle { display:flex; flex-wrap:wrap; align-items:center; gap:11px; }
+  .calificacion-detalle { padding:5px 10px; border-radius:8px; background:#fff5dc; color:#79520a; font-weight:800; }
+  .detalle h1 { margin:20px 0 12px; font-size:clamp(1.85rem,4vw,2.9rem); overflow-wrap:anywhere; }
+  .cuerpo-resena, .texto-comentario { white-space:pre-line; overflow-wrap:anywhere; }
+  .cuerpo-resena { color:#3a4c62; font-size:1.05rem; line-height:1.8; }
+  .detalle-seccion { display:flex; align-items:center; justify-content:space-between;
+    gap:12px; margin:27px 0 16px; }
+  .detalle-seccion h2 { margin:0; }
+  .contador { padding:4px 10px; border-radius:100px; background:#e0f3ed;
+    color:#075f56; font-size:.86rem; font-weight:750; }
+  .comentario { border-left:3px solid #30b59d; }
+  .comentario p { margin-bottom:0; }
+  .form-comentario button { margin-top:16px; }
+</style>
+{% endblock %}
 {% block contenido %}
-<div class="tarjeta publicado">
-  <h1>{{ hilo.titulo }}</h1>
-  <p class="meta">{{ hilo.calificacion }}/5 · por {{ hilo.autor.nombre }} · {{ hilo.creado_en.strftime('%Y-%m-%d %H:%M') }}</p>
-  <p>{{ hilo.cuerpo }}</p>
-  {% if hilo.clave_s3 %}<p><a href="/adjunto/{{ hilo.id }}">Ver imagen adjunta</a></p>{% endif %}
-</div>
-
-<h2>Comentarios</h2>
-{% for comentario in comentarios %}
-  <div class="tarjeta">
-    <p class="meta">{{ comentario.autor.nombre }} · {{ comentario.creado_en.strftime('%Y-%m-%d %H:%M') }}</p>
-    <p>{{ comentario.cuerpo }}</p>
+<div class="detalle">
+  <a class="volver" href="/">← Volver a las reseñas</a>
+  <article class="tarjeta publicado">
+    <div class="cabecera-detalle">
+      <span class="calificacion-detalle">★ {{ hilo.calificacion }}/5</span>
+      <span class="meta">por {{ hilo.autor.nombre }} · {{ hilo.creado_en.strftime('%Y-%m-%d %H:%M') }}</span>
+    </div>
+    <h1>{{ hilo.titulo }}</h1>
+    <p class="cuerpo-resena">{{ hilo.cuerpo }}</p>
+    {% if hilo.clave_s3 %}<p><a href="/adjunto/{{ hilo.id }}">Ver imagen adjunta →</a></p>{% endif %}
+  </article>
+  <div class="detalle-seccion">
+    <h2>Comentarios</h2><span class="contador">{{ comentarios | length }}</span>
   </div>
-{% else %}
-  <p>Sin comentarios todavia.</p>
-{% endfor %}
-
-{% if usuario %}
-<div class="tarjeta">
-  <form action="/hilos/{{ hilo.id }}/comentarios" method="post">
-    <label>Tu comentario <textarea name="cuerpo" rows="3" required></textarea></label>
-    <button type="submit">Enviar a revision</button>
-  </form>
+  {% for comentario in comentarios %}
+    <article class="tarjeta comentario">
+      <p class="meta">{{ comentario.autor.nombre }} · {{ comentario.creado_en.strftime('%Y-%m-%d %H:%M') }}</p>
+      <p class="texto-comentario">{{ comentario.cuerpo }}</p>
+    </article>
+  {% else %}
+    <div class="tarjeta"><p>Sin comentarios todavia.</p></div>
+  {% endfor %}
+  {% if usuario %}
+    <div class="tarjeta form-comentario">
+      <h2>Sumar a la conversación</h2>
+      <form action="/hilos/{{ hilo.id }}/comentarios" method="post">
+        <label for="nuevo-comentario">Tu comentario</label>
+        <textarea id="nuevo-comentario" name="cuerpo" rows="3" required></textarea>
+        <button type="submit">Enviar a revision →</button>
+      </form>
+    </div>
+  {% else %}
+    <div class="tarjeta"><p><a href="/entrar">Inicia sesion</a> para comentar.</p></div>
+  {% endif %}
 </div>
-{% else %}
-<p><a href="/entrar">Inicia sesion</a> para comentar.</p>
-{% endif %}
-<p><a href="/">Volver</a></p>
 {% endblock %}

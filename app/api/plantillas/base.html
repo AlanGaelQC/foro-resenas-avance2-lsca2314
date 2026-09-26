@@ -3,33 +3,91 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block titulo %}Foro y resenas{% endblock %}</title>
+  <meta name="theme-color" content="#172b44">
+  <title>{% block titulo %}Foro de reseñas{% endblock %} · Trama</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 760px; margin: 0 auto; padding: 16px; line-height: 1.5; }
-    header { display: flex; gap: 12px; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
-    header a { text-decoration: none; }
-    .tarjeta { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 12px 0; }
-    .rechazado { border-left: 4px solid #b00020; background: #fff5f5; }
-    .publicado { border-left: 4px solid #1b7f3b; }
-    .meta { color: #666; font-size: 0.85rem; }
-    label { display: block; margin-top: 8px; }
-    input, textarea, select { width: 100%; padding: 6px; }
-    button { margin-top: 10px; padding: 8px 14px; cursor: pointer; }
-    .error { color: #b00020; }
+    :root { color-scheme: light; font-family: "Segoe UI", system-ui, sans-serif;
+      --fondo:#f3f6f8; --papel:#fff; --tinta:#172b44; --suave:#5b6d7e;
+      --linea:#e2e9ed; --acento:#087d73; --sombra:0 12px 34px rgba(23,43,68,.06); }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin:0; background:var(--fondo); color:var(--tinta); line-height:1.6; }
+    a { color:#076a61; text-underline-offset:3px; }
+    a:hover { color:#00564e; }
+    :is(a, button, input, select, textarea):focus-visible { outline:3px solid #5fe1cb; outline-offset:3px; }
+    .sitio-header { background:#172b44; color:#fff; }
+    .cabecera-interior { max-width:1160px; margin:auto; padding:15px 24px;
+      display:flex; align-items:center; justify-content:space-between; gap:18px; }
+    .marca { display:inline-flex; align-items:center; gap:10px; color:#fff;
+      text-decoration:none; font-size:1.27rem; font-weight:800; letter-spacing:-.04em; }
+    .marca:hover { color:#fff; }
+    .marca-simbolo { display:grid; place-items:center; width:38px; height:38px;
+      border-radius:11px; background:#67e0cc; color:#172b44; }
+    .marca small { display:block; color:#afbfcc; font-size:.64rem; font-weight:600;
+      letter-spacing:.13em; line-height:1; text-transform:uppercase; }
+    .nav-principal { display:flex; align-items:center; flex-wrap:wrap; gap:19px; }
+    .nav-principal a { color:#e8f1f3; font-size:.9rem; font-weight:650; text-decoration:none; }
+    .nav-principal a:hover, .nav-principal button:hover { color:#67e0cc; }
+    .nav-principal .nav-boton { border:1px solid #67e0cc; border-radius:9px; padding:8px 14px; }
+    .nav-principal form { margin:0; }
+    .nav-principal button { margin:0; padding:0; border:0; background:none;
+      color:#e8f1f3; font:inherit; font-size:.9rem; cursor:pointer; }
+    .usuario-nav { max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .contenedor { max-width:1160px; margin:0 auto; padding:32px 24px 65px; }
+    h1, h2, h3, h4 { line-height:1.24; letter-spacing:-.035em; }
+    .meta { color:var(--suave); font-size:.85rem; }
+    .tarjeta { border:1px solid var(--linea); border-radius:18px; padding:25px;
+      margin:0 0 18px; background:var(--papel); box-shadow:var(--sombra); }
+    .tarjeta h2, .tarjeta h3 { margin-top:0; }
+    .rechazado { border-left:4px solid #bc4754; background:#fffafa; }
+    .publicado { border-left:4px solid #22a58e; }
+    label { display:block; margin:15px 0 6px; font-size:.89rem; font-weight:700; }
+    input, textarea, select { display:block; width:100%; padding:10px 12px; border:1px solid #cad5de;
+      border-radius:10px; background:white; color:var(--tinta); font:inherit; }
+    textarea { min-height:90px; resize:vertical; }
+    input[type=file] { font-size:.8rem; }
+    button, .boton { display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:11px 17px; border:0; border-radius:10px; background:var(--acento);
+      color:white; font:inherit; font-weight:700; text-decoration:none; cursor:pointer; }
+    button:hover, .boton:hover { background:#065f58; color:white; }
+    .error { color:#a9313f; font-weight:700; }
+    .panel-acceso { max-width:480px; margin:36px auto; }
+    .panel-acceso h1 { margin:0 0 8px; font-size:2rem; }
+    .panel-acceso button { width:100%; margin-top:20px; }
+    .panel-acceso .meta { margin-top:18px; }
+    .pie-sitio { padding:24px; border-top:1px solid var(--linea); color:var(--suave);
+      text-align:center; font-size:.85rem; }
+    @media(max-width:640px) {
+      .cabecera-interior { align-items:flex-start; flex-direction:column; gap:14px; }
+      .nav-principal { gap:12px; }
+      .contenedor { padding:19px 16px 45px; }
+      .tarjeta { padding:20px; }
+    }
+    @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
   </style>
+  {% block estilos %}{% endblock %}
 </head>
 <body>
-  <header>
-    <strong><a href="/">Foro y resenas</a></strong>
-    {% if usuario %}
-      <span class="meta">{{ usuario.nombre }}</span>
-      <a href="/mis-publicaciones">Mis publicaciones</a>
-      <form action="/salir" method="post" style="margin:0"><button type="submit">Salir</button></form>
-    {% else %}
-      <a href="/entrar">Entrar</a>
-      <a href="/registro">Registrarme</a>
-    {% endif %}
+  <header class="sitio-header">
+    <div class="cabecera-interior">
+      <a class="marca" href="/" aria-label="Trama, ir a la portada">
+        <span class="marca-simbolo" aria-hidden="true">T.</span>
+        <span>Trama<small>Foro de reseñas</small></span>
+      </a>
+      <nav class="nav-principal" aria-label="Navegación principal">
+        <a href="/#explorar">Explorar</a>
+        {% if usuario %}
+          <span class="usuario-nav">{{ usuario.nombre }}</span>
+          <a href="/mis-publicaciones">Mis publicaciones</a>
+          <form action="/salir" method="post"><button type="submit">Salir</button></form>
+        {% else %}
+          <a href="/entrar">Entrar</a>
+          <a class="nav-boton" href="/registro">Crear cuenta</a>
+        {% endif %}
+      </nav>
+    </div>
   </header>
-  {% block contenido %}{% endblock %}
+  <main class="contenedor">{% block contenido %}{% endblock %}</main>
+  <footer class="pie-sitio">Trama · Un espacio para compartir experiencias con respeto.</footer>
 </body>
 </html>

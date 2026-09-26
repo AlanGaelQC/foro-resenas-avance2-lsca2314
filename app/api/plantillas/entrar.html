@@ -1,12 +1,15 @@
 {% extends "base.html" %}
 {% block titulo %}Entrar{% endblock %}
 {% block contenido %}
-<h1>Iniciar sesion</h1>
-{% if error %}<p class="error">{{ error }}</p>{% endif %}
-<form action="/entrar" method="post">
-  <label>Correo <input type="email" name="correo" required></label>
-  <label>Contrasena <input type="password" name="contrasena" required></label>
-  <button type="submit">Entrar</button>
-</form>
-<p class="meta">¿Sin cuenta? <a href="/registro">Registrarme</a></p>
+<div class="tarjeta panel-acceso">
+  <h1>Iniciar sesion</h1>
+  <p class="meta">Vuelve a la conversación.</p>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form action="/entrar" method="post">
+    <label for="correo">Correo</label><input id="correo" type="email" name="correo" required autocomplete="email">
+    <label for="contrasena">Contrasena</label><input id="contrasena" type="password" name="contrasena" required autocomplete="current-password">
+    <button type="submit">Entrar</button>
+  </form>
+  <p class="meta">¿Sin cuenta? <a href="/registro">Registrarme</a></p>
+</div>
 {% endblock %}

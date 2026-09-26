@@ -4,6 +4,8 @@ Proyecto de **Herramientas de tecnologías de la información**, Tecmilenio (LSC
 
 **Estado:** QA completado: corrida bloqueada por XSS, remediación, portada pública, candidato `4333a32` con ocho controles `OK` y 19/19 pruebas, e imágenes empaquetadas. La evidencia está en `reportes/pipeline_bloqueado.txt`, `reportes/pipeline_verde.txt` y `reportes/entrega_final/`. Falta crear y verificar la EC2 nueva de Producción y reunir las capturas. [Procedimiento y evidencia de QA](docs/guia_qa.md) · [Arquitectura detallada](docs/arquitectura.md).
 
+**Candidato visual posterior:** se renovaron las plantillas de portada, detalle y acceso para mostrar claramente el antes y después. Este cambio de interfaz todavía requiere reconstrucción y un nuevo pipeline completo en QA. El manifiesto y el verde documentados arriba siguen correspondiendo exclusivamente a `4333a32`.
+
 ## Recorrido del usuario
 
 1. Una persona se registra, inicia sesión y publica una reseña. El servicio `moderador` decide `publicado` o `rechazado` antes de guardarla. El autor puede consultar sus rechazos y el motivo.
