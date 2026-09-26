@@ -1,8 +1,6 @@
 # ADR-003 — Promoción de artefactos y entornos QA/Producción
 
-**Estado:** promoción preparada en QA: veredicto y empaquetado comprobados sobre
-`4333a32`. Despliegue de Producción y recursos separados pendientes de verificación
-en la nueva EC2. Los detalles con `[PENDIENTE-AWS]` se cierran con datos reales.
+**Estado:** release de videojuegos `22ee1ec` aprobada en QA, exportada y desplegada en la EC2 nueva `i-089d62a1e8fdea7bb`. Verificación de destino 12/12 completada el 26 de septiembre de 2026; consultar [evidencia_produccion.md](evidencia_produccion.md).
 
 ## Contexto
 
@@ -22,37 +20,26 @@ dependencias distintas y romper la identidad de lo probado). El flujo:
    `reportes/06_image_ids.json` producido por la etapa 06. **No reconstruye**.
    Exporta con `docker image save`, calcula SHA-256 y escribe
    `reportes/manifest_release.json` con commit, tags, Image IDs y hashes.
-3. `[PENDIENTE-AWS]` Transferir los `.tar` por SSH a la EC2 nueva, verificar
+3. Transferir los `.tar` por SSH a la EC2 nueva, verificar
    hashes, `docker image load`, y `docker compose up` **sin build ni `:latest`**.
 4. Comprobar que los Image IDs cargados coinciden con el manifiesto.
 
-Se usa export/import porque no se presupone ECR. Si el Lab lo permitiera, se
-podría usar un registro con digests sin cambiar el contrato. `[PENDIENTE-AWS]`
-verificar disponibilidad de ECR. Un checksum detecta cambios de bytes, no
+Se usó export/import sin depender de ECR. La disponibilidad de ECR no se evaluó ni fue condición de la promoción. Un checksum detecta cambios de bytes, no
 autentica quién aprobó: la confianza viene del canal, permisos y origen
 controlado del manifiesto.
 
 ## Decisión 2 — Datos separados en un mismo RDS/bucket
 
-`[DECISIÓN-ALAN]` Con permisos de estudiante, la ruta realista es **compartir**
-la RDS/bucket del Avance 2 y separar por **base+usuario** (Producción) y
-**`PREFIJO_S3` distinto** en S3, no crear una segunda RDS/bucket. Se documenta el límite: dos
-bases en el mismo RDS no dan el aislamiento de dos servidores. No se copia el
-`.env` de QA: Producción tiene su propia `CLAVE_SESION`, su usuario de BD, su
-prefijo y `MODERADOR_PASS` propio. `[PENDIENTE-AWS]` comprobar que los permisos
-permiten ese aislamiento.
+La configuración aplicada comparte el RDS y el bucket del Avance 2, pero usa una **base y usuario propios** (`foro_prod`) y el **prefijo S3** `produccion/adjuntos/`. La aplicación en Producción comprobó acceso a RDS y S3; QA continúa usando la base `foro`. Dos bases dentro del mismo RDS no equivalen a dos servidores aislados. No se copió el `.env` de QA: Producción tiene `CLAVE_SESION`, `MODERADOR_PASS` y allowlist de moderadores propios. El archivo privado se transfirió con permisos 600.
 
 ## Decisión 3 — Verificación del destino (no reusar T1 de QA)
 
 `pipeline/verificar_produccion.py` corre en la EC2 nueva y compara los Image IDs y SHA-256 de los tar con el manifiesto de QA. También exige `entorno == "produccion"` (T1 de QA exige
-`"qa"` y fallaría siempre en Producción). Comprueba salud, BD, S3, conexión al moderador y vistas públicas; una inspección autorizada de contenido de prueba aún requiere una cuenta y reseña reales en la EC2 nueva. Un fallo
+`"qa"` y fallaría siempre en Producción). Comprueba salud, BD, S3, conexión al moderador y vistas públicas; se comprobó el detalle de una reseña real creada en la EC2 nueva. La petición anónima a la vista moderada obtuvo HTTP 403; la prueba autenticada de escape XSS se ejecutó en QA sobre los mismos Image IDs, no en la instancia nueva. Un fallo
 del destino marca la release como no aceptada aunque QA hubiera pasado; el error
 se documenta en `docs/bitacora_produccion.md` y, si es de código, vuelve a QA
 para un nuevo verde antes de re-promover.
 
 ## Decisión 4 — HTTPS
 
-`[PENDIENTE-AWS/verificar]` Let's Encrypt emite certificados para direcciones IP
-desde enero de 2026; su viabilidad en la EC2 (IP alcanzable en 80/443, IP
-estable, renovación ~6 días) se comprueba. Si no es viable en el Lab, se documenta
-HTTP como limitación (`COOKIE_SEGURA=false`), sin fingir HTTPS.
+En esta ejecución no se configuró un certificado ni un dominio estable. El navegador accede por HTTP a `8080` y `COOKIE_SEGURA=false`; el acceso de red se limita a la IP cliente mediante el grupo de seguridad. HTTPS queda como trabajo posterior y se documenta como limitación, sin afirmar que se haya verificado su viabilidad en el Learner Lab.
