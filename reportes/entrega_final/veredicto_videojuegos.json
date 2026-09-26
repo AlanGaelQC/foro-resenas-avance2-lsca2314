@@ -1,0 +1,9 @@
+{
+  "veredicto": "PERMITIDO",
+  "modo": "completo",
+  "commit": "22ee1ece314a857dc855378c24d4dbc15aaef0e1",
+  "arbol": "limpio",
+  "momento": "2026-09-26T03:50:36Z",
+  "etapas_bloqueantes_en_falla": 0,
+  "etapas": [{"etapa":"01","estado":"OK","bloqueante":"si"},{"etapa":"02","estado":"OK","bloqueante":"si"},{"etapa":"03","estado":"OK","bloqueante":"si"},{"etapa":"04","estado":"OK","bloqueante":"si"},{"etapa":"05","estado":"OK","bloqueante":"si"},{"etapa":"06","estado":"OK","bloqueante":"si"},{"etapa":"07","estado":"OK","bloqueante":"si"},{"etapa":"08","estado":"OK","bloqueante":"si"}]
+}
