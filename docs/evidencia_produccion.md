@@ -1,20 +1,27 @@
-# Evidencia de Producción · pendiente de EC2 nueva
+# Evidencia de Producción — Entrega Final
 
-**Estado:** plantilla. No existe aún despliegue verificado de esta Entrega Final.
+**Estado verificado:** 26 de septiembre de 2026. Producción funciona en una **EC2 nueva** (`i-089d62a1e8fdea7bb`, nombre interno `ip-172-31-30-151`, tipo `t2.small`); QA permanece en `i-05cc3223adae222ef`. La IP pública observada durante las capturas fue `98.81.185.30`, que puede cambiar al reiniciar la instancia.
 
-| Dato verificable | Evidencia a añadir |
+## Trazabilidad de la release
+
+| Control | Evidencia observada |
 |---|---|
-| Instance ID de la EC2 **nueva** y fecha de creación | `[PENDIENTE-AWS]` captura consola y `aws ec2 describe-instances` |
-| Commit y veredicto verde de QA | `4333a326d3d0ead37e80e3c96174c21798152043` (etiqueta `qa-verde-4333a32`), `PERMITIDO`, ocho etapas `OK`, árbol limpio, 19/19 pruebas; `reportes/pipeline_verde.txt` y `reportes/entrega_final/veredicto_verde.json` |
-| Imágenes examinadas en etapa 06 | `reportes/entrega_final/06_image_ids.json` y `reportes/entrega_final/manifest_release.json`; `pipeline/promover.sh` terminó con código 0 en QA |
-| Transferencia a Prod | `[PENDIENTE-AWS]` comprobación SHA-256 de tar antes de `docker image load` |
-| Identidad de imágenes de Prod | `[PENDIENTE-AWS]` Image IDs exactos tras `docker image load`, cotejados con QA |
-| Configuración separada | `[PENDIENTE-AWS]` `ENTORNO=produccion`, base/usuario y prefijo S3 distintos; no incluir secretos |
-| Disponibilidad y navegación | `[PENDIENTE-AWS]` salud API/moderador, portada y detalle, capturas comparables a QA |
-| Vista previa corregida | `[PENDIENTE-AWS]` solo moderador autorizado; texto XSS inerte y negritas funcionales |
-| Errores observados | `[PENDIENTE-AWS]` referencia a cada registro en `bitacora_produccion.md`; si no ocurre ninguno, escribirlo con las comprobaciones que lo sustentan |
+| Candidato de videojuegos aprobado **en QA** | `22ee1ece314a857dc855378c24d4dbc15aaef0e1`, etiqueta `qa-verde-videojuegos-22ee1ec`; pipeline completo `PERMITIDO`, **8/8** etapas y **19/19** pruebas. Ver `reportes/pipeline_verde_videojuegos.txt`, `reportes/entrega_final/veredicto_videojuegos.json`. El commit posterior que archiva estos reportes no cambia las imágenes de esta release. |
+| Artefactos aprobados | `reportes/entrega_final/manifest_videojuegos.json` conserva el manifiesto generado en QA. En el destino se verificaron SHA-256 de ambos tar y sus Image IDs antes de iniciar los contenedores. |
+| API | Image ID `sha256:ee1546ddd03dedbcde2b0d162c9759f59ac16f83751a76a0109cf49d212b48b3`; SHA-256 de `api.tar`: `ed9b0fc24fff53e9e7e7e3a9ae8518f4648151781c74cc80bda268598aa9ed7b`. |
+| Moderador | Image ID `sha256:34e2181a7df3797d8a0e4b5cca8d0a37a6caf75bd8eec1f8644c58e450c4e9c9`; SHA-256 de `moderador.tar`: `5fdb728e760185122e1b1d65966b24e3991b088f0b46ded6e909bfccda471ebf`. |
+| Promoción | Se transfirieron `.env`, manifiesto y tar por `scp -3 -p`; `docker image load` restauró las imágenes. El destino conserva el checkout del tag aprobado en `22ee1ec` y se ejecutó `docker compose up -d --no-build --pull never`. **No se reconstruyó el código en Producción.** |
+| Aislamiento de configuración | `ENTORNO=produccion`, base y usuario PostgreSQL `foro_prod` separados de la base `foro` de QA, `PREFIJO_S3=produccion/adjuntos/`; mismo RDS y bucket, con claves de sesión y moderador propias. El archivo `.env` en Producción tiene permisos `600`; no se publica. |
+| Salud y autorización | Contenedores `api` y `moderador` `healthy`; `/salud` HTTP 200 (`entorno=produccion`, PostgreSQL `ok`, S3 `ok`), `/salud/dependencias` HTTP 200 (`moderador=ok`), portada HTTP 200, petición anónima a vista de moderador HTTP 403. |
+| Verificador del destino | `pipeline/verificar_produccion.py`: **11/11** con base vacía, después **12/12** con reseña existente, incluido detalle. Logs originales en la EC2: `/home/ec2-user/verificacion_produccion_22ee1ec.log` y `/home/ec2-user/verificacion_produccion_con_resena_22ee1ec.log`. La comprobación del detalle valida HTTP 200; las capturas muestran además el conteo de cuatro comentarios. |
 
-Los problemas de despliegue y configuración de la nueva EC2 se documentan allí. Los defectos de código descubiertos durante la verificación regresan a QA, se corrigen y exigen otra corrida verde completa antes de transferir nuevas imágenes.
+## Evidencia visual y límites
 
-La comprobación técnica preparada se ejecutará **en la EC2 de Producción** con
-`python3 pipeline/verificar_produccion.py URL --manifest /ruta/manifest_release.json --tars /ruta/release`; requiere `httpx`, Docker e imágenes ya cargadas y falla si IDs, hashes o salud no coinciden. Comprobar el detalle de una reseña y la vista moderada con contenido de prueba exige disponer de esos datos y documentar sus resultados reales.
+- Captura inicial de Producción: portada sin reseñas en `98.81.185.30:8080`.
+- Captura posterior: reseña de **Luis** sobre *Midnight Club 3* con cuerpo recortado; contador de **cuatro comentarios** y **solo tres visibles** en la tarjeta. Comentarios publicados por otra cuenta (**Angel**).
+- Captura de detalle: autor, calificación y cuerpo completo; contador de **cuatro comentarios**. La imagen enviada muestra el comienzo de la lista: para evidenciar los cuatro, adjuntar también una captura al desplazarse hasta el final.
+- Las capturas fueron proporcionadas durante la ejecución; **aún deben insertarse en la plantilla oficial o versionarse en `docs/evidencias/`** antes de afirmar que están adjuntas al repositorio. Conviene que el encuadre incluya la URL y, en consola AWS, los Instance IDs de ambas EC2.
+- La vista previa enriquecida autorizada y el escape de XSS fueron verificados en QA. En Producción se verificó el acceso anónimo denegado y se comprobó que ambos Image IDs son idénticos a los de QA; el verificador actual **no realiza una prueba autenticada de XSS en Producción**.
+- El sitio se sirvió por **HTTP** (`COOKIE_SEGURA=false`) en una IP efímera: hay un límite de transporte que debe indicarse en la entrega. El puerto 8080 está restringido a la IP cliente autorizada en el grupo de seguridad; HTTPS no se presenta como implementado.
+
+Los errores reales de preparación y el reinicio transitorio de la API están en [bitacora_produccion.md](bitacora_produccion.md). Ninguno implicó publicar el parche vulnerable en Producción.
