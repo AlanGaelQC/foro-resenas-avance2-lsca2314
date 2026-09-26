@@ -2,7 +2,7 @@
 
 Proyecto de **Herramientas de tecnologías de la información**, Tecmilenio (LSCA2314), tema 4: foro y reseñas. **Trama** reúne opiniones de jugadores sobre videojuegos: cada persona puede escribir su reseña, calificarla de 1 a 5, añadir una imagen y conversar en los comentarios. Un segundo servicio aplica reglas de moderación antes de publicar. La Entrega Final introduce la vista previa enriquecida del moderador, demuestra y corrige una XSS suministrada en el parche del profesor, y añade una portada con extractos y tres comentarios por reseña. El título identifica el juego según lo escribe el autor; no existe catálogo de juegos ni puntuación agregada por videojuego.
 
-**Estado:** QA completado para el ciclo de seguridad: corrida bloqueada por XSS, remediación, portada pública y candidato `4333a32` con ocho controles `OK` y 19/19 pruebas. La evidencia histórica está en `reportes/pipeline_bloqueado.txt`, `reportes/pipeline_verde.txt` y `reportes/entrega_final/`. La interfaz genérica posterior `2e2b811` también pasó ocho controles y 19/19 pruebas en QA y se empaquetó (etiqueta `qa-verde-interfaz-2e2b811`). **La versión de videojuegos solo puede promoverse tras reconstruir la API y obtener una corrida completa PERMITIDO sobre su propio commit limpio, con las imágenes verificadas.** Falta crear y verificar la EC2 nueva de Producción y reunir sus capturas. [Procedimiento y evidencia de QA](docs/guia_qa.md) · [Arquitectura detallada](docs/arquitectura.md).
+**Estado:** ciclo del parche comprobado en QA: inicialmente la XSS pasó por una brecha del pipeline; al añadir la detección se bloqueó (etapas 04 y 08), se remediaron el código y las reglas, y la release temática `22ee1ec` pasó **8/8 etapas y 19/19 pruebas**. Su tag `qa-verde-videojuegos-22ee1ec` identifica las imágenes escaneadas que se transfirieron, sin reconstruir, a la EC2 nueva de Producción `i-089d62a1e8fdea7bb`; el verificador de destino terminó **12/12**. [Evidencia de Producción](docs/evidencia_produccion.md) · [Bitácora real](docs/bitacora_produccion.md). El commit actual de documentación es posterior al commit de la imagen aprobada. [Procedimiento y evidencia de QA](docs/guia_qa.md) · [Arquitectura detallada](docs/arquitectura.md).
 
 **Alcance:** la experiencia se inspira en leer reseñas breves de videojuegos y abrirlas para ver todo el texto y la conversación, como ocurre en comunidades de jugadores. Es un foro propio: no usa cuentas, catálogo, votos de utilidad, horas jugadas ni API de Steam. Conserva la calificación de 1 a 5 del proyecto original.
 
@@ -25,7 +25,7 @@ La selección de tres comentarios ocurre en PostgreSQL mediante `ROW_NUMBER() ..
 | S3 | Adjuntos privados con URLs firmadas | Permisos de la instancia, sin claves AWS en el repositorio |
 | Pipeline de QA | Ocho controles; una decisión final bloqueante | Ejecutado sobre la instancia QA y el commit candidato |
 
-QA es la instancia del Avance 2. Producción será **una EC2 nueva** y recibirá únicamente las imágenes de un commit remediado con pipeline completo en verde. Si se comparten RDS y bucket, se separan **base y usuario** de PostgreSQL y **prefijo `PREFIJO_S3`** de S3; esta decisión requiere comprobación de permisos del Learner Lab. El diagrama y los flujos están en [docs/arquitectura.md](docs/arquitectura.md).
+QA es `i-05cc3223adae222ef` (la instancia del Avance 2). Producción es la **EC2 nueva** `i-089d62a1e8fdea7bb` y recibió solo las imágenes del commit remediado `22ee1ec`, en verde. Ambas instancias usan el mismo RDS y bucket: Producción se separó mediante base y usuario PostgreSQL `foro_prod` y prefijo S3 `produccion/adjuntos/`. Salud y conectividad se comprobaron en el destino; compartir servidor y bucket impone un límite de aislamiento. El diagrama y los flujos están en [docs/arquitectura.md](docs/arquitectura.md).
 
 ## Pipeline: la condición de promoción
 
@@ -40,7 +40,7 @@ QA es la instancia del Avance 2. Producción será **una EC2 nueva** y recibirá
 | 07 | SBOM CycloneDX de **ambos** servicios | Formato o inventario inválido |
 | 08 | Pruebas HTTP de negocio, autorización, XSS y feed | Cualquier prueba fallida |
 
-El orquestador `pipeline/orquestador.sh` corre **las ocho etapas aunque alguna falle**, deja `reportes/veredicto.json` y archiva cada corrida en `reportes/corridas/`. Un error de herramienta bloquea: no se interpreta como escaneo limpio. Antes de empaquetar, `pipeline/promover.sh` verifica el commit, el árbol limpio y que los dos Image IDs actuales coincidan con los que examinó Trivy en la etapa 06. **El empaquetado no despliega:** la transferencia y verificación en la EC2 nueva se completan con datos reales de AWS.
+El orquestador `pipeline/orquestador.sh` corre **las ocho etapas aunque alguna falle**, deja `reportes/veredicto.json` y archiva cada corrida en `reportes/corridas/`. Un error de herramienta bloquea: no se interpreta como escaneo limpio. Antes de empaquetar, `pipeline/promover.sh` verifica el commit, el árbol limpio y que los dos Image IDs actuales coincidan con los que examinó Trivy en la etapa 06. **El empaquetado por sí solo no despliega:** la transferencia y verificación en la EC2 nueva quedaron comprobadas y constan en la evidencia de Producción.
 
 ### Hitos de QA
 
@@ -52,8 +52,9 @@ El orquestador `pipeline/orquestador.sh` corre **las ocho etapas aunque alguna f
 | Vista pública | `ca2529a` | Feed, comentario máximo y paginación |
 | Candidato funcional aprobado | `4333a32` (etiqueta `qa-verde-4333a32`) | Ocho controles `OK`, árbol limpio y 19/19 pruebas; imágenes examinadas y empaquetadas |
 | Interfaz genérica aprobada | `2e2b811` (etiqueta `qa-verde-interfaz-2e2b811`) | Ocho controles `OK`, árbol limpio y 19/19 pruebas; imágenes examinadas y empaquetadas |
+| **Release promovida: videojuegos** | `22ee1ec` (etiqueta `qa-verde-videojuegos-22ee1ec`) | Ocho controles `OK`, 19/19 pruebas y manifiesto `reportes/entrega_final/manifest_videojuegos.json`; destino 12/12 |
 
-Estas corridas se ejecutaron en la EC2 de QA. El commit `bc539cb` archiva los reportes históricos del candidato `4333a32`; el manifiesto activo en QA fue regenerado después para `2e2b811`. **Esos veredictos y paquetes solo certifican los commits registrados en sus manifiestos; la versión de videojuegos requiere un veredicto y paquete propios.** La versión con fallo deliberado nunca se promueve a Producción. Un error real de configuración o despliegue en Producción se registra allí; un defecto de código vuelve a QA y exige otro verde.
+Estas corridas se ejecutaron en la EC2 de QA. El commit `bc539cb` archiva los reportes históricos del candidato `4333a32`; la evidencia verde de videojuegos se archivó en `72d64f4` después de aprobar y exportar el commit `22ee1ec`. **Cada veredicto y manifiesto certifica solo el commit que nombra**. A Producción llegó el paquete de `22ee1ec`, no el parche vulnerable. Los problemas de configuración observados se registran en `docs/bitacora_produccion.md`; un futuro defecto de código tendría que volver a QA para otro ciclo completo.
 
 ## Configuración y ejecución
 
@@ -79,4 +80,6 @@ El orquestador carga la contraseña moderadora desde el `.env` local para su pru
 - `docs/evidencia_local/`: reproducción HTTP local de Claude; **no equivale** a evidencia de QA.
 - `docs/declaracion_ia.md`: plantilla para que Alan declare únicamente trabajo que hizo y verificó.
 
-**Pendiente:** consolidar capturas del antes/después en QA, crear la EC2 nueva, verificar Producción y anotar errores efectivamente observados. QA es `i-05cc3223adae222ef`; el manifiesto exportado y los Image IDs están en `reportes/entrega_final/`. No se completan con datos supuestos.
+**Entrega:** incorporar las capturas del antes/después de QA y de la Producción ya verificada a la plantilla oficial. Archivar el log final del destino y completar en primera persona `docs/declaracion_ia.md` y la autoevaluación. Los Image IDs y hashes de la release de videojuegos están en `reportes/entrega_final/manifest_videojuegos.json`.
+
+**Evolución propuesta (fuera de esta entrega):** respuestas enlazadas a comentarios concretos; cuentas verificadas de desarrolladores y una sección de noticias sin autocalificaciones. Esta función requeriría un tipo de publicación y reglas de autorización nuevos, migración de datos, pruebas de moderación y un ciclo QA → verde → promoción propio.
