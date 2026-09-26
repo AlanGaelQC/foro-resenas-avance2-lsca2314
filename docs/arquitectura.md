@@ -1,6 +1,6 @@
 # Arquitectura y puerta de promoción
 
-## Topología prevista
+## Topología desplegada
 
 ```mermaid
 flowchart TB
@@ -23,7 +23,7 @@ flowchart TB
   ART --> P_MOD
 ```
 
-Las bases de datos y los prefijos son **aislamientos lógicos propuestos**, no recursos ya creados. La EC2 QA existente y la nueva EC2 de Producción son instancias distintas. El servicio moderador solo tiene acceso a través de la red interna de Compose; la API es la frontera de autorización. El RDS no publica 5432 a Internet. El bucket no sirve adjuntos públicamente: la API genera URLs con vigencia limitada.
+El diagrama corresponde a **dos EC2 efectivamente creadas**: QA `i-05cc3223adae222ef` y Producción `i-089d62a1e8fdea7bb`. Los nodos `QA_DB` y `P_DB` son dos bases lógicamente separadas (`foro` y `foro_prod`) dentro del **mismo RDS**, y los dos nodos S3 son prefijos distintos dentro del **mismo bucket**, no servidores adicionales. La aplicación de Producción verificó sus conexiones a RDS y S3. El servicio moderador solo tiene acceso desde la red interna de Compose; la API es la frontera de autorización. El RDS no publica 5432 a Internet. Los adjuntos permanecen privados y la API genera URLs firmadas de duración limitada.
 
 ## Fronteras de confianza
 
@@ -47,7 +47,7 @@ Las bases de datos y los prefijos son **aislamientos lógicos propuestos**, no r
 | Candidato completo | Ocho etapas ejecutadas sobre imagen y código final | Veredicto PERMITIDO, IDs de imágenes examinadas |
 | EC2 nueva | Solo artefactos de QA verde, configuración separada | Validación de salud, identidad y bitácora de problemas de despliegue |
 
-La entrega académica aún necesita las capturas reales y completar la plantilla de evidencias oficial. El diagrama es un mapa del diseño, no una captura de infraestructura desplegada.
+La aplicación desplegada en Producción terminó 12/12 comprobaciones del destino. La entrega académica aún requiere incorporar capturas comparables a la plantilla oficial. El diagrama ilustra la topología comprobada, pero no sustituye la captura de AWS que acredita los Instance IDs.
 
 La selección de tres comentarios por reseña emplea la función de ventana
 [`row_number()` de SQLAlchemy 2.0](https://docs.sqlalchemy.org/en/20/tutorial/data_select.html#using-window-functions).
