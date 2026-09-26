@@ -134,7 +134,7 @@
 <section class="franja" aria-labelledby="novedades-titulo">
   <div class="franja-encabezado"><h2 id="novedades-titulo">Recién compartidas</h2><a href="#explorar">Ver todas las reseñas →</a></div>
   <div class="franja-grid">
-    {% for v in vista_hilos[:3] %}
+    {% for v in vista_hilos[1:4] %}
       <article class="mini-resena">
         <div class="mini-visual" aria-hidden="true">{{ v.hilo.titulo[:1] | upper }}</div>
         <div><p>★ {{ v.hilo.calificacion }}/5 · {{ v.hilo.autor.nombre }}</p>
