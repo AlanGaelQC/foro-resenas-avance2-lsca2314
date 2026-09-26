@@ -2,7 +2,7 @@
 
 Proyecto de **Herramientas de tecnologías de la información**, Tecmilenio (LSCA2314). Una API web permite publicar reseñas con calificación, comentarios e imágenes privadas. Un segundo servicio aplica reglas de moderación antes de publicar. El proyecto final introduce la vista previa enriquecida del moderador, demuestra y corrige una XSS suministrada en el parche del profesor, y añade una portada con extractos y tres comentarios por reseña.
 
-**Estado:** integración y corridas roja/verde observadas en QA; aún falta el verde del candidato completo, la EC2 nueva de Producción y sus capturas. [Procedimiento y evidencia de QA](docs/guia_qa.md) · [Arquitectura detallada](docs/arquitectura.md).
+**Estado:** QA completado: corrida bloqueada por XSS, remediación, portada pública, candidato `4333a32` con ocho controles `OK` y 19/19 pruebas, e imágenes empaquetadas. La evidencia está en `reportes/pipeline_bloqueado.txt`, `reportes/pipeline_verde.txt` y `reportes/entrega_final/`. Falta crear y verificar la EC2 nueva de Producción y reunir las capturas. [Procedimiento y evidencia de QA](docs/guia_qa.md) · [Arquitectura detallada](docs/arquitectura.md).
 
 ## Recorrido del usuario
 
@@ -48,9 +48,9 @@ El orquestador `pipeline/orquestador.sh` corre **las ocho etapas aunque alguna f
 | Cobertura añadida | `84443a4` | La regla y T10d deben bloquear por la falla real |
 | Remediación | `30a764b` | Texto de usuario escapado, negritas y saltos preservados |
 | Vista pública | `ca2529a` | Feed, comentario máximo y paginación |
-| Candidato íntegro | Rama `entrega-final` | Ocho controles en verde **sobre este commit final**, con ambas imágenes examinadas |
+| Candidato aprobado | `4333a32` (etiqueta `qa-verde-4333a32`) | Ocho controles `OK`, árbol limpio y 19/19 pruebas; imágenes examinadas y empaquetadas |
 
-Estos hitos son commits, no afirmaciones de corridas AWS ya realizadas. Cada fase se ejecuta en QA antes de avanzar a la siguiente. La versión con fallo deliberado nunca se promueve a Producción. Un error real de configuración o despliegue en Producción se registra allí; un defecto de código vuelve a QA y exige otro verde.
+Estas corridas se ejecutaron en la EC2 de QA. El commit posterior `bc539cb` archiva los reportes; **las imágenes y el manifiesto corresponden a `4333a32`**, no a ese commit de documentación. La versión con fallo deliberado nunca se promueve a Producción. Un error real de configuración o despliegue en Producción se registra allí; un defecto de código vuelve a QA y exige otro verde.
 
 ## Configuración y ejecución
 
@@ -70,10 +70,10 @@ El orquestador carga la contraseña moderadora desde el `.env` local para su pru
 
 ## Evidencia y decisiones
 
-- `docs/clasificacion_hallazgo.md`: CWE-79, impacto, falso positivo y espacio para la corrida real.
+- `docs/clasificacion_hallazgo.md`: CWE-79, impacto, falso positivo y corridas reales en QA.
 - `docs/respuesta_incidente.md`: contención temporal separada de la corrección permanente.
 - `docs/ADR-002-vista-previa.md` y `docs/ADR-003-promocion-entornos.md`: decisiones y límites del diseño.
 - `docs/evidencia_local/`: reproducción HTTP local de Claude; **no equivale** a evidencia de QA.
 - `docs/declaracion_ia.md`: plantilla para que Alan declare únicamente trabajo que hizo y verificó.
 
-**Pendiente de AWS:** consolidar capturas del antes/después en QA y el verde final del candidato completo; registrar Instance IDs y manifiesto exportado, crear la EC2 nueva, verificar Producción y anotar errores efectivamente observados. No se completan con datos supuestos.
+**Pendiente:** consolidar capturas del antes/después en QA, crear la EC2 nueva, verificar Producción y anotar errores efectivamente observados. QA es `i-05cc3223adae222ef`; el manifiesto exportado y los Image IDs están en `reportes/entrega_final/`. No se completan con datos supuestos.
