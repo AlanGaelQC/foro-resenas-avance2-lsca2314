@@ -1,6 +1,6 @@
 # Ejecución en QA · orden y evidencia
 
-**Estado:** corridas del parche, detección, remediación y vista pública observadas en QA; aún falta validar el candidato completo para empaquetar. Todos los comandos se ejecutan en la **instancia QA del Avance 2**, con la misma base de datos persistente; no borres usuarios ni datos para conseguir un verde.
+**Estado:** ciclo completo observado en la instancia QA `i-05cc3223adae222ef` (Avance 2), incluida la corrida verde del candidato y el empaquetado. La base de datos persistente no se reinició para obtener el verde.
 
 ## Antes de actualizar QA
 
@@ -30,7 +30,9 @@ El orquestador ejecuta ocho etapas y crea `reportes/veredicto.json` y `reportes/
 
 **Remediación comprobada en QA, 2026-09-25 22:40–22:41 UTC:** después de instalar el renderizador seguro en `30a764b` y restaurar la lista de moderadores, las ocho etapas terminaron `OK`, el pipeline devolvió código 0 y `PERMITIDO`, y pasaron 18/18 pruebas, incluidas T10d y T10e. Carpeta: `reportes/corridas/20260925T224110120081948Z-permitido/`. El registro aún indicó incorrectamente que había cambios locales, aunque Git terminó limpio.
 
-**Vista pública comprobada en QA, 2026-09-25 23:57–23:59 UTC:** en `ca2529a` el servicio respondió HTTP 200, RDS y S3 estaban disponibles; el pipeline completo terminó con ocho etapas `OK`, código 0 y `PERMITIDO`. Pasaron 19/19 pruebas, incluida T11 (tres comentarios en portada) y T10d (XSS escapada). Carpeta: `reportes/corridas/20260925T235905408924320Z-permitido/`. El registro volvió a indicar cambios locales durante la limpieza temporal de SBOM; Git terminó limpio. **Aún falta** probar el HEAD completo, con el arreglo del registro y los controles de identidad de imágenes, para autorizar la promoción.
+**Vista pública comprobada en QA, 2026-09-25 23:57–23:59 UTC:** en `ca2529a` el servicio respondió HTTP 200, RDS y S3 estaban disponibles; el pipeline completo terminó con ocho etapas `OK`, código 0 y `PERMITIDO`. Pasaron 19/19 pruebas, incluida T11 (tres comentarios en portada) y T10d (XSS escapada). Carpeta: `reportes/corridas/20260925T235905408924320Z-permitido/`. El registro volvió a indicar cambios locales durante la limpieza temporal de SBOM; Git terminó limpio.
+
+**Candidato final y release, 2026-09-26 00:06–00:08 UTC:** el pipeline completo en `4333a326d3d0ead37e80e3c96174c21798152043` devolvió código 0, `PERMITIDO`, `arbol: limpio`, ocho etapas `OK` y 19/19 pruebas. Carpeta original de QA: `reportes/corridas/20260926T000621186097674Z-permitido/`; copia entregable: `reportes/pipeline_verde.txt` y `reportes/entrega_final/veredicto_verde.json`. `pipeline/promover.sh` terminó con código 0; `reportes/entrega_final/manifest_release.json` conserva los Image IDs y SHA-256 de los dos archivos `.tar`. La etiqueta `qa-verde-4333a32` apunta al commit aprobado. `bc539cb` solo añade los reportes al repositorio; la release mantiene `4333a32` como commit de origen.
 
 | Orden | Checkout en la rama local | Qué observar y registrar |
 |---|---|---|
@@ -48,4 +50,4 @@ En cada paso verifica que `git status --short` está limpio. El script `pipeline
 - Completa `docs/clasificacion_hallazgo.md` y `docs/respuesta_incidente.md` con la etapa real, exit code y rutas de los archivos. La contención puede retirar temporalmente `MODERADORES`; la corrección es escapar el contenido conservando el formato.
 - Tras verificar QA, completa la plantilla oficial de evidencias con capturas y enlaces reales. La plantilla de declaración de IA requiere palabras y comprobaciones personales de Alan.
 
-**Pendiente:** `[PENDIENTE-QA]` Instance ID, saldo, IAM y SG; verificar el verde del candidato completo, exportar imágenes y capturar su identidad. Los reportes descritos arriba son corridas observadas; no se asignan datos de AWS que aún no se hayan comprobado.
+**Inventario QA verificado:** instancia `i-05cc3223adae222ef`, tipo `t2.small`, perfil `LabInstanceProfile`, grupo `sg-0a2c36cea7fb012d7` y RDS `foro-resenas-qa` en la misma VPC; los datos de identificación de la release están en `reportes/entrega_final/`. **Pendiente:** capturas comparables de QA, comprobar saldo vigente del Learner Lab y documentar la instancia nueva de Producción.
