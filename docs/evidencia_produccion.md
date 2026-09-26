@@ -2,7 +2,23 @@
 
 **Estado verificado:** 26 de septiembre de 2026. Producción funciona en una **EC2 nueva** (`i-089d62a1e8fdea7bb`, nombre interno `ip-172-31-30-151`, tipo `t2.small`); QA permanece en `i-05cc3223adae222ef`. La IP pública observada durante las capturas fue `98.81.185.30`, que puede cambiar al reiniciar la instancia.
 
-## Trazabilidad de la release
+## Segunda promoción: diseño gamer (release actual)
+
+El 26 de septiembre de 2026 se activó en la misma EC2 de Producción el commit `94242727087285c0e7c26e9eb71ce5fef5b336dd`, etiqueta `qa-verde-diseno-9424272`. En QA se observaron ocho etapas `OK`, árbol limpio y **19/19** pruebas; ver [`pipeline_verde_diseno_gamer_9424272.txt`](../reportes/pipeline_verde_diseno_gamer_9424272.txt) y el [veredicto](../reportes/entrega_final/veredicto_diseno_gamer_9424272.json). El cambio del verificador de Producción se hizo en QA antes de repetir el pipeline; el resultado anterior `22ee1ec` se conserva como primera promoción y respaldo.
+
+| Control | Resultado observado |
+|---|---|
+| Origen e integridad | [Manifiesto de QA](../reportes/entrega_final/manifest_diseno_gamer_9424272.json) ligado a `9424272`; `api.tar` SHA-256 `36a5f37b27aa95cb0d5589952ed94c6881ba897f9193b492412f58a7c1195075` y `moderador.tar` SHA-256 `8e31bbb21d2d72b0cc337b5e0cc4d2dd39858e29027cd37e6386b53bac6bb4ba`, ambos comprobados en Producción. |
+| Imágenes | API `sha256:8afbda2d22c83af6b6c8f2350c8091dbc7a7f978fb7c2ac6b714472c59615a96`; moderador `sha256:34e2181a7df3797d8a0e4b5cca8d0a37a6caf75bd8eec1f8644c58e450c4e9c9`. Los contenedores activos coincidieron con estos IDs; no se reconstruyeron en el destino. |
+| Salud | Ambos servicios `healthy`; `/salud` HTTP 200 con `entorno=produccion`, PostgreSQL y S3 `ok`; portada HTTP 200. La primera petición durante el arranque recibió un `Connection reset by peer`; el reintento respondió HTTP 200 y se confirmó `healthy`. |
+| Verificación | [`verificacion_produccion_diseno_gamer_9424272.log`](../reportes/entrega_final/verificacion_produccion_diseno_gamer_9424272.log) registra **12/12** controles con reseña y detalle existentes, incluidos integridad de imágenes, servicios y acceso anónimo denegado a la vista de moderador. El original permanece en `/home/ec2-user/verificacion_produccion_9424272.log` en la EC2 de Producción. |
+| Respaldo | Se conservó `/home/ec2-user/release-22ee1ec/` con los tar y manifiesto originales. El checkout del destino es el tag aprobado `qa-verde-diseno-9424272`; la rama de evidencias puede contener commits posteriores. |
+
+La IP pública observada durante la segunda promoción fue `54.236.196.171`; puede cambiar tras reiniciar la EC2. Las capturas de la interfaz rediseñada aún deben incorporarse a la entrega; el resultado del verificador no sustituye esa comprobación visual.
+
+## Primera promoción: 22ee1ec (histórica)
+
+### Trazabilidad de la release
 
 | Control | Evidencia observada |
 |---|---|

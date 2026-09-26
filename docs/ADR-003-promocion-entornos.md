@@ -1,6 +1,6 @@
 # ADR-003 — Promoción de artefactos y entornos QA/Producción
 
-**Estado:** release de videojuegos `22ee1ec` aprobada en QA, exportada y desplegada en la EC2 nueva `i-089d62a1e8fdea7bb`. Verificación de destino 12/12 completada el 26 de septiembre de 2026; consultar [evidencia_produccion.md](evidencia_produccion.md).
+**Estado:** primera release de videojuegos `22ee1ec` aprobada y desplegada en la EC2 nueva `i-089d62a1e8fdea7bb`; promoción posterior del rediseño `9424272` (tag `qa-verde-diseno-9424272`) aprobada 8/8 y 19/19 en QA, verificada **12/12** en el destino el 26 de septiembre de 2026. Consultar [evidencia_produccion.md](evidencia_produccion.md) y [bitacora_produccion.md](bitacora_produccion.md).
 
 ## Contexto
 
