@@ -1,0 +1,13 @@
+[PASA] Manifiesto de release disponible: commit 22ee1ece314a
+[PASA] Image ID de api coincide con QA
+[PASA] SHA-256 de api.tar coincide con QA
+[PASA] Image ID de moderador coincide con QA
+[PASA] SHA-256 de moderador.tar coincide con QA
+[PASA] API identifica entorno Producción
+[PASA] RDS alcanzable
+[PASA] S3 alcanzable
+[PASA] Moderador alcanzable
+[PASA] Portada con reseñas disponible
+[PASA] Vista del moderador rechaza sesión anónima
+[PASA] Detalle de reseña disponible
+Verificación: 12/12 controles completados
