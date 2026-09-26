@@ -73,7 +73,8 @@ def ejecutar() -> int:
             dependencias = cliente.get(f"{base}/salud/dependencias")
             anotar("Moderador alcanzable", dependencias.status_code == 200 and dependencias.json().get("moderador") == "ok")
             portada = cliente.get(base + "/")
-            anotar("Portada con reseñas disponible", portada.status_code == 200 and "Resenas publicadas" in portada.text)
+            # El identificador del feed permanece estable aunque cambie el texto visible.
+            anotar("Portada con reseñas disponible", portada.status_code == 200 and 'id="titulo-publicaciones"' in portada.text)
             restringida = cliente.post(f"{base}/moderacion/resenas/1/vista-previa")
             anotar("Vista del moderador rechaza sesión anónima", restringida.status_code == 403)
             coincidencia = re.search(r'href="(/hilos/\d+)"', portada.text)
