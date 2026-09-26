@@ -1,0 +1,22 @@
+Pruebas de flujo contra http://localhost:8080
+  [PASA ] T1 QA usa PostgreSQL/RDS y alcanza S3 -- http 200; salud={'estado': 'vivo', 'entorno': 'qa', 'motor_base_datos': 'postgresql', 'base_datos': 'ok', 'almacenamiento_s3': 'ok'}
+  [PASA ] T1b El servicio moderador esta disponible -- http 200
+  [PASA ] T2 Un anonimo no puede publicar -- http 401 (se esperaba 401)
+  [PASA ] T3 Registro e inicio de sesion funcionan -- registro=303, ingreso=303
+  [PASA ] T4 El contenido aprobado aparece en la portada -- http 303
+  [PASA ] T5 El moderador impide publicar contenido prohibido
+  [PASA ] T5b El autor ve el rechazo y su motivo
+  [PASA ] T6 El contenido se publica escapado y no ejecutable
+  [PASA ] T6b El moderador rechaza tambien comentarios
+  [PASA ] T7 Se rechaza una calificacion fuera del rango 1-5 -- http 400
+  [PASA ] T8 Se rechaza un archivo cuya firma no es de imagen -- http 400
+  [PASA ] T8b Un adjunto valido se guarda en S3 y genera URL prefirmada
+  [PASA ] T11 El feed muestra <=3 comentarios por resena y el total correcto -- comentarios mostrados en portada: 3
+  [PASA ] T9 Un usuario no ve rechazos de otro usuario
+  [PASA ] T10 El registro publico rechaza los correos de moderador -- http 403 (se esperaba 403)
+  [PASA ] T10b Un usuario comun no accede a la vista previa del moderador -- http 403 (se esperaba 403)
+  [PASA ] T10c El moderador preaprovisionado inicia sesion -- ingreso=303 (cuenta moderador.qa.03b10026cae9@example.com debe existir en QA)
+  [PASA ] T10d La vista previa NO ejecuta el contenido del autor (XSS almacenado) -- http 200
+  [PASA ] T10e La vista previa conserva el formato enriquecido (negrita)
+
+Resultado: 19/19 pruebas pasaron
