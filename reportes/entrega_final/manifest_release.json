@@ -1,0 +1,6 @@
+{
+  "source_commit": "4333a326d3d0ead37e80e3c96174c21798152043",
+  "imagen_api":       {"tag": "foro-resenas-api:local", "image_id": "sha256:02f91cbe52f580e04ebbeb11123b87ef8b5fdf6130a1741de6f3525c8627e354", "sha256_tar": "9b84d127308db1a2da151f74a31d2832fd6496918a88aebe6e0f02bb2c2179e9"},
+  "imagen_moderador": {"tag": "foro-resenas-moderador:local", "image_id": "sha256:34e2181a7df3797d8a0e4b5cca8d0a37a6caf75bd8eec1f8644c58e450c4e9c9", "sha256_tar": "b14398229a99eecee9b9eda74ca8f7c2ea34bcc5e6158750814b7357ad4d5c27"},
+  "momento": "2026-09-26T00:07:58Z"
+}

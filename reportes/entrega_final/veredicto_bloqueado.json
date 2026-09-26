@@ -1,0 +1,9 @@
+{
+  "veredicto": "BLOQUEADO",
+  "modo": "completo",
+  "commit": "84443a479c5a52c8efaab8ac49e2679f058d7b39",
+  "arbol": "CON CAMBIOS SIN CONFIRMAR",
+  "momento": "2026-09-25T22:18:25Z",
+  "etapas_bloqueantes_en_falla": 2,
+  "etapas": [{"etapa":"01","estado":"OK","bloqueante":"si"},{"etapa":"02","estado":"OK","bloqueante":"si"},{"etapa":"03","estado":"OK","bloqueante":"si"},{"etapa":"04","estado":"HALLAZGO","bloqueante":"si"},{"etapa":"05","estado":"OK","bloqueante":"si"},{"etapa":"06","estado":"OK","bloqueante":"si"},{"etapa":"07","estado":"OK","bloqueante":"si"},{"etapa":"08","estado":"HALLAZGO","bloqueante":"si"}]
+}
