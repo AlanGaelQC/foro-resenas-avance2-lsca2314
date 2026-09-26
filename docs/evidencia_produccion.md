@@ -5,8 +5,8 @@
 | Dato verificable | Evidencia a añadir |
 |---|---|
 | Instance ID de la EC2 **nueva** y fecha de creación | `[PENDIENTE-AWS]` captura consola y `aws ec2 describe-instances` |
-| Commit y veredicto verde de QA | `ca2529a`: verde intermedio con 19/19 pruebas, `reportes/corridas/20260925T235905408924320Z-permitido/`; `[PENDIENTE-QA]` verde del candidato completo con árbol limpio e identidad de imágenes |
-| Imágenes examinadas en etapa 06 | `[PENDIENTE-QA]` `06_image_ids.json` y manifiesto de empaquetado |
+| Commit y veredicto verde de QA | `4333a326d3d0ead37e80e3c96174c21798152043` (etiqueta `qa-verde-4333a32`), `PERMITIDO`, ocho etapas `OK`, árbol limpio, 19/19 pruebas; `reportes/pipeline_verde.txt` y `reportes/entrega_final/veredicto_verde.json` |
+| Imágenes examinadas en etapa 06 | `reportes/entrega_final/06_image_ids.json` y `reportes/entrega_final/manifest_release.json`; `pipeline/promover.sh` terminó con código 0 en QA |
 | Transferencia a Prod | `[PENDIENTE-AWS]` comprobación SHA-256 de tar antes de `docker image load` |
 | Identidad de imágenes de Prod | `[PENDIENTE-AWS]` Image IDs exactos tras `docker image load`, cotejados con QA |
 | Configuración separada | `[PENDIENTE-AWS]` `ENTORNO=produccion`, base/usuario y prefijo S3 distintos; no incluir secretos |
