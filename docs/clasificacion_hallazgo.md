@@ -85,8 +85,12 @@ en la portada), archivada en
 `reportes/corridas/20260925T235905408924320Z-permitido/`. Las ocho etapas
 terminaron `OK` en ambas. El campo `arbol` aún se imprimió como modificado en
 estas dos corridas, aunque `git status --short --branch` al terminarlas mostró
-un HEAD sin modificaciones; el arreglo del registro se aplicará al candidato
-completo antes de la corrida final que autorice el empaquetado.
+un HEAD sin modificaciones. El candidato `4333a32`, con el registro corregido,
+obtuvo un tercer verde final: código 0, `PERMITIDO`, `arbol: limpio`, ocho etapas
+`OK` y 19/19 pruebas el 2026-09-26 00:06:21 UTC. Véanse
+`reportes/pipeline_verde.txt` y `reportes/entrega_final/veredicto_verde.json`.
+El manifiesto de la release está en `reportes/entrega_final/manifest_release.json`;
+el commit posterior `bc539cb` solo versiona la evidencia, sin alterar la release aprobada.
 
 ## Nota sobre la cobertura previa
 
