@@ -1,0 +1,11 @@
+{
+  "commit": "94242727087285c0e7c26e9eb71ce5fef5b336dd",
+  "api": {
+    "tag": "foro-resenas-api:local",
+    "image_id": "sha256:8afbda2d22c83af6b6c8f2350c8091dbc7a7f978fb7c2ac6b714472c59615a96"
+  },
+  "moderador": {
+    "tag": "foro-resenas-moderador:local",
+    "image_id": "sha256:34e2181a7df3797d8a0e4b5cca8d0a37a6caf75bd8eec1f8644c58e450c4e9c9"
+  }
+}
