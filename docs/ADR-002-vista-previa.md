@@ -1,6 +1,6 @@
 # ADR-002 — Vista previa del moderador y vista pública
 
-**Estado:** implementado y validado funcionalmente en QA; tematización editorial pendiente de corrida completa.
+**Estado:** implementado y validado funcionalmente en QA; cada commit candidato requiere su propia corrida completa antes de promoción.
 **Contexto:** Entrega Final. El parche del tema 4 añade una "vista previa con
 formato enriquecido para el moderador"; además el proyecto agrega una vista
 pública tipo feed. Ambas se documentan aquí.
