@@ -1,17 +1,17 @@
-# Bitácora de Producción
+# Bitácora de despliegue en Producción
 
-**Estado:** sin despliegue todavía; no se registran incidentes ficticios.
+**Fecha de ejecución:** 26 de septiembre de 2026. **Instancia nueva:** `i-089d62a1e8fdea7bb` (`ip-172-31-30-151`), distinta de QA `i-05cc3223adae222ef`. **Release desplegada:** `22ee1ece314a857dc855378c24d4dbc15aaef0e1`, etiqueta `qa-verde-videojuegos-22ee1ec`, con ocho etapas en verde y 19/19 pruebas en QA. Los incidentes siguientes son de preparación y conectividad del destino; no se desplegó el parche vulnerable ni se corrigió código de la aplicación en Producción.
 
-Por cada evento real tras crear la EC2 nueva, registra:
+| Fase / observación real | Diagnóstico y acción | Comprobación posterior |
+|---|---|---|
+| Instancia recién creada: `docker: command not found`, Compose y Git ausentes | Se instalaron Docker Engine y Git en Amazon Linux 2023 y el plugin Compose; el usuario `ec2-user` obtuvo acceso a Docker. | En la EC2 nueva se observaron Docker Engine 25.0.16 y Compose v5.5.1; el repositorio se clonó desde el tag aprobado en HEAD `22ee1ec`. |
+| Preparación de la base separada: existía el rol `foro_prod` pero no la base `foro_prod` | Se comprobó ese estado desde QA con el administrador del RDS y se creó solo la base faltante, propiedad del rol previsto. No se atribuye una causa no observada a la creación parcial del rol. | Conexión con `foro_prod` a la base `foro_prod` y permiso para crear tablas confirmados. |
+| Transferencia por SSH a la nueva EC2: `Connection timed out` al puerto 22 | La IP pública del cliente cambió de `187.189.163.164` a `189.218.7.164`, mientras el grupo de Producción solo admitía la anterior. Se añadió `189.218.7.164/32` a 22 y 8080 del grupo `sg-0b8bb51b7c7c2e560`. | `Test-NetConnection 98.81.185.30 -Port 22` devolvió `True`; `scp -3 -p` transfirió `.env`, el manifiesto y ambos archivos de imagen completos. Retirar las reglas de la IP anterior tras cerrar el despliegue. |
+| Primera solicitud de salud justo después de `docker compose up`: `curl: (56) Recv failure: Connection reset by peer` | La API aún aparecía `health: starting`. El mismo comando reintentó sin modificar código ni configuración. | `/salud` devolvió HTTP 200, `entorno=produccion`, PostgreSQL y S3 `ok`; ambos contenedores terminaron `healthy`. Se registra el transitorio, sin llamarlo falla persistente. |
+| Verificador del host: falta `httpx` en el Python de la EC2 | Se creó un entorno virtual separado en `/home/ec2-user/.venv-verificacion-prod` y se instaló `httpx==0.28.1`. La aplicación ya disponía de su dependencia dentro de la imagen aprobada. | `pipeline/verificar_produccion.py` pasó primero 11/11 con base vacía, y después **12/12** con la reseña y el detalle disponibles. Logs: `/home/ec2-user/verificacion_produccion_22ee1ec.log` y `/home/ec2-user/verificacion_produccion_con_resena_22ee1ec.log`. |
 
-| Campo | Dato |
-|---|---|
-| Fecha y hora, zona | `[PENDIENTE-AWS]` |
-| Instancia y release (commit, Image IDs) | `[PENDIENTE-AWS]` |
-| Comportamiento observado y paso que lo reprodujo | `[PENDIENTE-AWS]` |
-| Evidencia original (log/captura, sin secretos) | `[PENDIENTE-AWS]` |
-| Clase de error (red, IAM, base, S3, contenedor, código) | `[PENDIENTE-AWS]` |
-| Contención, causa y resolución aplicada | `[PENDIENTE-AWS]` |
-| Verificación posterior y, si hubo cambio de código, nuevo verde QA | `[PENDIENTE-AWS]` |
+## Veredicto y límites
 
-Si la verificación no encuentra errores, indícalo expresamente y enlaza las pruebas ejecutadas; no inventes fallos para completar la bitácora.
+Los tar recibidos coincidieron por SHA-256 con el manifiesto de QA; los Image IDs cargados coincidieron con los examinados en QA. Se ejecutó `docker compose up -d --no-build --pull never`. La API, RDS, S3 y moderador respondieron correctamente; la vista moderada rechazó sesión anónima (HTTP 403). Dos cuentas de demostración produjeron una reseña y cuatro comentarios; la portada mostró un extracto y solo tres comentarios, y el detalle mostró el contenido completo y los cuatro comentarios.
+
+No se observó un defecto de código de aplicación en Producción que exigiera nueva remediación. Se usa HTTP sobre `8080`, restringido al cliente configurado en el grupo de seguridad; HTTPS está pendiente. No se incluyen contraseñas, contenido de `.env` ni URL de base en esta bitácora.
