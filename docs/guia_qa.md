@@ -1,6 +1,6 @@
 # Ejecución en QA · orden y evidencia
 
-**Estado:** procedimiento preparado; las salidas con `[PENDIENTE-QA]` se sustituyen al operar la EC2 existente. Todos los comandos se ejecutan en la **instancia QA del Avance 2**, con la misma base de datos persistente; no borres usuarios ni datos para conseguir un verde.
+**Estado:** corridas del parche, detección, remediación y vista pública observadas en QA; aún falta validar el candidato completo para empaquetar. Todos los comandos se ejecutan en la **instancia QA del Avance 2**, con la misma base de datos persistente; no borres usuarios ni datos para conseguir un verde.
 
 ## Antes de actualizar QA
 
@@ -28,6 +28,10 @@ El orquestador ejecuta ocho etapas y crea `reportes/veredicto.json` y `reportes/
 
 **Contención comprobada en QA, 2026-09-25 22:26:37 UTC:** con la versión vulnerable aún desplegada, se respaldó el entorno en un archivo privado fuera del repositorio, se dejó `MODERADORES=` vacío y se recreó `api`. Los contenedores quedaron sanos; la cuenta del moderador inició sesión (HTTP 303) y la solicitud de vista previa obtuvo HTTP 403. Conservar la captura de esta comprobación. Primero instala y verifica la imagen remediada de `moderador`; solo entonces restaura la lista y recrea `api` para recuperar la vista previa.
 
+**Remediación comprobada en QA, 2026-09-25 22:40–22:41 UTC:** después de instalar el renderizador seguro en `30a764b` y restaurar la lista de moderadores, las ocho etapas terminaron `OK`, el pipeline devolvió código 0 y `PERMITIDO`, y pasaron 18/18 pruebas, incluidas T10d y T10e. Carpeta: `reportes/corridas/20260925T224110120081948Z-permitido/`. El registro aún indicó incorrectamente que había cambios locales, aunque Git terminó limpio.
+
+**Vista pública comprobada en QA, 2026-09-25 23:57–23:59 UTC:** en `ca2529a` el servicio respondió HTTP 200, RDS y S3 estaban disponibles; el pipeline completo terminó con ocho etapas `OK`, código 0 y `PERMITIDO`. Pasaron 19/19 pruebas, incluida T11 (tres comentarios en portada) y T10d (XSS escapada). Carpeta: `reportes/corridas/20260925T235905408924320Z-permitido/`. El registro volvió a indicar cambios locales durante la limpieza temporal de SBOM; Git terminó limpio. **Aún falta** probar el HEAD completo, con el arreglo del registro y los controles de identidad de imágenes, para autorizar la promoción.
+
 | Orden | Checkout en la rama local | Qué observar y registrar |
 |---|---|---|
 | 1 | `git switch --detach 215be19` | Parche del profesor vivo. Corre el **pipeline original** antes de añadir detección. Registra si pasa por una brecha real o se bloquea por otra causa. No promuevas aunque diga PERMITIDO. |
@@ -44,4 +48,4 @@ En cada paso verifica que `git status --short` está limpio. El script `pipeline
 - Completa `docs/clasificacion_hallazgo.md` y `docs/respuesta_incidente.md` con la etapa real, exit code y rutas de los archivos. La contención puede retirar temporalmente `MODERADORES`; la corrección es escapar el contenido conservando el formato.
 - Tras verificar QA, completa la plantilla oficial de evidencias con capturas y enlaces reales. La plantilla de declaración de IA requiere palabras y comprobaciones personales de Alan.
 
-**Pendiente:** `[PENDIENTE-QA]` Instance ID, saldo, IAM, SG, estado de RDS/S3, fechas y veredictos reales. No se asignan valores en este documento antes de ver la instancia.
+**Pendiente:** `[PENDIENTE-QA]` Instance ID, saldo, IAM y SG; verificar el verde del candidato completo, exportar imágenes y capturar su identidad. Los reportes descritos arriba son corridas observadas; no se asignan datos de AWS que aún no se hayan comprobado.

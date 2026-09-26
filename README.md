@@ -2,7 +2,7 @@
 
 Proyecto de **Herramientas de tecnologías de la información**, Tecmilenio (LSCA2314). Una API web permite publicar reseñas con calificación, comentarios e imágenes privadas. Un segundo servicio aplica reglas de moderación antes de publicar. El proyecto final introduce la vista previa enriquecida del moderador, demuestra y corrige una XSS suministrada en el parche del profesor, y añade una portada con extractos y tres comentarios por reseña.
 
-**Estado:** integración local preparada para QA. Las corridas reales de las ocho etapas, la EC2 nueva de Producción y sus capturas siguen pendientes. [Procedimiento y evidencia de QA](docs/guia_qa.md) · [Arquitectura detallada](docs/arquitectura.md).
+**Estado:** integración y corridas roja/verde observadas en QA; aún falta el verde del candidato completo, la EC2 nueva de Producción y sus capturas. [Procedimiento y evidencia de QA](docs/guia_qa.md) · [Arquitectura detallada](docs/arquitectura.md).
 
 ## Recorrido del usuario
 
@@ -76,4 +76,4 @@ El orquestador carga la contraseña moderadora desde el `.env` local para su pru
 - `docs/evidencia_local/`: reproducción HTTP local de Claude; **no equivale** a evidencia de QA.
 - `docs/declaracion_ia.md`: plantilla para que Alan declare únicamente trabajo que hizo y verificó.
 
-**Pendiente de AWS:** evidencia del antes/después en QA, corridas original/roja/verde completas, Instance IDs, manifiesto exportado, la EC2 nueva, verificación de Producción y bitácora de errores efectivamente observados. No se completan con datos supuestos.
+**Pendiente de AWS:** consolidar capturas del antes/después en QA y el verde final del candidato completo; registrar Instance IDs y manifiesto exportado, crear la EC2 nueva, verificar Producción y anotar errores efectivamente observados. No se completan con datos supuestos.

@@ -40,6 +40,10 @@ pedida (negrita y saltos de línea):
   (texto inerte); `**bien**` sigue viéndose como **bien**.
 - Verificado localmente: la versión segura escapa el `<script>` y conserva
   `<b>…</b>` y `<br>`. La regla SAST deja de marcar y la prueba DAST pasa.
+- Verificado en QA sobre `30a764b`: ocho etapas `OK`, `PERMITIDO`, código 0 y
+  18/18 pruebas. En `ca2529a`, con la vista pública integrada, ocho etapas
+  `OK`, `PERMITIDO`, código 0 y 19/19 pruebas. Véanse las carpetas y horas
+  exactas en `guia_qa.md`.
 
 **Por qué es prevención y no parche cosmético:** no se comenta ni se borra la
 función, no se desactiva la regla ni se baja el umbral. Se corrige el
@@ -56,7 +60,9 @@ es que explique y elimine la causa.
 
 ## 4. Alcance observado
 
-`[pendiente-corrida QA]` Qué se demostró exactamente (petición, respuesta,
-contexto del moderador) y qué no. La reproducción académica no prueba que
-hubiera usuarios reales comprometidos; se describe el vector, no un incidente
-real de producción.
+La corrida roja en QA probó que una cuenta común guardó el contenido y que el
+moderador autenticado obtuvo una respuesta HTML sin escape; la corrida verde
+probó que la misma prueba HTTP rechazó el script crudo y conservó el formato.
+La prueba inspecciona HTML y no ejecuta JavaScript en un navegador real.
+La reproducción académica no prueba que hubiera usuarios reales comprometidos;
+se describe el vector, no un incidente real de producción.

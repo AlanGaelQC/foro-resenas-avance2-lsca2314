@@ -1,7 +1,7 @@
 # Clasificación del hallazgo — Entrega Final
 
-> **Estado:** hallazgo reproducido en la instancia QA el 2026-09-25. Remediación
-> y corrida verde pendientes de ejecutar en QA; no se presentan como hechos.
+> **Estado:** hallazgo reproducido y remediado en QA el 2026-09-25; el
+> candidato con la vista pública también pasó el pipeline completo en QA.
 
 ## Identificación
 
@@ -74,6 +74,19 @@ El campo `arbol: CON CAMBIOS SIN CONFIRMAR` de esta corrida se debe al borrado
 temporal de los SBOM versionados antes de que el orquestador consultara Git;
 los regeneró la etapa 07. Ese defecto del registro se corrigió en un commit
 posterior, sin alterar la corrida histórica.
+
+**Corridas verdes reales en QA:** sobre `30a764bedee0538abe0a0282a2cf8d1431ce24fa`
+la remediación devolvió código 0 y `PERMITIDO` (18/18 pruebas; T10d y T10e
+pasaron), archivada en
+`reportes/corridas/20260925T224110120081948Z-permitido/`. Sobre
+`ca2529a80c15563bb4dae031ab0a4dca0ae6ac2e` la vista pública también
+devolvió código 0 y `PERMITIDO` (19/19 pruebas; T11 mostró tres comentarios
+en la portada), archivada en
+`reportes/corridas/20260925T235905408924320Z-permitido/`. Las ocho etapas
+terminaron `OK` en ambas. El campo `arbol` aún se imprimió como modificado en
+estas dos corridas, aunque `git status --short --branch` al terminarlas mostró
+un HEAD sin modificaciones; el arreglo del registro se aplicará al candidato
+completo antes de la corrida final que autorice el empaquetado.
 
 ## Nota sobre la cobertura previa
 
