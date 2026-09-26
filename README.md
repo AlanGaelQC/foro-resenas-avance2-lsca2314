@@ -1,6 +1,6 @@
-# Foro de reseñas · Entrega Final
+# Trama · Foro de restaurantes y cafeterías · Entrega Final
 
-Proyecto de **Herramientas de tecnologías de la información**, Tecmilenio (LSCA2314). Una API web permite publicar reseñas con calificación, comentarios e imágenes privadas. Un segundo servicio aplica reglas de moderación antes de publicar. El proyecto final introduce la vista previa enriquecida del moderador, demuestra y corrige una XSS suministrada en el parche del profesor, y añade una portada con extractos y tres comentarios por reseña.
+Proyecto de **Herramientas de tecnologías de la información**, Tecmilenio (LSCA2314), tema 4: foro y reseñas. **Trama** reúne experiencias sobre restaurantes y cafeterías: cada persona puede escribir una reseña de su visita, calificarla de 1 a 5, añadir una imagen privada y conversar en los comentarios. Un segundo servicio aplica reglas de moderación antes de publicar. La Entrega Final introduce la vista previa enriquecida del moderador, demuestra y corrige una XSS suministrada en el parche del profesor, y añade una portada con extractos y tres comentarios por reseña. El título identifica el lugar reseñado; aún no existe un catálogo de establecimientos, mapa ni puntuación agregada por lugar.
 
 **Estado:** QA completado: corrida bloqueada por XSS, remediación, portada pública, candidato `4333a32` con ocho controles `OK` y 19/19 pruebas, e imágenes empaquetadas. La evidencia está en `reportes/pipeline_bloqueado.txt`, `reportes/pipeline_verde.txt` y `reportes/entrega_final/`. Falta crear y verificar la EC2 nueva de Producción y reunir las capturas. [Procedimiento y evidencia de QA](docs/guia_qa.md) · [Arquitectura detallada](docs/arquitectura.md).
 

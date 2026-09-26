@@ -5,6 +5,11 @@
 formato enriquecido para el moderador"; además el proyecto agrega una vista
 pública tipo feed. Ambas se documentan aquí.
 
+**Tema editorial:** reseñas de visitas a restaurantes y cafeterías. El título
+del hilo identifica el lugar y el cuerpo relata la experiencia; la nota de 1 a 5,
+las fotos y los comentarios ya existían en el modelo. No se representa a cada
+establecimiento como entidad distinta ni se calcula una nota global por local.
+
 ## Decisión 1 — Dónde vive el endpoint del parche
 
 `PARCHE.md` pide integrar la vista previa **dentro del servicio de moderación** y
