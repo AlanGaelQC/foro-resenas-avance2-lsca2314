@@ -1,7 +1,8 @@
 # ADR-003 — Promoción de artefactos y entornos QA/Producción
 
-**Estado:** propuesto (andamio). Los detalles con `[PENDIENTE-AWS]` se cierran con
-el inventario real del Learner Lab.
+**Estado:** promoción preparada en QA: veredicto y empaquetado comprobados sobre
+`4333a32`. Despliegue de Producción y recursos separados pendientes de verificación
+en la nueva EC2. Los detalles con `[PENDIENTE-AWS]` se cierran con datos reales.
 
 ## Contexto
 
