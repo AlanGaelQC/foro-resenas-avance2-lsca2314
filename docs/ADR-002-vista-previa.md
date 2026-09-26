@@ -1,14 +1,15 @@
 # ADR-002 — Vista previa del moderador y vista pública
 
-**Estado:** propuesto (borrador del andamio, para revisión).
+**Estado:** implementado y validado funcionalmente en QA; tematización editorial pendiente de corrida completa.
 **Contexto:** Entrega Final. El parche del tema 4 añade una "vista previa con
 formato enriquecido para el moderador"; además el proyecto agrega una vista
 pública tipo feed. Ambas se documentan aquí.
 
-**Tema editorial:** reseñas de visitas a restaurantes y cafeterías. El título
-del hilo identifica el lugar y el cuerpo relata la experiencia; la nota de 1 a 5,
-las fotos y los comentarios ya existían en el modelo. No se representa a cada
-establecimiento como entidad distinta ni se calcula una nota global por local.
+**Tema editorial:** reseñas de videojuegos escritas por jugadores. El título
+del hilo identifica el juego y el cuerpo relata la experiencia; la nota de 1 a 5,
+los adjuntos y los comentarios ya existían en el modelo. No se representa cada
+juego como entidad distinta, ni se calcula una nota global por videojuego. La
+referencia a plataformas de reseñas es funcional; no hay integración con Steam.
 
 ## Decisión 1 — Dónde vive el endpoint del parche
 

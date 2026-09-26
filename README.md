@@ -1,10 +1,10 @@
-# Trama · Foro de restaurantes y cafeterías · Entrega Final
+# Trama · Foro de reseñas de videojuegos · Entrega Final
 
-Proyecto de **Herramientas de tecnologías de la información**, Tecmilenio (LSCA2314), tema 4: foro y reseñas. **Trama** reúne experiencias sobre restaurantes y cafeterías: cada persona puede escribir una reseña de su visita, calificarla de 1 a 5, añadir una imagen privada y conversar en los comentarios. Un segundo servicio aplica reglas de moderación antes de publicar. La Entrega Final introduce la vista previa enriquecida del moderador, demuestra y corrige una XSS suministrada en el parche del profesor, y añade una portada con extractos y tres comentarios por reseña. El título identifica el lugar reseñado; aún no existe un catálogo de establecimientos, mapa ni puntuación agregada por lugar.
+Proyecto de **Herramientas de tecnologías de la información**, Tecmilenio (LSCA2314), tema 4: foro y reseñas. **Trama** reúne opiniones de jugadores sobre videojuegos: cada persona puede escribir su reseña, calificarla de 1 a 5, añadir una imagen y conversar en los comentarios. Un segundo servicio aplica reglas de moderación antes de publicar. La Entrega Final introduce la vista previa enriquecida del moderador, demuestra y corrige una XSS suministrada en el parche del profesor, y añade una portada con extractos y tres comentarios por reseña. El título identifica el juego según lo escribe el autor; no existe catálogo de juegos ni puntuación agregada por videojuego.
 
-**Estado:** QA completado: corrida bloqueada por XSS, remediación, portada pública, candidato `4333a32` con ocho controles `OK` y 19/19 pruebas, e imágenes empaquetadas. La evidencia está en `reportes/pipeline_bloqueado.txt`, `reportes/pipeline_verde.txt` y `reportes/entrega_final/`. Falta crear y verificar la EC2 nueva de Producción y reunir las capturas. [Procedimiento y evidencia de QA](docs/guia_qa.md) · [Arquitectura detallada](docs/arquitectura.md).
+**Estado:** QA completado para el ciclo de seguridad: corrida bloqueada por XSS, remediación, portada pública y candidato `4333a32` con ocho controles `OK` y 19/19 pruebas. La evidencia histórica está en `reportes/pipeline_bloqueado.txt`, `reportes/pipeline_verde.txt` y `reportes/entrega_final/`. La interfaz genérica posterior `2e2b811` también pasó ocho controles y 19/19 pruebas en QA y se empaquetó (etiqueta `qa-verde-interfaz-2e2b811`). **La tematización de videojuegos de este commit aún debe reconstruirse y pasar el pipeline completo antes de promoverla.** Falta crear y verificar la EC2 nueva de Producción y reunir sus capturas. [Procedimiento y evidencia de QA](docs/guia_qa.md) · [Arquitectura detallada](docs/arquitectura.md).
 
-**Candidato visual posterior:** se renovaron las plantillas de portada, detalle y acceso para mostrar claramente el antes y después. Este cambio de interfaz todavía requiere reconstrucción y un nuevo pipeline completo en QA. El manifiesto y el verde documentados arriba siguen correspondiendo exclusivamente a `4333a32`.
+**Alcance:** la experiencia se inspira en leer reseñas breves de videojuegos y abrirlas para ver todo el texto y la conversación, como ocurre en comunidades de jugadores. Es un foro propio: no usa cuentas, catálogo, votos de utilidad, horas jugadas ni API de Steam. Conserva la calificación de 1 a 5 del proyecto original.
 
 ## Recorrido del usuario
 
@@ -50,9 +50,10 @@ El orquestador `pipeline/orquestador.sh` corre **las ocho etapas aunque alguna f
 | Cobertura añadida | `84443a4` | La regla y T10d deben bloquear por la falla real |
 | Remediación | `30a764b` | Texto de usuario escapado, negritas y saltos preservados |
 | Vista pública | `ca2529a` | Feed, comentario máximo y paginación |
-| Candidato aprobado | `4333a32` (etiqueta `qa-verde-4333a32`) | Ocho controles `OK`, árbol limpio y 19/19 pruebas; imágenes examinadas y empaquetadas |
+| Candidato funcional aprobado | `4333a32` (etiqueta `qa-verde-4333a32`) | Ocho controles `OK`, árbol limpio y 19/19 pruebas; imágenes examinadas y empaquetadas |
+| Interfaz genérica aprobada | `2e2b811` (etiqueta `qa-verde-interfaz-2e2b811`) | Ocho controles `OK`, árbol limpio y 19/19 pruebas; imágenes examinadas y empaquetadas |
 
-Estas corridas se ejecutaron en la EC2 de QA. El commit posterior `bc539cb` archiva los reportes; **las imágenes y el manifiesto corresponden a `4333a32`**, no a ese commit de documentación. La versión con fallo deliberado nunca se promueve a Producción. Un error real de configuración o despliegue en Producción se registra allí; un defecto de código vuelve a QA y exige otro verde.
+Estas corridas se ejecutaron en la EC2 de QA. El commit `bc539cb` archiva los reportes históricos del candidato `4333a32`; el manifiesto activo en QA fue regenerado después para `2e2b811`. **Ninguno de esos veredictos ni paquetes certifica todavía la tematización de videojuegos.** La versión con fallo deliberado nunca se promueve a Producción. Un error real de configuración o despliegue en Producción se registra allí; un defecto de código vuelve a QA y exige otro verde.
 
 ## Configuración y ejecución
 

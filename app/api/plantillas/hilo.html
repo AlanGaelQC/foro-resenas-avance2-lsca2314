@@ -33,7 +33,7 @@
     {% if hilo.clave_s3 %}<p><a href="/adjunto/{{ hilo.id }}">Ver imagen adjunta →</a></p>{% endif %}
   </article>
   <div class="detalle-seccion">
-    <h2>Comentarios</h2><span class="contador">{{ comentarios | length }}</span>
+    <h2>Comentarios de jugadores</h2><span class="contador">{{ comentarios | length }}</span>
   </div>
   {% for comentario in comentarios %}
     <article class="tarjeta comentario">

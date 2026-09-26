@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block titulo %}Restaurantes y cafeterías contados por sus visitantes{% endblock %}
+{% block titulo %}Reseñas de videojuegos escritas por jugadores{% endblock %}
 {% block estilos %}
 <style>
   .hero { position:relative; overflow:hidden; min-height:255px; display:flex; align-items:center;
@@ -60,9 +60,9 @@
 {% block contenido %}
 <section class="hero" aria-labelledby="hero-titulo">
   <div class="hero-contenido">
-    <p class="eyebrow">Restaurantes · Cafeterías · Comunidad</p>
-    <h1 id="hero-titulo">Descubre dónde comer a través de quienes ya fueron.</h1>
-    <p>Comparte cómo te fue, lee otras experiencias y conversa sobre los lugares que vale la pena conocer.</p>
+    <p class="eyebrow">Videojuegos · Reseñas · Comunidad</p>
+    <h1 id="hero-titulo">Antes de jugar, escucha a quienes ya estuvieron ahí.</h1>
+    <p>Lee opiniones de otros jugadores, descubre qué les gustó y comparte tu propia experiencia.</p>
     <a class="boton" href="#explorar">Explorar reseñas <span aria-hidden="true">↗</span></a>
   </div>
 </section>
@@ -70,7 +70,7 @@
 <div class="disposicion">
   <section id="explorar" aria-labelledby="titulo-publicaciones">
     <div class="titular-seccion">
-      <div><p class="eyebrow">La comunidad comparte sus visitas</p><h2 id="titulo-publicaciones">Resenas publicadas</h2></div>
+      <div><p class="eyebrow">La comunidad habla de juegos</p><h2 id="titulo-publicaciones">Resenas publicadas</h2></div>
       {% if promedio %}<p class="promedio">★ Calificacion promedio del foro: {{ promedio }} / 5</p>{% endif %}
     </div>
     {% for v in vista_hilos %}
@@ -106,16 +106,16 @@
   <aside class="panel-lateral" aria-label="Participa en el foro">
     {% if usuario %}
       <div class="tarjeta" id="publicar">
-        <p class="eyebrow">Tu experiencia cuenta</p>
-        <h2>Publicar una resena</h2>
+        <p class="eyebrow">Tu partida cuenta</p>
+        <h2>Publicar una reseña</h2>
         <form action="/hilos" method="post" enctype="multipart/form-data">
-          <label for="resena-titulo">Restaurante o cafetería</label><input id="resena-titulo" type="text" name="titulo" required maxlength="160" placeholder="Nombre del lugar">
-          <label for="resena-cuerpo">¿Cómo fue tu visita?</label><textarea id="resena-cuerpo" name="cuerpo" rows="4" required placeholder="Cuéntanos sobre la comida, el servicio y el ambiente."></textarea>
-          <label for="resena-calificacion">Califica tu experiencia</label>
+          <label for="resena-titulo">Nombre del videojuego</label><input id="resena-titulo" type="text" name="titulo" required maxlength="160" placeholder="¿Qué juego reseñas?">
+          <label for="resena-cuerpo">¿Qué te pareció?</label><textarea id="resena-cuerpo" name="cuerpo" rows="4" required placeholder="Cuéntanos sobre la historia, las mecánicas o el rendimiento."></textarea>
+          <label for="resena-calificacion">Tu calificación del juego</label>
           <select id="resena-calificacion" name="calificacion">
             {% for n in [5, 4, 3, 2, 1] %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
           </select>
-          <label for="resena-adjunto">Foto de tu visita (opcional)</label><input id="resena-adjunto" type="file" name="adjunto" accept="image/*">
+          <label for="resena-adjunto">Captura del juego (opcional)</label><input id="resena-adjunto" type="file" name="adjunto" accept="image/*">
           <button type="submit">Enviar a revision <span aria-hidden="true">→</span></button>
         </form>
         <p class="meta nota-panel">Toda reseña pasa primero por el servicio de moderación.</p>
@@ -123,8 +123,8 @@
     {% else %}
       <div class="tarjeta panel-invitacion">
         <p class="eyebrow">Únete a la conversación</p>
-        <h2>¿Dónde comiste últimamente?</h2>
-        <p>Cuéntanos qué tal estuvo la comida, el servicio y el ambiente. Tu experiencia puede ayudar a la comunidad.</p>
+        <h2>¿Qué jugaste últimamente?</h2>
+        <p>Cuéntanos qué te gustó, qué mejorarías y a quién recomendarías ese juego.</p>
         <a class="boton" href="/registro">Crear cuenta <span aria-hidden="true">→</span></a>
         <p class="meta">¿Ya participas? <a href="/entrar">Inicia sesión</a>.</p>
       </div>
