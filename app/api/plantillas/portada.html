@@ -2,83 +2,161 @@
 {% block titulo %}Reseñas de videojuegos escritas por jugadores{% endblock %}
 {% block estilos %}
 <style>
-  .hero { position:relative; overflow:hidden; min-height:255px; display:flex; align-items:center;
-    padding:36px 42px; border-radius:22px;
-    background:linear-gradient(120deg,#192c48 0%,#193f54 70%,#146a61 100%); color:white; }
-  .hero::after { content:""; position:absolute; right:-80px; top:-170px; width:410px; height:410px;
-    border:1px solid rgba(123,241,218,.3); border-radius:50%;
-    box-shadow:0 0 0 65px rgba(123,241,218,.055),0 0 0 130px rgba(123,241,218,.035); pointer-events:none; }
-  .hero-contenido { position:relative; z-index:1; max-width:670px; }
-  .eyebrow { margin:0 0 12px; color:#6be1cb; font-size:.77rem; font-weight:800;
-    text-transform:uppercase; letter-spacing:.13em; }
-  .hero h1 { margin:0; font-size:clamp(2.08rem,4vw,3.2rem); }
-  .hero p:not(.eyebrow) { max-width:520px; margin:14px 0 23px; color:#d7e7e8; }
-  .hero .boton { background:white; color:#172b44; }
-  .hero .boton:hover { background:#e6faf5; }
-  .disposicion { display:grid; grid-template-columns:minmax(0,1fr) 305px; align-items:start;
-    gap:26px; margin-top:34px; }
+  .eyebrow { margin:0 0 13px; color:var(--acento); font-size:.75rem; font-weight:800;
+    text-transform:uppercase; letter-spacing:.12em; }
+  .hero { position:relative; overflow:hidden; display:grid; grid-template-columns:minmax(0,1.1fr) minmax(280px,.8fr);
+    align-items:center; gap:42px; min-height:360px; padding:45px clamp(25px,4vw,58px);
+    border:1px solid #35413e; border-radius:23px;
+    background:radial-gradient(circle at 80% 38%,#30443e 0%,#242b29 36%,#202426 75%);
+    color:var(--tinta); }
+  .hero::after { content:""; position:absolute; right:-88px; top:-168px; width:420px; height:420px;
+    border:1px solid rgba(131,222,193,.13); border-radius:50%;
+    box-shadow:0 0 0 65px rgba(131,222,193,.035),0 0 0 130px rgba(131,222,193,.025);
+    pointer-events:none; }
+  .hero-contenido,.hero-destacado { position:relative; z-index:1; }
+  .hero h1 { max-width:770px; margin:0; font-size:clamp(2.15rem,4.1vw,3.55rem); letter-spacing:-.055em; }
+  .hero-descripcion { max-width:550px; margin:19px 0 25px; color:#c0ccca; font-size:1.03rem; }
+  .hero .eyebrow { display:inline-block; padding:6px 12px; border-radius:50px;
+    background:#83dec120; letter-spacing:.07em; }
+  .hero-destacado { align-self:stretch; display:flex; align-items:center; justify-content:center; }
+  .escaparate { width:100%; max-width:390px; padding:20px; border:1px solid #486258;
+    border-radius:18px; background:#151b1bdc; box-shadow:0 25px 48px #0004; }
+  .escaparate-visual { display:grid; place-content:center; min-height:155px; overflow:hidden;
+    border-radius:12px; background:linear-gradient(130deg,#303f49,#315146 62%,#1c292b); text-align:center; }
+  .escaparate-visual span { color:#a6e9d1; font-size:2.35rem; font-weight:900; letter-spacing:-.13em; }
+  .escaparate-visual small { display:block; color:#d5e6de; font-size:.7rem; font-weight:800;
+    text-transform:uppercase; letter-spacing:.24em; }
+  .escaparate .etiqueta { margin:17px 0 5px; color:var(--acento); font-size:.72rem;
+    font-weight:800; text-transform:uppercase; letter-spacing:.1em; }
+  .escaparate h2 { margin:0 0 7px; font-size:1.25rem; overflow-wrap:anywhere; }
+  .escaparate h2 a { color:var(--tinta); text-decoration:none; }
+  .escaparate h2 a:hover { color:var(--acento); }
+  .escaparate .meta { margin:0; }
+  .hero-glifo { display:grid; place-items:center; width:230px; height:230px;
+    border:1px solid #83dec140; border-radius:55px; background:linear-gradient(145deg,#83dec115,#83dec105);
+    color:var(--acento); font-size:8rem; font-weight:900; letter-spacing:-.15em; transform:rotate(-10deg); }
+  .atajos { display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; }
+  .atajos a { padding:7px 12px; border:1px solid #53655e; border-radius:8px;
+    color:#cde8dc; font-size:.79rem; font-weight:700; text-decoration:none; }
+  .atajos a:hover { border-color:var(--acento); color:var(--acento); }
+  .franja { margin:28px 0 5px; }
+  .franja-encabezado { display:flex; justify-content:space-between; align-items:end; gap:12px; margin-bottom:14px; }
+  .franja-encabezado h2 { margin:0; font-size:1.26rem; }
+  .franja-encabezado a { font-size:.85rem; font-weight:700; }
+  .franja-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:15px; }
+  .mini-resena { display:flex; gap:14px; min-width:0; padding:15px;
+    border:1px solid var(--linea); border-radius:13px; background:var(--papel); }
+  .mini-visual { flex:0 0 60px; display:grid; place-items:center; height:65px; border-radius:9px;
+    background:linear-gradient(145deg,#2b6252,#334b63); color:#d9f5e8;
+    font-size:1.6rem; font-weight:900; }
+  .mini-resena p { margin:1px 0 3px; color:var(--acento); font-size:.73rem; font-weight:800; }
+  .mini-resena h3 { margin:0; font-size:.94rem; overflow-wrap:anywhere; }
+  .mini-resena a { color:var(--tinta); text-decoration:none; }
+  .mini-resena a:hover { color:var(--acento); }
+  .disposicion { display:grid; grid-template-columns:minmax(0,1fr) 310px; align-items:start;
+    gap:26px; margin-top:38px; }
+  #explorar { scroll-margin-top:20px; min-width:0; }
   .titular-seccion { display:flex; justify-content:space-between; align-items:end; gap:15px; margin-bottom:18px; }
-  .titular-seccion h2 { margin:0; font-size:1.68rem; }
-  .titular-seccion .eyebrow { margin-bottom:3px; color:var(--acento); }
-  .promedio { margin:0; padding:7px 11px; border-radius:100px; white-space:nowrap;
-    background:#e0f3ed; color:#075f56; font-size:.81rem; font-weight:750; }
+  .titular-seccion h2 { margin:0; font-size:1.73rem; }
+  .titular-seccion .eyebrow { margin-bottom:4px; }
+  .promedio { margin:0; padding:7px 11px; border:1px solid #3c6657; border-radius:100px;
+    background:#83dec115; color:#a4eacf; font-size:.8rem; font-weight:750; }
+  .tarjeta-resena { transition:border-color .18s ease; }
+  .tarjeta-resena:hover { border-color:#668276; }
   .resena-top { display:flex; align-items:center; gap:11px; margin-bottom:15px; }
-  .avatar { flex:none; display:grid; place-items:center; width:38px; height:38px;
-    border-radius:11px; background:#e1f4ec; color:#09695d; font-weight:800; }
+  .avatar { flex:none; display:grid; place-items:center; width:39px; height:39px;
+    border-radius:11px; background:#30443d; color:var(--acento); font-weight:800; }
   .autor { font-size:.9rem; font-weight:750; }
   .fecha { display:block; margin-top:-2px; }
-  .calificacion { margin-left:auto; padding:5px 10px; border:1px solid #f5dcac;
-    border-radius:8px; background:#fff7e6; color:#80580b; font-size:.83rem; font-weight:800; white-space:nowrap; }
-  .tarjeta-resena h3 { margin:0 0 9px; font-size:1.29rem; overflow-wrap:anywhere; }
+  .calificacion { margin-left:auto; padding:5px 10px; border:1px solid #446c57;
+    border-radius:100px; background:#294035; color:#b6f2ce; font-size:.83rem;
+    font-weight:800; white-space:nowrap; }
+  .tarjeta-resena h3 { margin:0 0 9px; font-size:1.36rem; overflow-wrap:anywhere; }
   .tarjeta-resena h3 a { color:var(--tinta); text-decoration:none; }
   .tarjeta-resena h3 a:hover { color:var(--acento); }
-  .extracto { margin:0 0 18px; color:#46596f; overflow-wrap:anywhere; }
-  .comentarios-muestra { padding:14px 17px; border:1px solid #e7edf0; border-radius:12px; background:#f8fafb; }
-  .comentarios-muestra h4 { margin:0 0 8px; color:#526274; font-size:.84rem; }
-  .comentario-previo { margin:8px 0 0; color:#41526a; font-size:.88rem; overflow-wrap:anywhere; }
-  .comentario-previo .meta { color:#0a665d; font-weight:750; }
-  .resena-pie { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:17px; }
+  .extracto { margin:0 0 19px; color:#ccd4d2; overflow-wrap:anywhere; }
+  .comentarios-muestra { padding:14px 17px; border:1px solid #353d3e; border-radius:12px;
+    background:#191c1f; }
+  .comentarios-muestra h4 { margin:0 0 8px; color:#cad4d1; font-size:.84rem; }
+  .comentario-previo { margin:8px 0 0; color:#c0ceca; font-size:.88rem; overflow-wrap:anywhere; }
+  .comentario-previo .meta { color:var(--acento); font-weight:750; }
+  .resena-pie { display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:12px; margin-top:18px; }
   .resena-pie a { font-size:.87rem; font-weight:750; }
-  .resena-pie .imagen-link { color:#697788; font-weight:600; }
+  .resena-pie .imagen-link { color:#c4d3ce; font-weight:600; }
   .panel-lateral { position:sticky; top:20px; }
-  .panel-lateral h2 { font-size:1.26rem; }
+  .panel-lateral h2 { font-size:1.3rem; }
   .panel-lateral p { font-size:.89rem; }
-  .panel-lateral button, .panel-lateral .boton { width:100%; margin-top:15px; }
+  .panel-lateral button,.panel-lateral .boton { width:100%; margin-top:15px; }
   .nota-panel { padding-top:14px; border-top:1px solid var(--linea); }
-  .panel-invitacion { background:#e6f4ee; border-color:#c9e8dc; }
+  .panel-invitacion { background:linear-gradient(145deg,#264139,#202b2a); border-color:#47675b; }
   .paginas { display:flex; justify-content:space-between; gap:12px; padding:9px 0 20px; }
   .paginas a { padding:9px 14px; border:1px solid var(--linea); border-radius:9px;
-    background:white; text-decoration:none; font-weight:700; }
-  @media(max-width:860px) { .disposicion { grid-template-columns:1fr; } .panel-lateral { position:static; } }
-  @media(max-width:640px) {
-    .hero { min-height:0; padding:27px 23px; }
-    .titular-seccion { flex-direction:column; align-items:start; }
-    .resena-pie { flex-wrap:wrap; }
-  }
+    background:var(--papel); text-decoration:none; font-weight:700; }
+  @media(max-width:950px) { .hero { gap:22px; } .disposicion { grid-template-columns:1fr; }
+    .panel-lateral { position:static; } }
+  @media(max-width:740px) { .hero { grid-template-columns:1fr; padding:29px 25px; }
+    .hero-destacado { justify-content:start; } .escaparate { max-width:none; }
+    .escaparate-visual { min-height:90px; } .hero-glifo { display:none; }
+    .franja-grid { grid-template-columns:1fr; } }
+  @media(max-width:640px) { .titular-seccion { flex-direction:column; align-items:start; }
+    .hero h1 { font-size:clamp(2rem,9vw,2.8rem); } }
 </style>
 {% endblock %}
 {% block contenido %}
 <section class="hero" aria-labelledby="hero-titulo">
   <div class="hero-contenido">
-    <p class="eyebrow">Videojuegos · Reseñas · Comunidad</p>
+    <p class="eyebrow">Reseñas · Comunidad · Videojuegos</p>
     <h1 id="hero-titulo">Antes de jugar, escucha a quienes ya estuvieron ahí.</h1>
-    <p>Lee opiniones de otros jugadores, descubre qué les gustó y comparte tu propia experiencia.</p>
-    <a class="boton" href="#explorar">Explorar reseñas <span aria-hidden="true">↗</span></a>
+    <p class="hero-descripcion">Lee opiniones de otros jugadores, descubre qué les gustó y comparte tu propia experiencia.</p>
+    <a class="boton" href="#explorar">Explorar reseñas <span aria-hidden="true">→</span></a>
+    <div class="atajos" aria-label="Participa en Trama">
+      {% if usuario %}<a href="#publicar">Publicar mi reseña</a>{% else %}<a href="/registro">Unirme a la comunidad</a>{% endif %}
+      {% if usuario %}<a href="/mis-publicaciones">Mis publicaciones</a>{% else %}<a href="/entrar">Ya tengo cuenta</a>{% endif %}
+    </div>
+  </div>
+  <div class="hero-destacado">
+    {% if vista_hilos and pagina == 1 %}
+      {% set reciente = vista_hilos[0] %}
+      <article class="escaparate">
+        <div class="escaparate-visual" aria-hidden="true"><span>T.</span><small>Trama / Reseñas</small></div>
+        <p class="etiqueta">Reseña reciente · ★ {{ reciente.hilo.calificacion }}/5</p>
+        <h2><a href="/hilos/{{ reciente.hilo.id }}">{{ reciente.hilo.titulo }}</a></h2>
+        <p class="meta">Compartida por {{ reciente.hilo.autor.nombre }}</p>
+      </article>
+    {% else %}
+      <div class="hero-glifo" aria-hidden="true">T.</div>
+    {% endif %}
   </div>
 </section>
+
+{% if vista_hilos | length > 1 and pagina == 1 %}
+<section class="franja" aria-labelledby="novedades-titulo">
+  <div class="franja-encabezado"><h2 id="novedades-titulo">Recién compartidas</h2><a href="#explorar">Ver todas las reseñas →</a></div>
+  <div class="franja-grid">
+    {% for v in vista_hilos[:3] %}
+      <article class="mini-resena">
+        <div class="mini-visual" aria-hidden="true">{{ v.hilo.titulo[:1] | upper }}</div>
+        <div><p>★ {{ v.hilo.calificacion }}/5 · {{ v.hilo.autor.nombre }}</p>
+          <h3><a href="/hilos/{{ v.hilo.id }}">{{ v.hilo.titulo }}</a></h3></div>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 
 <div class="disposicion">
   <section id="explorar" aria-labelledby="titulo-publicaciones">
     <div class="titular-seccion">
-      <div><p class="eyebrow">La comunidad habla de juegos</p><h2 id="titulo-publicaciones">Resenas publicadas</h2></div>
-      {% if promedio %}<p class="promedio">★ Calificacion promedio del foro: {{ promedio }} / 5</p>{% endif %}
+      <div><p class="eyebrow">La comunidad habla de juegos</p><h2 id="titulo-publicaciones">Reseñas publicadas</h2></div>
+      {% if promedio %}<p class="promedio">★ Calificación promedio del foro: {{ promedio }} / 5</p>{% endif %}
     </div>
     {% for v in vista_hilos %}
       <article class="tarjeta tarjeta-resena">
         <div class="resena-top">
           <span class="avatar" aria-hidden="true">{{ v.hilo.autor.nombre[:1] | upper }}</span>
           <div><span class="autor">{{ v.hilo.autor.nombre }}</span><time class="meta fecha">{{ v.hilo.creado_en.strftime('%Y-%m-%d %H:%M') }}</time></div>
-          <span class="calificacion" aria-label="Calificacion: {{ v.hilo.calificacion }} de 5">★ {{ v.hilo.calificacion }}/5</span>
+          <span class="calificacion" aria-label="Calificación: {{ v.hilo.calificacion }} de 5">★ {{ v.hilo.calificacion }}/5</span>
         </div>
         <h3><a href="/hilos/{{ v.hilo.id }}">{{ v.hilo.titulo }}</a></h3>
         <p class="extracto">{{ v.extracto }}</p>
@@ -91,12 +169,12 @@
           </div>
         {% endif %}
         <div class="resena-pie">
-          <a href="/hilos/{{ v.hilo.id }}">Ver resena y {{ v.total_comentarios }} comentario(s) <span aria-hidden="true">→</span></a>
+          <a href="/hilos/{{ v.hilo.id }}">Ver reseña y {{ v.total_comentarios }} comentario(s) <span aria-hidden="true">→</span></a>
           {% if v.hilo.clave_s3 %}<a class="imagen-link" href="/adjunto/{{ v.hilo.id }}">Ver imagen adjunta</a>{% endif %}
         </div>
       </article>
     {% else %}
-      <div class="tarjeta"><p>Todavia no hay resenas publicadas. Sé la primera persona en compartir una.</p></div>
+      <div class="tarjeta"><p>Todavía no hay reseñas publicadas. Sé la primera persona en compartir una.</p></div>
     {% endfor %}
     <nav class="paginas" aria-label="Páginas de reseñas">
       {% if pagina > 1 %}<a href="/?pagina={{ pagina - 1 }}">← Anteriores</a>{% endif %}
@@ -116,7 +194,7 @@
             {% for n in [5, 4, 3, 2, 1] %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
           </select>
           <label for="resena-adjunto">Captura del juego (opcional)</label><input id="resena-adjunto" type="file" name="adjunto" accept="image/*">
-          <button type="submit">Enviar a revision <span aria-hidden="true">→</span></button>
+          <button type="submit">Enviar a revisión <span aria-hidden="true">→</span></button>
         </form>
         <p class="meta nota-panel">Toda reseña pasa primero por el servicio de moderación.</p>
       </div>
@@ -130,5 +208,5 @@
       </div>
     {% endif %}
   </aside>
-  </div>
+</div>
 {% endblock %}

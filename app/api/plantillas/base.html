@@ -3,71 +3,84 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#172b44">
+  <meta name="theme-color" content="#151719">
   <title>{% block titulo %}Foro de reseñas{% endblock %} · Trama</title>
   <style>
-    :root { color-scheme: light; font-family: "Segoe UI", system-ui, sans-serif;
-      --fondo:#f3f6f8; --papel:#fff; --tinta:#172b44; --suave:#5b6d7e;
-      --linea:#e2e9ed; --acento:#087d73; --sombra:0 12px 34px rgba(23,43,68,.06); }
-    *, *::before, *::after { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    :root { color-scheme: dark; font-family: "Segoe UI", system-ui, sans-serif;
+      --fondo:#151719; --papel:#202326; --papel-2:#272b2e; --tinta:#f5f7f6;
+      --suave:#aeb9b6; --linea:#383f40; --acento:#83dec1;
+      --sombra:0 20px 50px rgba(0,0,0,.16); }
+    *, *::before, *::after { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
     body { margin:0; background:var(--fondo); color:var(--tinta); line-height:1.6; }
-    a { color:#076a61; text-underline-offset:3px; }
-    a:hover { color:#00564e; }
-    :is(a, button, input, select, textarea):focus-visible { outline:3px solid #5fe1cb; outline-offset:3px; }
-    .sitio-header { background:#172b44; color:#fff; }
-    .cabecera-interior { max-width:1160px; margin:auto; padding:15px 24px;
+    a { color:var(--acento); text-underline-offset:3px; }
+    a:hover { color:#b5f4df; }
+    :is(a,button,input,select,textarea):focus-visible { outline:3px solid #aaf4d8; outline-offset:3px; }
+    .saltar { position:absolute; z-index:10; top:-100px; left:16px; padding:10px 14px;
+      border-radius:8px; background:var(--acento); color:#12241e; }
+    .saltar:focus { top:12px; }
+    .sitio-header { border-bottom:1px solid #2c3132; background:#191b1d; }
+    .cabecera-interior { max-width:1320px; margin:auto; padding:15px 30px;
       display:flex; align-items:center; justify-content:space-between; gap:18px; }
-    .marca { display:inline-flex; align-items:center; gap:10px; color:#fff;
-      text-decoration:none; font-size:1.27rem; font-weight:800; letter-spacing:-.04em; }
-    .marca:hover { color:#fff; }
-    .marca-simbolo { display:grid; place-items:center; width:38px; height:38px;
-      border-radius:11px; background:#67e0cc; color:#172b44; }
-    .marca small { display:block; color:#afbfcc; font-size:.64rem; font-weight:600;
-      letter-spacing:.13em; line-height:1; text-transform:uppercase; }
-    .nav-principal { display:flex; align-items:center; flex-wrap:wrap; gap:19px; }
-    .nav-principal a { color:#e8f1f3; font-size:.9rem; font-weight:650; text-decoration:none; }
-    .nav-principal a:hover, .nav-principal button:hover { color:#67e0cc; }
-    .nav-principal .nav-boton { border:1px solid #67e0cc; border-radius:9px; padding:8px 14px; }
+    .marca { display:inline-flex; align-items:center; gap:11px; color:var(--tinta);
+      text-decoration:none; font-size:1.28rem; font-weight:800; letter-spacing:-.045em; }
+    .marca:hover { color:var(--tinta); }
+    .marca-simbolo { display:grid; place-items:center; width:39px; height:39px;
+      border-radius:12px; background:var(--acento); color:#14241e; font-weight:900; }
+    .marca small { display:block; color:var(--suave); font-size:.65rem; font-weight:600;
+      letter-spacing:.03em; line-height:1.15; }
+    .nav-principal { display:flex; align-items:center; flex-wrap:wrap; gap:22px; }
+    .nav-principal a { color:#d7dfdc; font-size:.9rem; font-weight:650; text-decoration:none; }
+    .nav-principal a:hover, .nav-principal button:hover { color:var(--acento); }
+    .nav-principal .nav-boton { border:1px solid var(--acento); border-radius:10px; padding:8px 14px;
+      color:var(--acento); }
     .nav-principal form { margin:0; }
     .nav-principal button { margin:0; padding:0; border:0; background:none;
-      color:#e8f1f3; font:inherit; font-size:.9rem; cursor:pointer; }
-    .usuario-nav { max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .contenedor { max-width:1160px; margin:0 auto; padding:32px 24px 65px; }
-    h1, h2, h3, h4 { line-height:1.24; letter-spacing:-.035em; }
+      color:#d7dfdc; font:inherit; font-size:.9rem; cursor:pointer; }
+    .usuario-nav { max-width:160px; padding:7px 11px; border-radius:9px;
+      background:#292f2e; color:var(--acento); font-size:.88rem; font-weight:700;
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .contenedor { max-width:1320px; margin:0 auto; padding:32px 30px 72px; }
+    h1,h2,h3,h4 { line-height:1.22; letter-spacing:-.035em; }
     .meta { color:var(--suave); font-size:.85rem; }
-    .tarjeta { border:1px solid var(--linea); border-radius:18px; padding:25px;
+    .tarjeta { border:1px solid var(--linea); border-radius:17px; padding:25px;
       margin:0 0 18px; background:var(--papel); box-shadow:var(--sombra); }
-    .tarjeta h2, .tarjeta h3 { margin-top:0; }
-    .rechazado { border-left:4px solid #bc4754; background:#fffafa; }
-    .publicado { border-left:4px solid #22a58e; }
-    label { display:block; margin:15px 0 6px; font-size:.89rem; font-weight:700; }
-    input, textarea, select { display:block; width:100%; padding:10px 12px; border:1px solid #cad5de;
-      border-radius:10px; background:white; color:var(--tinta); font:inherit; }
-    textarea { min-height:90px; resize:vertical; }
+    .tarjeta h2,.tarjeta h3 { margin-top:0; }
+    .rechazado { border-left:4px solid #ee8492; background:#2e2227; }
+    .publicado { border-left:4px solid var(--acento); }
+    label { display:block; margin:15px 0 6px; font-size:.89rem; font-weight:700; color:#d9e2df; }
+    input,textarea,select { display:block; width:100%; padding:11px 13px;
+      border:1px solid #444c4d; border-radius:10px; background:#171a1c; color:var(--tinta);
+      font:inherit; }
+    input::placeholder,textarea::placeholder { color:#9aa6a3; }
+    input:focus,textarea:focus,select:focus { border-color:var(--acento); }
+    textarea { min-height:94px; resize:vertical; }
     input[type=file] { font-size:.8rem; }
-    button, .boton { display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    button,.boton { display:inline-flex; align-items:center; justify-content:center; gap:8px;
       padding:11px 17px; border:0; border-radius:10px; background:var(--acento);
-      color:white; font:inherit; font-weight:700; text-decoration:none; cursor:pointer; }
-    button:hover, .boton:hover { background:#065f58; color:white; }
-    .error { color:#a9313f; font-weight:700; }
+      color:#14251f; font:inherit; font-weight:800; text-decoration:none; cursor:pointer;
+      transition:background .18s ease, transform .18s ease; }
+    button:hover,.boton:hover { background:#b1f2d8; color:#14251f; transform:translateY(-1px); }
+    .error { color:#ffacb3; font-weight:700; }
     .panel-acceso { max-width:480px; margin:36px auto; }
     .panel-acceso h1 { margin:0 0 8px; font-size:2rem; }
     .panel-acceso button { width:100%; margin-top:20px; }
     .panel-acceso .meta { margin-top:18px; }
-    .pie-sitio { padding:24px; border-top:1px solid var(--linea); color:var(--suave);
+    .pie-sitio { padding:27px; border-top:1px solid var(--linea); color:var(--suave);
       text-align:center; font-size:.85rem; }
     @media(max-width:640px) {
-      .cabecera-interior { align-items:flex-start; flex-direction:column; gap:14px; }
-      .nav-principal { gap:12px; }
-      .contenedor { padding:19px 16px 45px; }
+      .cabecera-interior { align-items:flex-start; flex-direction:column; gap:16px; padding:14px 18px; }
+      .nav-principal { gap:12px 17px; }
+      .contenedor { padding:20px 16px 50px; }
       .tarjeta { padding:20px; }
     }
-    @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+    @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; }
+      button,.boton { transition:none; } }
   </style>
   {% block estilos %}{% endblock %}
 </head>
 <body>
+  <a class="saltar" href="#contenido-principal">Ir al contenido</a>
   <header class="sitio-header">
     <div class="cabecera-interior">
       <a class="marca" href="/" aria-label="Trama, ir a la portada">
@@ -77,8 +90,8 @@
       <nav class="nav-principal" aria-label="Navegación principal">
         <a href="/#explorar">Explorar</a>
         {% if usuario %}
-          <span class="usuario-nav">{{ usuario.nombre }}</span>
           <a href="/mis-publicaciones">Mis publicaciones</a>
+          <span class="usuario-nav">{{ usuario.nombre }}</span>
           <form action="/salir" method="post"><button type="submit">Salir</button></form>
         {% else %}
           <a href="/entrar">Entrar</a>
@@ -87,7 +100,7 @@
       </nav>
     </div>
   </header>
-  <main class="contenedor">{% block contenido %}{% endblock %}</main>
+  <main id="contenido-principal" class="contenedor">{% block contenido %}{% endblock %}</main>
   <footer class="pie-sitio">Trama · Reseñas de videojuegos escritas por jugadores.</footer>
 </body>
 </html>
