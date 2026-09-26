@@ -5,36 +5,32 @@
   .eyebrow { margin:0 0 13px; color:var(--acento); font-size:.75rem; font-weight:800;
     text-transform:uppercase; letter-spacing:.12em; }
   .hero { position:relative; overflow:hidden; display:grid; grid-template-columns:minmax(0,1.1fr) minmax(280px,.8fr);
-    align-items:center; gap:42px; min-height:360px; padding:45px clamp(25px,4vw,58px);
-    border:1px solid #35413e; border-radius:23px;
-    background:radial-gradient(circle at 80% 38%,#30443e 0%,#242b29 36%,#202426 75%);
+    align-items:center; gap:42px; min-height:355px; padding:43px clamp(25px,4vw,58px);
+    border:1px solid #425269; border-radius:23px;
+    background:linear-gradient(110deg,#1a2731 0%,#1d2435 56%,#26324a 100%);
     color:var(--tinta); }
-  .hero::after { content:""; position:absolute; right:-88px; top:-168px; width:420px; height:420px;
-    border:1px solid rgba(131,222,193,.13); border-radius:50%;
-    box-shadow:0 0 0 65px rgba(131,222,193,.035),0 0 0 130px rgba(131,222,193,.025);
-    pointer-events:none; }
+  .hero-arte { position:absolute; inset:0 0 0 auto; width:61%; height:100%;
+    opacity:.92; pointer-events:none; mask-image:linear-gradient(to right,transparent,#000 26%); }
   .hero-contenido,.hero-destacado { position:relative; z-index:1; }
   .hero h1 { max-width:770px; margin:0; font-size:clamp(2.15rem,4.1vw,3.55rem); letter-spacing:-.055em; }
   .hero-descripcion { max-width:550px; margin:19px 0 25px; color:#c0ccca; font-size:1.03rem; }
   .hero .eyebrow { display:inline-block; padding:6px 12px; border-radius:50px;
     background:#83dec120; letter-spacing:.07em; }
   .hero-destacado { align-self:stretch; display:flex; align-items:center; justify-content:center; }
-  .escaparate { width:100%; max-width:390px; padding:20px; border:1px solid #486258;
-    border-radius:18px; background:#151b1bdc; box-shadow:0 25px 48px #0004; }
-  .escaparate-visual { display:grid; place-content:center; min-height:155px; overflow:hidden;
-    border-radius:12px; background:linear-gradient(130deg,#303f49,#315146 62%,#1c292b); text-align:center; }
-  .escaparate-visual span { color:#a6e9d1; font-size:2.35rem; font-weight:900; letter-spacing:-.13em; }
-  .escaparate-visual small { display:block; color:#d5e6de; font-size:.7rem; font-weight:800;
-    text-transform:uppercase; letter-spacing:.24em; }
+  .escaparate { width:100%; max-width:365px; padding:15px; border:1px solid #659d9d;
+    border-radius:18px; background:#111b26ee; box-shadow:0 25px 60px #030b18a8; }
+  .escaparate-visual { overflow:hidden; height:147px; border-radius:12px;
+    border:1px solid #5a8d9d66; background:#18243b; }
+  .escaparate-visual svg { display:block; width:100%; height:100%; }
   .escaparate .etiqueta { margin:17px 0 5px; color:var(--acento); font-size:.72rem;
     font-weight:800; text-transform:uppercase; letter-spacing:.1em; }
   .escaparate h2 { margin:0 0 7px; font-size:1.25rem; overflow-wrap:anywhere; }
   .escaparate h2 a { color:var(--tinta); text-decoration:none; }
   .escaparate h2 a:hover { color:var(--acento); }
   .escaparate .meta { margin:0; }
-  .hero-glifo { display:grid; place-items:center; width:230px; height:230px;
-    border:1px solid #83dec140; border-radius:55px; background:linear-gradient(145deg,#83dec115,#83dec105);
-    color:var(--acento); font-size:8rem; font-weight:900; letter-spacing:-.15em; transform:rotate(-10deg); }
+  .hero-glifo { width:100%; max-width:365px; overflow:hidden; border:1px solid #659d9d;
+    border-radius:18px; box-shadow:0 25px 60px #030b18a8; }
+  .hero-glifo svg { display:block; width:100%; }
   .atajos { display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; }
   .atajos a { padding:7px 12px; border:1px solid #53655e; border-radius:8px;
     color:#cde8dc; font-size:.79rem; font-weight:700; text-decoration:none; }
@@ -96,8 +92,9 @@
   @media(max-width:950px) { .hero { gap:22px; } .disposicion { grid-template-columns:1fr; }
     .panel-lateral { position:static; } }
   @media(max-width:740px) { .hero { grid-template-columns:1fr; padding:29px 25px; }
+    .hero-arte { width:100%; opacity:.45; mask-image:linear-gradient(to bottom,transparent,#000); }
     .hero-destacado { justify-content:start; } .escaparate { max-width:none; }
-    .escaparate-visual { min-height:90px; } .hero-glifo { display:none; }
+    .escaparate-visual { height:120px; } .hero-glifo { display:none; }
     .franja-grid { grid-template-columns:1fr; } }
   @media(max-width:640px) { .titular-seccion { flex-direction:column; align-items:start; }
     .hero h1 { font-size:clamp(2rem,9vw,2.8rem); } }
@@ -105,12 +102,41 @@
 {% endblock %}
 {% block contenido %}
 <section class="hero" aria-labelledby="hero-titulo">
+  <svg class="hero-arte" viewBox="0 0 640 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="cielo-arcade" x2="0" y2="1"><stop stop-color="#161d38"/><stop offset=".6" stop-color="#293064"/><stop offset="1" stop-color="#14535c"/></linearGradient>
+      <radialGradient id="luz-arcade"><stop stop-color="#ffb474"/><stop offset=".55" stop-color="#ed649e"/><stop offset="1" stop-color="#854bdd" stop-opacity="0"/></radialGradient>
+      <linearGradient id="suelo-arcade" x2="0" y2="1"><stop stop-color="#2b2751"/><stop offset="1" stop-color="#111827"/></linearGradient>
+      <linearGradient id="mando-arcade" x2="0" y2="1"><stop stop-color="#394863"/><stop offset="1" stop-color="#1b2237"/></linearGradient>
+    </defs>
+    <g id="escena-arcade">
+      <rect width="640" height="420" fill="url(#cielo-arcade)"/>
+      <circle cx="450" cy="123" r="139" fill="url(#luz-arcade)" opacity=".8"/>
+      <circle cx="450" cy="127" r="61" fill="#fa96ab" opacity=".83"/>
+      <path d="M389 123h122M381 139h138M374 155h151M395 170h111" stroke="#291d4c" stroke-width="5" opacity=".42"/>
+      <path d="M0 269V190h24v31h20v-55h39v40h23v-28h25v57h26v-71h34v17h16v67h29v-46h37v58h30v-78h19v25h29v51h23v-44h32v-20h38v67h36v-62h27v36h34v-24h35v68z" fill="#17253c"/>
+      <path d="M0 277h640" stroke="#74dbdc" stroke-width="3" opacity=".75"/>
+      <path d="M0 420 287 278h176l177 142" fill="url(#suelo-arcade)"/>
+      <path d="M285 278 75 420M462 278l142 142M375 285l-26 135M395 285l38 135" stroke="#7eebd8" stroke-width="3" opacity=".72"/>
+      <path d="M0 327h640M0 373h640" stroke="#9a6dca" stroke-width="2" opacity=".38"/>
+      <path d="M75 319h112M502 302h101M24 359h120M513 355h91" stroke="#f9a1ad" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+      <g transform="translate(335 228) rotate(-9 112 62)">
+        <path d="M35 34Q51 14 83 20h60q35-6 52 14l28 72q6 23-13 28-14 4-25-10l-25-30H70l-25 30q-11 14-25 10Q1 129 7 106z" fill="url(#mando-arcade)" stroke="#80e8d3" stroke-width="5"/>
+        <path d="M63 61v28M49 75h28" stroke="#a7f2e3" stroke-width="9" stroke-linecap="round"/>
+        <circle cx="164" cy="58" r="8" fill="#f59bad"/><circle cx="185" cy="75" r="8" fill="#aab4ff"/>
+        <circle cx="143" cy="75" r="8" fill="#77dccc"/><circle cx="164" cy="93" r="8" fill="#f5ca8d"/>
+        <circle cx="95" cy="110" r="8" fill="#101b2f" stroke="#899cb5" stroke-width="3"/>
+        <circle cx="128" cy="110" r="8" fill="#101b2f" stroke="#899cb5" stroke-width="3"/>
+      </g>
+      <text x="24" y="392" fill="#b6f5e6" font-size="13" font-family="monospace" letter-spacing="5">PLAYER 01 / PRESS START</text>
+    </g>
+  </svg>
   <div class="hero-contenido">
     <p class="eyebrow">Reseñas · Comunidad · Videojuegos</p>
-    <h1 id="hero-titulo">Antes de jugar, escucha a quienes ya estuvieron ahí.</h1>
+    <h1 id="hero-titulo">Se acaba la partida. Empieza la conversación.</h1>
     <p class="hero-descripcion">Lee opiniones de otros jugadores, descubre qué les gustó y comparte tu propia experiencia.</p>
     <a class="boton" href="#explorar">Explorar reseñas <span aria-hidden="true">→</span></a>
-    <div class="atajos" aria-label="Participa en Trama">
+    <div class="atajos" aria-label="Participa en Pulso Pixel">
       {% if usuario %}<a href="#publicar">Publicar mi reseña</a>{% else %}<a href="/registro">Unirme a la comunidad</a>{% endif %}
       {% if usuario %}<a href="/mis-publicaciones">Mis publicaciones</a>{% else %}<a href="/entrar">Ya tengo cuenta</a>{% endif %}
     </div>
@@ -119,13 +145,13 @@
     {% if vista_hilos and pagina == 1 %}
       {% set reciente = vista_hilos[0] %}
       <article class="escaparate">
-        <div class="escaparate-visual" aria-hidden="true"><span>T.</span><small>Trama / Reseñas</small></div>
+        <div class="escaparate-visual" aria-hidden="true"><svg viewBox="0 0 640 420" preserveAspectRatio="xMidYMid slice" focusable="false"><use href="#escena-arcade"/></svg></div>
         <p class="etiqueta">Reseña reciente · ★ {{ reciente.hilo.calificacion }}/5</p>
         <h2><a href="/hilos/{{ reciente.hilo.id }}">{{ reciente.hilo.titulo }}</a></h2>
         <p class="meta">Compartida por {{ reciente.hilo.autor.nombre }}</p>
       </article>
     {% else %}
-      <div class="hero-glifo" aria-hidden="true">T.</div>
+      <div class="hero-glifo" aria-hidden="true"><svg viewBox="0 0 640 420" focusable="false"><use href="#escena-arcade"/></svg></div>
     {% endif %}
   </div>
 </section>

@@ -3,23 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#151719">
-  <title>{% block titulo %}Foro de reseñas{% endblock %} · Trama</title>
+  <meta name="theme-color" content="#10141f">
+  <title>{% block titulo %}Foro de reseñas{% endblock %} · Pulso Pixel</title>
   <style>
     :root { color-scheme: dark; font-family: "Segoe UI", system-ui, sans-serif;
-      --fondo:#151719; --papel:#202326; --papel-2:#272b2e; --tinta:#f5f7f6;
+      --fondo:#10141f; --papel:#202326; --papel-2:#272b2e; --tinta:#f5f7f6;
       --suave:#aeb9b6; --linea:#383f40; --acento:#83dec1;
       --sombra:0 20px 50px rgba(0,0,0,.16); }
     *, *::before, *::after { box-sizing:border-box; }
     html { scroll-behavior:smooth; }
-    body { margin:0; background:var(--fondo); color:var(--tinta); line-height:1.6; }
+    body { margin:0; min-height:100vh; color:var(--tinta); line-height:1.6;
+      background:
+        radial-gradient(ellipse 55% 30% at 93% 17%,rgba(123,73,219,.18),transparent 75%),
+        radial-gradient(ellipse 42% 27% at 5% 54%,rgba(41,212,185,.10),transparent 80%),
+        linear-gradient(150deg,#151923 0%,#10141f 54%,#161829 100%);
+      background-attachment:fixed; }
     a { color:var(--acento); text-underline-offset:3px; }
     a:hover { color:#b5f4df; }
     :is(a,button,input,select,textarea):focus-visible { outline:3px solid #aaf4d8; outline-offset:3px; }
     .saltar { position:absolute; z-index:10; top:-100px; left:16px; padding:10px 14px;
       border-radius:8px; background:var(--acento); color:#12241e; }
     .saltar:focus { top:12px; }
-    .sitio-header { border-bottom:1px solid #2c3132; background:#191b1d; }
+    .sitio-header { border-bottom:1px solid #303440; background:#171b23ec; }
     .cabecera-interior { max-width:1320px; margin:auto; padding:15px 30px;
       display:flex; align-items:center; justify-content:space-between; gap:18px; }
     .marca { display:inline-flex; align-items:center; gap:11px; color:var(--tinta);
@@ -83,9 +88,9 @@
   <a class="saltar" href="#contenido-principal">Ir al contenido</a>
   <header class="sitio-header">
     <div class="cabecera-interior">
-      <a class="marca" href="/" aria-label="Trama, ir a la portada">
-        <span class="marca-simbolo" aria-hidden="true">T.</span>
-        <span>Trama<small>Reseñas de videojuegos</small></span>
+      <a class="marca" href="/" aria-label="Pulso Pixel, ir a la portada">
+        <span class="marca-simbolo" aria-hidden="true">P.</span>
+        <span>Pulso Pixel<small>Reseñas de videojuegos</small></span>
       </a>
       <nav class="nav-principal" aria-label="Navegación principal">
         <a href="/#explorar">Explorar</a>
@@ -101,6 +106,6 @@
     </div>
   </header>
   <main id="contenido-principal" class="contenedor">{% block contenido %}{% endblock %}</main>
-  <footer class="pie-sitio">Trama · Reseñas de videojuegos escritas por jugadores.</footer>
+  <footer class="pie-sitio">Pulso Pixel · Se acaba la partida. Empieza la conversación.</footer>
 </body>
 </html>
