@@ -1,23 +1,43 @@
 {% extends "base.html" %}
 {% block titulo %}Mis publicaciones{% endblock %}
+{% block estilos %}
+<style>
+  .mis-publicaciones { max-width:980px; margin-inline:auto; }
+  .mis-publicaciones .resena-propia { display:grid; grid-template-columns:minmax(0,1fr) 136px;
+    align-items:center; gap:20px; }
+  .mis-publicaciones .resena-propia-texto { min-width:0; overflow-wrap:anywhere; }
+  .mis-publicaciones .resena-propia-texto p:last-child { margin-bottom:0; }
+  .mis-publicaciones .resena-propia-imagen { display:block; width:136px; height:92px;
+    overflow:hidden; border:1px solid var(--linea); border-radius:10px;
+    background:#141c29; }
+  .mis-publicaciones .resena-propia-imagen img { display:block; width:100%; height:100%;
+    object-fit:cover; }
+  @media(max-width:520px) {
+    .mis-publicaciones .resena-propia { grid-template-columns:minmax(0,1fr) 96px; gap:12px; }
+    .mis-publicaciones .resena-propia-imagen { width:96px; height:72px; }
+  }
+</style>
+{% endblock %}
 {% block contenido %}
+<section class="mis-publicaciones">
 <h1>Mis publicaciones</h1>
 <p class="meta">Consulta tus reseñas publicadas y las rechazadas con su motivo.</p>
 
-<h2>Resenas</h2>
+<h2>Reseñas</h2>
 {% for hilo in hilos %}
-  <div class="tarjeta {{ 'rechazado' if hilo.estado == 'rechazado' else 'publicado' }}">
+  <article class="tarjeta {{ 'rechazado' if hilo.estado == 'rechazado' else 'publicado' }}{% if hilo.estado == 'publicado' and hilo.clave_s3 %} resena-propia{% endif %}">
+    <div class="resena-propia-texto">
+      <h3>{% if hilo.estado == 'publicado' %}<a href="/hilos/{{ hilo.id }}">{{ hilo.titulo }}</a>{% else %}{{ hilo.titulo }}{% endif %}</h3>
+      <p class="meta">Estado: {{ hilo.estado }}{% if hilo.motivo_moderacion %} · {{ hilo.motivo_moderacion }}{% endif %}</p>
+      <p>{{ hilo.cuerpo }}</p>
+    </div>
     {% if hilo.estado == 'publicado' and hilo.clave_s3 %}
-      <a href="/hilos/{{ hilo.id }}" aria-label="Ver reseña {{ hilo.titulo }}">
+      <a class="resena-propia-imagen" href="/hilos/{{ hilo.id }}" aria-label="Ver reseña {{ hilo.titulo }}">
         <img src="/imagen/{{ hilo.id }}" alt="Imagen adjunta a la reseña {{ hilo.titulo }}"
-             loading="lazy" decoding="async"
-             style="display:block;max-width:100%;max-height:220px;margin-bottom:16px;border-radius:12px">
+             loading="lazy" decoding="async">
       </a>
     {% endif %}
-    <h3>{% if hilo.estado == 'publicado' %}<a href="/hilos/{{ hilo.id }}">{{ hilo.titulo }}</a>{% else %}{{ hilo.titulo }}{% endif %}</h3>
-    <p class="meta">Estado: {{ hilo.estado }}{% if hilo.motivo_moderacion %} · {{ hilo.motivo_moderacion }}{% endif %}</p>
-    <p>{{ hilo.cuerpo }}</p>
-  </div>
+  </article>
 {% else %}
   <p>Aun no publicas resenas.</p>
 {% endfor %}
@@ -31,4 +51,5 @@
 {% else %}
   <p>Aun no escribes comentarios.</p>
 {% endfor %}
+</section>
 {% endblock %}
