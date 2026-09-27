@@ -1,0 +1,17 @@
+ESCANEO INDEPENDIENTE DEL HISTORIAL · 2026-09-27 UTC
+Repositorio auditado: 6f5f42dcbc6d6d65f68bdaf1033c7de07394470a
+Herramienta: Gitleaks 8.21.2; todas las referencias obtenidas del remoto.
+Configuración: la del proyecto, retirando las exclusiones globales de .env y reportes/.
+SHA-256 de configuración utilizada: 8b74631e4daafa2b0256fe5c3f8c65c7ffe835272d3396d6b5759f2487920a12
+Este escaneo no reemplaza una corrida de las ocho etapas en QA.
+Salida original a continuación; solo se retiraron códigos de color ANSI.
+
+    ○
+    │╲
+    │ ○
+    ○ ░
+    ░    gitleaks
+
+7:48AM INF 60 commits scanned.
+7:48AM INF scan completed in 43.2ms
+7:48AM INF no leaks found

@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1152pt" height="741.6pt" viewBox="0 0 1152 741.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-27T07:59:58.936296</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 741.6
+L 1152 741.6
+L 1152 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 0 741.6
+L 1152 741.6
+L 1152 0
+L 0 0
+z
+" clip-path="url(#pb9877c705e)" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 0 104.4
+L 1152 104.4
+L 1152 0
+L 0 0
+z
+" clip-path="url(#pb9877c705e)" style="fill: #152b43; stroke: #152b43; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 54.36 255.24
+L 287.64 255.24
+Q 296.28 255.24 296.28 246.6
+L 296.28 158.04
+Q 296.28 149.4 287.64 149.4
+L 54.36 149.4
+Q 45.72 149.4 45.72 158.04
+L 45.72 246.6
+Q 45.72 255.24 54.36 255.24
+z
+" clip-path="url(#pb9877c705e)" style="fill: #f4f7fb; stroke: #d7e1eb; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 297.20127 201.6
+Q 316.801093 201.6 334.500258 201.6
+" clip-path="url(#pb9877c705e)" style="fill: none; stroke: #516477; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 328.500258 198.6
+L 334.500258 201.6
+L 328.500258 204.6
+z
+" clip-path="url(#pb9877c705e)" style="fill: #516477; stroke: #516477; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 347.4 284.76
+L 1097.64 284.76
+Q 1106.28 284.76 1106.28 276.12
+L 1106.28 158.04
+Q 1106.28 149.4 1097.64 149.4
+L 347.4 149.4
+Q 338.76 149.4 338.76 158.04
+L 338.76 276.12
+Q 338.76 284.76 347.4 284.76
+z
+" clip-path="url(#pb9877c705e)" style="fill: #f4f1fa; stroke: #d7ceea; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 722.16 285.679028
+Q 722.16 304.918855 722.16 322.258025
+" clip-path="url(#pb9877c705e)" style="fill: none; stroke: #6650a1; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 725.16 316.258025
+L 722.16 322.258025
+L 719.16 316.258025
+z
+" clip-path="url(#pb9877c705e)" style="fill: #6650a1; stroke: #6650a1; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 556.2 387.72
+L 888.12 387.72
+Q 896.76 387.72 896.76 379.08
+L 896.76 333.72
+Q 896.76 325.08 888.12 325.08
+L 556.2 325.08
+Q 547.56 325.08 547.56 333.72
+L 547.56 379.08
+Q 547.56 387.72 556.2 387.72
+z
+" clip-path="url(#pb9877c705e)" style="fill: #f4f1fa; stroke: #6650a1; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 546.640444 356.4
+Q 517.321396 356.4 489.903006 356.4
+" clip-path="url(#pb9877c705e)" style="fill: none; stroke: #b44043; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 495.903006 359.4
+L 489.903006 356.4
+L 495.903006 353.4
+z
+" clip-path="url(#pb9877c705e)" style="fill: #b44043; stroke: #b44043; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 54.36 398.52
+L 477 398.52
+Q 485.64 398.52 485.64 389.88
+L 485.64 321.48
+Q 485.64 312.84 477 312.84
+L 54.36 312.84
+Q 45.72 312.84 45.72 321.48
+L 45.72 389.88
+Q 45.72 398.52 54.36 398.52
+z
+" clip-path="url(#pb9877c705e)" style="fill: #fff4f3; stroke: #deaeb0; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 722.16 388.638369
+Q 722.16 410.400343 722.16 430.261658
+" clip-path="url(#pb9877c705e)" style="fill: none; stroke: #127968; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 725.16 424.261658
+L 722.16 430.261658
+L 719.16 424.261658
+z
+" clip-path="url(#pb9877c705e)" style="fill: #127968; stroke: #127968; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 213.12 438.322588
+Q 213.12 447.481792 213.12 454.740339
+" clip-path="url(#pb9877c705e)" style="fill: none; stroke: #127968; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 216.12 448.740339
+L 213.12 454.740339
+L 210.12 448.740339
+z
+" clip-path="url(#pb9877c705e)" style="fill: #127968; stroke: #127968; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 54.36 618.12
+L 369 618.12
+Q 377.64 618.12 377.64 609.48
+L 377.64 466.2
+Q 377.64 457.56 369 457.56
+L 54.36 457.56
+Q 45.72 457.56 45.72 466.2
+L 45.72 609.48
+Q 45.72 618.12 54.36 618.12
+z
+" clip-path="url(#pb9877c705e)" style="fill: #f4f7fb; stroke: #d7e1eb; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 418.68 618.12
+L 733.32 618.12
+Q 741.96 618.12 741.96 609.48
+L 741.96 466.2
+Q 741.96 457.56 733.32 457.56
+L 418.68 457.56
+Q 410.04 457.56 410.04 466.2
+L 410.04 609.48
+Q 410.04 618.12 418.68 618.12
+z
+" clip-path="url(#pb9877c705e)" style="fill: #f4f7fb; stroke: #d7e1eb; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 783 618.12
+L 1097.64 618.12
+Q 1106.28 618.12 1106.28 609.48
+L 1106.28 466.2
+Q 1106.28 457.56 1097.64 457.56
+L 783 457.56
+Q 774.36 457.56 774.36 466.2
+L 774.36 609.48
+Q 774.36 618.12 783 618.12
+z
+" clip-path="url(#pb9877c705e)" style="fill: #f4f7fb; stroke: #d7e1eb; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 379.28127 535.68
+Q 393.839684 535.68 406.497441 535.68
+" clip-path="url(#pb9877c705e)" style="fill: none; stroke: #127968; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 400.497441 532.68
+L 406.497441 535.68
+L 400.497441 538.68
+z
+" clip-path="url(#pb9877c705e)" style="fill: #127968; stroke: #127968; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 743.60127 535.68
+Q 758.159684 535.68 770.817441 535.68
+" clip-path="url(#pb9877c705e)" style="fill: none; stroke: #127968; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 764.817441 532.68
+L 770.817441 535.68
+L 764.817441 538.68
+z
+" clip-path="url(#pb9877c705e)" style="fill: #127968; stroke: #127968; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_18">
+    <path d="M 54.36 694.44
+L 1097.64 694.44
+Q 1106.28 694.44 1106.28 685.8
+L 1106.28 654.12
+Q 1106.28 645.48 1097.64 645.48
+L 54.36 645.48
+Q 45.72 645.48 45.72 654.12
+L 45.72 685.8
+Q 45.72 694.44 54.36 694.44
+z
+" clip-path="url(#pb9877c705e)" style="fill: #eaf6f2; stroke: #b8dfd3; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 722.16 436.32
+L 213.12 436.32
+" clip-path="url(#pb9877c705e)" style="fill: none; stroke: #127968; stroke-width: 1.7; stroke-linecap: square"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #84dfcb" x="46.8" y="30.119375" transform="rotate(-0 46.8 30.119375)">PULSO PIXEL  /  ENTREGA FINAL</text>
+   </g>
+   <g id="text_2">
+    <text style="font-weight: 700; font-size: 23px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #ffffff" x="46.8" y="69.356719" transform="rotate(-0 46.8 69.356719)">De QA a Producción: controles y evidencia</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #d6e2ee" x="46.8" y="88.639375" transform="rotate(-0 46.8 88.639375)">Flujo ejecutado · sin reconstruir imágenes en el destino · los pasos manuales se indican expresamente</text>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #3267ae" x="63.36" y="178.27125" transform="rotate(-0 63.36 178.27125)">1. CANDIDATO EN QA</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #516477" x="63.36" y="207.735312" transform="rotate(-0 63.36 207.735312)">Commit + árbol limpio</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #516477" x="63.36" y="233.359375" transform="rotate(-0 63.36 233.359375)">Construir imágenes y ejecutar app</text>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #6650a1" x="357.12" y="178.99125" transform="rotate(-0 357.12 178.99125)">2. OCHO ETAPAS · pipeline/orquestador.sh</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #516477" x="357.12" y="214.715312" transform="rotate(-0 357.12 214.715312)">01 Secretos        02 Dependencias        03 Bandit        04 Semgrep</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #516477" x="357.12" y="249.495313" transform="rotate(-0 357.12 249.495313)">05 IaC / Docker    06 Imágenes / Trivy    07 SBOM          08 Flujos HTTP</text>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #6650a1" x="722.16" y="359.71125" transform="rotate(-0 722.16 359.71125)">¿Ocho estados OK con evidencia?</text>
+   </g>
+   <g id="text_11">
+    <g id="patch_19">
+     <path d="M 508.611094 342.305156
+L 522.428906 342.305156
+Q 525.578906 342.305156 525.578906 339.155156
+L 525.578906 330.444844
+Q 525.578906 327.294844 522.428906 327.294844
+L 508.611094 327.294844
+Q 505.461094 327.294844 505.461094 330.444844
+L 505.461094 339.155156
+Q 505.461094 342.305156 508.611094 342.305156
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #b44043" x="515.52" y="337.283437" transform="rotate(-0 515.52 337.283437)">NO</text>
+   </g>
+   <g id="text_12">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #a2393d" x="63.36" y="341.71125" transform="rotate(-0 63.36 341.71125)">BLOQUEADO · no se promueve</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 9.3px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #516477" x="63.36" y="370.486219" transform="rotate(-0 63.36 370.486219)">Hallazgo, error o control sin ejecutar → corregir y repetir en QA</text>
+   </g>
+   <g id="text_14">
+    <g id="patch_20">
+     <path d="M 746.775703 419.345156
+L 755.144297 419.345156
+Q 758.294297 419.345156 758.294297 416.195156
+L 758.294297 407.484844
+Q 758.294297 404.334844 755.144297 404.334844
+L 746.775703 404.334844
+Q 743.625703 404.334844 743.625703 407.484844
+L 743.625703 416.195156
+Q 743.625703 419.345156 746.775703 419.345156
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #127968" x="750.96" y="414.323438" transform="rotate(-0 750.96 414.323438)">SÍ</text>
+   </g>
+   <g id="text_15">
+    <text style="font-weight: 700; font-size: 10.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #127968" x="61.2" y="486.737344" transform="rotate(-0 61.2 486.737344)">3. EMPAQUETAR EN QA</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 9.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #6650a1" x="61.2" y="513.821406" transform="rotate(-0 61.2 513.821406)">promover.sh</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 9.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #516477" x="61.2" y="545.691406" transform="rotate(-0 61.2 545.691406)">Veredicto + commit + árbol limpio</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 9.1px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #516477" x="61.2" y="573.471031" transform="rotate(-0 61.2 573.471031)">Image IDs de Trivy → docker save</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 9.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #516477" x="61.2" y="601.661406" transform="rotate(-0 61.2 601.661406)">Manifiesto + SHA-256 de los tar</text>
+   </g>
+   <g id="text_20">
+    <text style="font-weight: 700; font-size: 10.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #127968" x="425.52" y="486.737344" transform="rotate(-0 425.52 486.737344)">4. TRANSFERIR E IMPORTAR</text>
+   </g>
+   <g id="text_21">
+    <text style="font-size: 9.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #6650a1" x="425.52" y="514.011406" transform="rotate(-0 425.52 514.011406)">Operación manual por SSH</text>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 9.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #516477" x="425.52" y="545.501406" transform="rotate(-0 425.52 545.501406)">Copiar tar y manifiesto aprobado</text>
+   </g>
+   <g id="text_23">
+    <text style="font-size: 9.1px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #516477" x="425.52" y="573.471031" transform="rotate(-0 425.52 573.471031)">Comprobar hashes → docker load</text>
+   </g>
+   <g id="text_24">
+    <text style="font-size: 9.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #516477" x="425.52" y="601.661406" transform="rotate(-0 425.52 601.661406)">Tag Git del candidato aprobado</text>
+   </g>
+   <g id="text_25">
+    <text style="font-weight: 700; font-size: 10.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #127968" x="789.84" y="486.737344" transform="rotate(-0 789.84 486.737344)">5. ACTIVAR Y VERIFICAR</text>
+   </g>
+   <g id="text_26">
+    <text style="font-size: 9.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #6650a1" x="789.84" y="514.011406" transform="rotate(-0 789.84 514.011406)">Operación en EC2 Producción</text>
+   </g>
+   <g id="text_27">
+    <text style="font-size: 9.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #516477" x="789.84" y="545.501406" transform="rotate(-0 789.84 545.501406)">compose up --no-build --pull never</text>
+   </g>
+   <g id="text_28">
+    <text style="font-size: 9.1px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #516477" x="789.84" y="573.653031" transform="rotate(-0 789.84 573.653031)">Contenedores activos: inspección manual</text>
+   </g>
+   <g id="text_29">
+    <text style="font-size: 9.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #516477" x="789.84" y="601.661406" transform="rotate(-0 789.84 601.661406)">Verificador: salud, HTTP, tags y tar</text>
+   </g>
+   <g id="text_30">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #127968" x="576" y="672.559375" transform="rotate(-0 576 672.559375)">EVIDENCIA ARCHIVADA  ·  rojo 84443a4 → corrección 30a764b → release 0ec86bb: QA 8/8 y 19/19; Producción 12/12</text>
+   </g>
+   <g id="text_31">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #9a5a16" x="46.8" y="722.663437" transform="rotate(-0 46.8 722.663437)">Límite detectado: el verificador consulta tags cargados; comprobar el Image ID del contenedor activo aún es un paso manual. Ver auditoría.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pb9877c705e">
+   <rect x="0" y="0" width="1152" height="741.6"/>
+  </clipPath>
+ </defs>
+</svg>

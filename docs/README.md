@@ -99,15 +99,22 @@ docker compose ps        # los dos servicios, el moderador en healthy
 
 La aplicación queda en `http://<ip-de-tu-instancia>:8080`.
 
-### Limitaciones conocidas del entorno QA
+### Limitaciones de la demostración en QA y Producción
 
-La demostración usa HTTP directo en el puerto 8080 porque el Learner Lab no
-tiene terminación TLS configurada. Por ello `COOKIE_SEGURA=false`: la cookie
-está firmada, pero el navegador no exige transportarla por HTTPS. Producción
-requiere HTTPS y `COOKIE_SEGURA=true`.
+Ambos entornos de esta demostración usan HTTP directo en el puerto 8080;
+no se configuró terminación TLS. Con `COOKIE_SEGURA=false` la cookie está
+firmada, pero carece de protección de transporte. Restringir la IP cliente en
+el grupo de seguridad no cifra la navegación. Para ofrecer el servicio con
+transporte protegido deben configurarse HTTPS y `COOKIE_SEGURA=true`;
+no se afirma que ya existan en la EC2 llamada Producción.
 
-La conexión a PostgreSQL usa `sslmode=require`, que cifra el transporte pero no
-verifica por sí solo la identidad del servidor como lo haría `verify-full`.
+Cuando se configura `sslmode=require` para PostgreSQL, se cifra el transporte,
+pero no se verifica por sí solo la identidad del servidor como con
+`verify-full`. La auditoría del repositorio no abrió los archivos privados ni
+comprobó una sesión TLS actual; se requiere verificarla en la conexión real.
+Un resultado de salud correcto no acredita ese cifrado. Véanse el
+[ADR de entornos](ADR-003-promocion-entornos.md) y la
+[revisión final](auditoria/revision_final_2026-09-27.md).
 
 ## Infraestructura como código
 

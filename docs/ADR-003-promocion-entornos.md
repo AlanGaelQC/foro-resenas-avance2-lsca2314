@@ -22,7 +22,10 @@ dependencias distintas y romper la identidad de lo probado). El flujo:
    `reportes/manifest_release.json` con commit, tags, Image IDs y hashes.
 3. Transferir los `.tar` por SSH a la EC2 nueva, verificar
    hashes, `docker image load`, y `docker compose up` **sin build ni `:latest`**.
-4. Comprobar que los Image IDs cargados coinciden con el manifiesto.
+4. Comprobar que los Image IDs cargados coinciden con el manifiesto y, tras
+   iniciar Compose, que `.Image` de cada contenedor activo coincide también.
+   En los despliegues documentados esta segunda comprobación se hizo mediante
+   comandos manuales; aún no forma parte del verificador de la release auditada.
 
 Se usó export/import sin depender de ECR. La disponibilidad de ECR no se evaluó ni fue condición de la promoción. Un checksum detecta cambios de bytes, no
 autentica quién aprobó: la confianza viene del canal, permisos y origen
@@ -34,11 +37,18 @@ La configuración aplicada comparte el RDS y el bucket del Avance 2, pero usa un
 
 ## Decisión 3 — Verificación del destino (no reusar T1 de QA)
 
-`pipeline/verificar_produccion.py` corre en la EC2 nueva y compara los Image IDs y SHA-256 de los tar con el manifiesto de QA. También exige `entorno == "produccion"` (T1 de QA exige
+`pipeline/verificar_produccion.py` corre en la EC2 nueva y compara los Image IDs de los tags cargados y SHA-256 de los tar con el manifiesto de QA. También exige `entorno == "produccion"` (T1 de QA exige
 `"qa"` y fallaría siempre en Producción). Comprueba salud, BD, S3, conexión al moderador y vistas públicas; se comprobó el detalle de una reseña real creada en la EC2 nueva. La petición anónima a la vista moderada obtuvo HTTP 403; la prueba autenticada de escape XSS se ejecutó en QA sobre los mismos Image IDs, no en la instancia nueva. Un fallo
 del destino marca la release como no aceptada aunque QA hubiera pasado; el error
 se documenta en `docs/bitacora_produccion.md` y, si es de código, vuelve a QA
 para un nuevo verde antes de re-promover.
+
+**Precisión de la auditoría del 27 de septiembre:** el script no consulta la
+imagen del contenedor activo. Además, si no hay reseñas, omite la comprobación
+del detalle y devuelve éxito con 11/11 y un aviso `PENDIENTE`. La corrida final
+archivada sí tuvo una reseña y 12/12; las comprobaciones manuales verificaron
+las imágenes en ejecución. Automatizar identidad y completitud sigue pendiente
+en A-02 de la [revisión final](auditoria/revision_final_2026-09-27.md).
 
 ## Decisión 4 — HTTPS
 

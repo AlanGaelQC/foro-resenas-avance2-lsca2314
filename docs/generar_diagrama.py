@@ -1,156 +1,150 @@
+"""Diagramas documentales de la Entrega Final, sin acceso a AWS.
+Uso: python3 docs/generar_diagrama.py
+Requiere matplotlib. Genera PNG y SVG junto a este archivo.
+Topología basada en código y registros archivados, no en una consulta en vivo.
 """
-Genera docs/diagrama_arquitectura.png.
-
-El diagrama se genera con codigo y no a mano para poder regenerarlo cuando
-cambie la arquitectura: un diagrama que muestra servicios que ya no existen es
-justamente lo que la rubrica penaliza.
-
-Uso:  python3 docs/generar_diagrama.py
-"""
-import pathlib
-
+from pathlib import Path
 import matplotlib
-
 matplotlib.use("Agg")
-import matplotlib.patches as patches
 import matplotlib.pyplot as plt
+from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, Rectangle
 
-TINTA = "#1b1b1f"
-GRIS = "#5b6470"
-NUBE = "#e8f0fb"
-NUBE_BORDE = "#3f74b8"
-CONTENEDOR = "#edf7ee"
-CONTENEDOR_BORDE = "#3f8f52"
-INSTANCIA = "#fafafc"
-SALUD_FONDO = "#fff6df"
-SALUD_BORDE = "#b0810f"
+DESTINO = Path(__file__).resolve().parent
+TINTA, SECUNDARIO = "#152B43", "#516477"
+AZUL, VERDE, VIOLETA = "#3267AE", "#127968", "#6650A1"
+BORDE, FONDO, AMBAR = "#D7E1EB", "#F4F7FB", "#9A5A16"
+plt.rcParams.update({"font.family": "DejaVu Sans", "svg.fonttype": "none"})
 
-figura, eje = plt.subplots(figsize=(14, 9.6))
-eje.set_xlim(0, 14)
-eje.set_ylim(0, 9.6)
-eje.axis("off")
+def texto(ax, x, y, contenido, tam=11, color=TINTA, peso="normal", ha="left"):
+    return ax.text(x, y, contenido, fontsize=tam, color=color, fontweight=peso,
+                   ha=ha, va="center", linespacing=1.5)
 
+def pagina(titulo, subtitulo, alto=11):
+    fig, ax = plt.subplots(figsize=(16, alto))
+    fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    ax.set(xlim=(0, 16), ylim=(0, alto))
+    ax.axis("off")
+    ax.add_patch(Rectangle((0, 0), 16, alto, color="white"))
+    ax.add_patch(Rectangle((0, alto - 1.45), 16, 1.45, color=TINTA))
+    texto(ax, .65, alto-.38, "PULSO PIXEL  /  ENTREGA FINAL", 10, "#84DFCB", peso="bold")
+    texto(ax, .65, alto-.87, titulo, 23, "white", peso="bold")
+    texto(ax, .65, alto-1.19, subtitulo, 10, "#D6E2EE")
+    return fig, ax
 
-def caja(x, y, ancho, alto, titulo, lineas, color, borde, grosor=1.7, guion="solid", tamano=8.2):
-    eje.add_patch(
-        patches.FancyBboxPatch(
-            (x, y), ancho, alto,
-            boxstyle="round,pad=0.02",
-            facecolor=color, edgecolor=borde, linewidth=grosor, linestyle=guion,
-        )
-    )
-    eje.text(x + ancho / 2, y + alto - 0.34, titulo,
-             ha="center", va="top", fontsize=11.5, fontweight="bold", color=TINTA)
-    for indice, linea in enumerate(lineas):
-        eje.text(x + ancho / 2, y + alto - 0.78 - indice * 0.26, linea,
-                 ha="center", va="top", fontsize=tamano, color="#333")
+def caja(ax, x, y, w, h, fondo="white", borde=BORDE, grosor=1.3):
+    ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.015,rounding_size=0.12",
+                               facecolor=fondo, edgecolor=borde, linewidth=grosor))
 
+def flecha(ax, x1, y1, x2, y2, color=SECUNDARIO, estilo="solid"):
+    ax.add_patch(FancyArrowPatch((x1, y1), (x2, y2), arrowstyle="-|>",
+                                mutation_scale=15, linewidth=1.7, color=color,
+                                linestyle=estilo, shrinkA=2, shrinkB=2))
 
-def insignia_salud(x, y, ancho, texto):
-    eje.add_patch(
-        patches.FancyBboxPatch(
-            (x, y), ancho, 0.42,
-            boxstyle="round,pad=0.02",
-            facecolor=SALUD_FONDO, edgecolor=SALUD_BORDE, linewidth=1.4,
-        )
-    )
-    eje.text(x + ancho / 2, y + 0.21, texto, ha="center", va="center",
-             fontsize=8.8, fontweight="bold", color=SALUD_BORDE)
+def etiqueta(ax, x, y, contenido, color=SECUNDARIO, tam=9.5):
+    return ax.text(x, y, contenido, ha="center", va="center", fontsize=tam, color=color,
+                   bbox={"boxstyle": "round,pad=.35", "facecolor": "white", "edgecolor": "none"})
 
+def guardar(fig, nombre):
+    for extension in ("png", "svg"):
+        ruta = DESTINO / f"{nombre}.{extension}"
+        fig.savefig(ruta, dpi=180, facecolor="white")
+        if extension == "svg":
+            ruta.write_text("\n".join(linea.rstrip() for linea in ruta.read_text().splitlines()) + "\n")
+        print(ruta)
+    plt.close(fig)
 
-def flecha(inicio, fin, color=GRIS, guion="solid"):
-    eje.annotate("", xy=fin, xytext=inicio,
-                 arrowprops=dict(arrowstyle="-|>", color=color, linewidth=1.7,
-                                 linestyle=guion, shrinkA=1, shrinkB=1))
+def arquitectura():
+    fig, ax = pagina("Arquitectura desplegada", "Dos EC2 · dos redes Compose · un RDS y un bucket compartidos · release documentada: 0ec86bb")
+    caja(ax, .65, 8.45, 14.7, .65, FONDO)
+    texto(ax, 8, 8.78, "NAVEGADOR  ·  jugadores y moderadores con sesión", 12, ha="center", peso="bold")
+    for x, rotulo in ((4.13, "HTTP :8080 · SG de QA"), (11.88, "HTTP :8080 · SG de Producción")):
+        flecha(ax, x, 8.45, x, 7.88)
+        etiqueta(ax, x, 8.15, rotulo)
+    for x, color, nombre, descripcion, inferior, detalle in (
+        (.65, AZUL, "01  QA", "EC2 del Avance 2 · desarrollo y validación",
+         "PIPELINE DE SEGURIDAD", "8 etapas → veredicto → exportación de imágenes"),
+        (8.4, VERDE, "02  PRODUCCIÓN", "EC2 nueva · despliegue del candidato aprobado",
+         "EJECUCIÓN DE LA RELEASE", "Importación de imágenes · arranque · verificación"),
+    ):
+        caja(ax, x, 4.38, 6.95, 3.49, FONDO, color, 1.6)
+        texto(ax, x+.25, 7.48, nombre, 15, color, peso="bold")
+        texto(ax, x+.25, 7.11, descripcion, 10, SECUNDARIO)
+        caja(ax, x+.25, 5.52, 3.3, 1.25)
+        texto(ax, x+.45, 6.47, "API · FastAPI", 12, peso="bold")
+        texto(ax, x+.45, 6.12, "8080 del host → 8000", 10, SECUNDARIO)
+        texto(ax, x+.45, 5.78, "Sesiones · reseñas · adjuntos", 9.5, SECUNDARIO)
+        caja(ax, x+4.48, 5.52, 2.22, 1.25)
+        texto(ax, x+4.66, 6.47, "Moderador", 12, peso="bold")
+        texto(ax, x+4.66, 6.12, "Reglas y render seguro", 9, SECUNDARIO)
+        texto(ax, x+4.66, 5.78, "Sin puerto público", 9.5, SECUNDARIO)
+        flecha(ax, x+3.55, 6.22, x+4.48, 6.22, color)
+        etiqueta(ax, x+4.0, 6.61, "HTTP", color, 8.5)
+        etiqueta(ax, x+4.0, 5.9, ":8001", color, 8.5)
+        texto(ax, x+.25, 5.2, "Red red_foro propia · ambos sin root · HEALTHCHECK real /salud", 9, SECUNDARIO)
+        texto(ax, x+.25, 4.88, inferior, 9.5, color, peso="bold")
+        texto(ax, x+.25, 4.59, detalle, 9.5, SECUNDARIO)
+    for x in (4.13, 11.88):
+        flecha(ax, x, 4.38, x, 3.65)
+        etiqueta(ax, x, 4.04, "API → datos y adjuntos")
+    caja(ax, .65, 1.0, 14.7, 2.64, "#F8FAFC", BORDE)
+    texto(ax, .92, 3.34, "SERVICIOS AWS COMPARTIDOS", 11, peso="bold")
+    texto(ax, 15.05, 3.34, "Separación lógica; no aislamiento entre cuentas AWS", 9.5, SECUNDARIO, ha="right")
+    caja(ax, .92, 1.31, 6.68, 1.65)
+    texto(ax, 1.15, 2.64, "Amazon RDS · una instancia PostgreSQL", 12, AZUL, peso="bold")
+    texto(ax, 1.15, 2.26, "QA: foro   |   Producción: foro_prod / usuario foro_prod", 10, SECUNDARIO)
+    texto(ax, 1.15, 1.88, "TCP :5432 · SG permite a las EC2 · sin acceso público¹", 10, SECUNDARIO)
+    texto(ax, 1.15, 1.52, "Tablas: usuarios · hilos · comentarios", 10, SECUNDARIO)
+    caja(ax, 8.01, 1.31, 7.06, 1.65)
+    texto(ax, 8.24, 2.64, "Amazon S3 · un bucket de adjuntos", 12, VERDE, peso="bold")
+    texto(ax, 8.24, 2.26, "QA: adjuntos/   |   Producción: produccion/adjuntos/", 10, SECUNDARIO)
+    texto(ax, 8.24, 1.88, "HTTPS · boto3 / perfil IAM · objetos privados¹", 10, SECUNDARIO)
+    texto(ax, 8.24, 1.52, "Descarga por URL prefirmada de 5 minutos, tras autorizar", 10, SECUNDARIO)
+    texto(ax, .65, .65, "Límite de transporte: navegador → EC2 usa HTTP; COOKIE_SEGURA=false. No se declara HTTPS integral.", 10, AMBAR)
+    texto(ax, .65, .33, "¹ Topología y acceso según código y registros archivados. Cifrado, políticas y permisos efectivos requieren comprobación actual en AWS.", 9, SECUNDARIO)
+    guardar(fig, "diagrama_arquitectura")
 
+def promocion():
+    fig, ax = pagina("De QA a Producción: controles y evidencia", "Flujo ejecutado · sin reconstruir imágenes en el destino · los pasos manuales se indican expresamente", alto=10.3)
+    caja(ax, .65, 6.77, 3.45, 1.44, FONDO)
+    texto(ax, .88, 7.87, "1. CANDIDATO EN QA", 12, AZUL, peso="bold")
+    texto(ax, .88, 7.46, "Commit + árbol limpio", 11, SECUNDARIO)
+    texto(ax, .88, 7.1, "Construir imágenes y ejecutar app", 10, SECUNDARIO)
+    flecha(ax, 4.1, 7.5, 4.7, 7.5)
+    caja(ax, 4.72, 6.36, 10.63, 1.85, "#F4F1FA", "#D7CEEA")
+    texto(ax, 4.96, 7.86, "2. OCHO ETAPAS · pipeline/orquestador.sh", 12, VIOLETA, peso="bold")
+    texto(ax, 4.96, 7.36, "01 Secretos        02 Dependencias        03 Bandit        04 Semgrep", 11, SECUNDARIO)
+    texto(ax, 4.96, 6.88, "05 IaC / Docker    06 Imágenes / Trivy    07 SBOM          08 Flujos HTTP", 11, SECUNDARIO)
+    flecha(ax, 10.03, 6.36, 10.03, 5.77, VIOLETA)
+    caja(ax, 7.62, 4.93, 4.82, .84, "#F4F1FA", VIOLETA)
+    texto(ax, 10.03, 5.35, "¿Ocho estados OK con evidencia?", 12, VIOLETA, peso="bold", ha="center")
+    flecha(ax, 7.62, 5.35, 6.75, 5.35, "#B44043")
+    etiqueta(ax, 7.16, 5.65, "NO", "#B44043", 9)
+    caja(ax, .65, 4.78, 6.08, 1.16, "#FFF4F3", "#DEAEB0")
+    texto(ax, .88, 5.6, "BLOQUEADO · no se promueve", 12, "#A2393D", peso="bold")
+    texto(ax, .88, 5.19, "Hallazgo, error o control sin ejecutar → corregir y repetir en QA", 9.3, SECUNDARIO)
+    flecha(ax, 10.03, 4.93, 10.03, 4.27, VERDE)
+    etiqueta(ax, 10.43, 4.58, "SÍ", VERDE, 9)
+    bloques = [
+        (.65, "3. EMPAQUETAR EN QA", "promover.sh", "Veredicto + commit + árbol limpio", "Image IDs de Trivy → docker save", "Manifiesto + SHA-256 de los tar"),
+        (5.71, "4. TRANSFERIR E IMPORTAR", "Operación manual por SSH", "Copiar tar y manifiesto aprobado", "Comprobar hashes → docker load", "Tag Git del candidato aprobado"),
+        (10.77, "5. ACTIVAR Y VERIFICAR", "Operación en EC2 Producción", "compose up --no-build --pull never", "Contenedores activos: inspección manual", "Verificador: salud, HTTP, tags y tar"),
+    ]
+    ax.plot([10.03, 2.96], [4.24, 4.24], color=VERDE, linewidth=1.7)
+    flecha(ax, 2.96, 4.24, 2.96, 3.93, VERDE)
+    for x, titulo, subtitulo, a, b, c in bloques:
+        caja(ax, x, 1.73, 4.58, 2.2, FONDO)
+        texto(ax, x+.2, 3.58, titulo, 10.5, VERDE, peso="bold")
+        texto(ax, x+.2, 3.2, subtitulo, 9.5, VIOLETA)
+        texto(ax, x+.2, 2.76, a, 9.5, SECUNDARIO)
+        texto(ax, x+.2, 2.37, b, 9.1, SECUNDARIO)
+        texto(ax, x+.2, 1.98, c, 9.5, SECUNDARIO)
+    flecha(ax, 5.24, 2.86, 5.7, 2.86, VERDE)
+    flecha(ax, 10.3, 2.86, 10.76, 2.86, VERDE)
+    caja(ax, .65, .67, 14.7, .65, "#EAF6F2", "#B8DFD3")
+    texto(ax, 8, 1.0, "EVIDENCIA ARCHIVADA  ·  rojo 84443a4 → corrección 30a764b → release 0ec86bb: QA 8/8 y 19/19; Producción 12/12", 10, VERDE, ha="center")
+    texto(ax, .65, .3, "Límite detectado: el verificador consulta tags cargados; comprobar el Image ID del contenedor activo aún es un paso manual. Ver auditoría.", 9, AMBAR)
+    guardar(fig, "diagrama_promocion")
 
-def etiqueta(x, y, texto, tamano=8.4, alineacion="center"):
-    eje.text(x, y, texto, ha=alineacion, va="center", fontsize=tamano, color=TINTA,
-             bbox=dict(boxstyle="round,pad=0.26", facecolor="white",
-                       edgecolor="#d5d8de", linewidth=0.8))
-
-
-# --- Titulo -------------------------------------------------------------------
-eje.text(7, 9.25, "Foro y reseñas — arquitectura del Avance 2",
-         ha="center", fontsize=15.5, fontweight="bold", color=TINTA)
-eje.text(7, 8.92, "LSCA2314 · tema 4 · el moderador corre en su propio contenedor, separado de la API",
-         ha="center", fontsize=9.6, color="#666")
-
-# --- Instancia EC2 ------------------------------------------------------------
-eje.add_patch(
-    patches.FancyBboxPatch((3.05, 1.95), 5.85, 6.35, boxstyle="round,pad=0.03",
-                           facecolor=INSTANCIA, edgecolor=GRIS,
-                           linewidth=1.6, linestyle=(0, (6, 4)))
-)
-eje.text(5.97, 8.05, "Instancia EC2 · AWS Academy · Docker Compose",
-         ha="center", fontsize=10, fontweight="bold", color=TINTA)
-eje.text(5.97, 7.79, "red interna:  red_foro", ha="center", fontsize=8.4, color="#777")
-
-# --- Usuario ------------------------------------------------------------------
-caja(0.35, 6.15, 2.2, 1.15, "Usuario", ["navegador web"], "#ffffff", GRIS)
-flecha((2.55, 6.72), (3.35, 6.72))
-etiqueta(2.95, 7.12, "HTTP\n:8080", tamano=8.0)
-
-# --- Contenedor API -----------------------------------------------------------
-caja(3.35, 5.70, 5.25, 1.95, "contenedor   api",
-     ["FastAPI + Uvicorn · usuario no root · HEALTHCHECK",
-      "publica 8080 → 8000",
-      "registro · sesión · reseñas · comentarios · adjuntos"],
-     CONTENEDOR, CONTENEDOR_BORDE, tamano=7.6)
-insignia_salud(3.62, 5.76, 4.71, "GET /salud   →   vivo · base de datos · S3")
-
-# --- Contenedor moderador -----------------------------------------------------
-caja(3.35, 3.15, 5.25, 1.95, "contenedor   moderador",
-     ["FastAPI + Uvicorn · usuario no root · HEALTHCHECK",
-      "puerto 8001, solo en la red interna",
-      "5 reglas: léxico · enlaces · contacto · gritería · vacío"],
-     CONTENEDOR, CONTENEDOR_BORDE, tamano=7.6)
-insignia_salud(3.62, 3.21, 4.71, "GET /salud   →   vivo")
-
-# Ida y vuelta entre api y moderador
-flecha((4.55, 5.70), (4.55, 5.10))
-etiqueta(3.55, 5.40, "POST /moderar\nantes de publicar", tamano=7.9)
-flecha((7.30, 5.10), (7.30, 5.70))
-etiqueta(8.18, 5.40, "aprobado / rechazado\n+ motivo", tamano=7.9)
-
-# --- Pipeline -----------------------------------------------------------------
-caja(3.35, 2.10, 5.25, 0.98, "pipeline/   ·   8 controles → un solo veredicto",
-     ["gitleaks · pip-audit · bandit · semgrep · checkov · trivy · SBOM · pruebas de flujo"],
-     "#f1eff9", "#6a5acd", grosor=1.5, tamano=7.0)
-
-# --- Servicios de AWS ---------------------------------------------------------
-caja(9.85, 6.30, 3.85, 1.60, "Amazon S3",
-     ["bucket privado de adjuntos", "acceso público bloqueado · cifrado AES256",
-      "versionado · solo TLS · URL prefirmada 5 min"],
-     NUBE, NUBE_BORDE)
-
-caja(9.85, 3.75, 3.85, 1.60, "Amazon RDS · PostgreSQL",
-     ["cifrada en reposo · sin acceso público", "alcanzable solo desde el SG de la instancia",
-      "tablas: usuarios · hilos · comentarios"],
-     NUBE, NUBE_BORDE)
-
-flecha((8.60, 7.15), (9.85, 7.15))
-etiqueta(9.22, 7.58, "HTTPS · boto3\nput_object / presigned", tamano=7.9)
-
-flecha((8.60, 6.10), (9.85, 4.95))
-etiqueta(9.32, 5.66, "SQL :5432\ndentro de la VPC", tamano=7.9)
-
-# --- Flujo --------------------------------------------------------------------
-eje.text(0.35, 1.72, "Flujo completo de una reseña",
-         fontsize=10.5, fontweight="bold", color=TINTA)
-pasos = [
-    "1.  El usuario con sesión iniciada envía título, texto, calificación de 1 a 5 y, si quiere, una imagen.",
-    "2.  Si hay imagen, la API valida tamaño, tipo, extensión y firma real; todavía no la sube.",
-    "3.  La API consulta al moderador. Si no responde, la petición falla con 503 y no se guarda nada.",
-    "4.  Si se aprueba, sube el adjunto a S3; después guarda en RDS el estado y el motivo del veredicto.",
-    "5.  Lo publicado aparece en la portada; lo rechazado solo lo ve su autor en /mis-publicaciones, junto con el motivo.",
-]
-for indice, paso in enumerate(pasos):
-    eje.text(0.35, 1.38 - indice * 0.30, paso, fontsize=8.9, color="#333")
-
-eje.text(13.75, 0.12, "Regenerar con:  python3 docs/generar_diagrama.py",
-         ha="right", fontsize=7.6, color="#a5a5a5")
-
-destino = pathlib.Path(__file__).parent / "diagrama_arquitectura.png"
-plt.savefig(destino, dpi=170, bbox_inches="tight", facecolor="white")
-print(f"diagrama escrito en {destino}")
+if __name__ == "__main__":
+    arquitectura()
+    promocion()

@@ -1,0 +1,39 @@
+AUDITORÍA LOCAL · 2026-09-27 UTC
+Código auditado: 6f5f42dcbc6d6d65f68bdaf1033c7de07394470a
+Release documental: 0ec86bb5498fc8f91090edf3ec4e77498586644d
+Las reproducciones usan datos sintéticos. No son corridas nuevas en QA o Producción.
+
+PRUEBAS LOCALES SINTÉTICAS: no son evidencia de ejecución en AWS.
+FORMATO: 15 entradas sin etiquetas activas; negrita y saltos conservados.
+VERIFICADOR/control: escenario completo y coherente => 12/12, salida 0.
+VERIFICADOR/hueco: tag aprobado + contenedor anterior => 12/12, salida 0; no inspecciona contenedores.
+VERIFICADOR/hueco: sin reseñas => detalle pendiente, 11/11, salida 0.
+VERIFICADOR/control: Image ID cargado distinto => salida 1.
+VERIFICADOR/control: TAR alterado => salida 1.
+ETAPA08/hueco: /salud dice produccion => T1 falla, pero realiza 19 POST sintéticos posteriores.
+T11/hueco: cero comentarios del hilo probado + contador 4 en otro hilo => criterio actual verdadero.
+HEALTHCHECK: ambos consultan /salud; respuesta 200 => éxito, conexión fallida => error.
+
+Código de salida de la reproducción: 0
+
+REPRODUCCIÓN SINTÉTICA: no contiene credenciales reales.
+Control: archivo normal: salida=1, hallazgos=1
+Hueco: archivo bajo reportes/: salida=0, hallazgos=0
+Hueco: .env anidado: salida=0, hallazgos=0
+Hueco: .env eliminado pero presente en historial: salida=0, hallazgos=0
+Control ampliado: reportes/ detectado: salida=1, hallazgos=1
+Control ampliado: .env histórico detectado: salida=1, hallazgos=1
+
+Código de salida de la reproducción: 0
+
+============================================================
+ Prueba de la puerta de control
+============================================================
+  [PASA ] Caso 1: las 8 etapas en OK -> DESPLIEGUE PERMITIDO (salida 0)
+  [PASA ] Caso 2: una etapa con HALLAZGO -> DESPLIEGUE BLOQUEADO (salida 1)
+  [PASA ] Caso 3: una etapa con ERROR_OPERATIVO -> DESPLIEGUE BLOQUEADO (salida 1)
+  [PASA ] Caso 4: una etapa sin archivo de estado (nunca corrio) -> DESPLIEGUE BLOQUEADO (salida 1)
+
+Resultado: 4/4 casos de la puerta se comportan como documentado
+
+Código de salida de la reproducción: 0

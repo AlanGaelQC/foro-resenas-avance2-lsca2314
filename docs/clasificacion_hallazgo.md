@@ -89,8 +89,11 @@ un HEAD sin modificaciones. El candidato `4333a32`, con el registro corregido,
 obtuvo un tercer verde final: código 0, `PERMITIDO`, `arbol: limpio`, ocho etapas
 `OK` y 19/19 pruebas el 2026-09-26 00:06:21 UTC. Véanse
 `reportes/pipeline_verde.txt` y `reportes/entrega_final/veredicto_verde.json`.
-El manifiesto de la release está en `reportes/entrega_final/manifest_release.json`;
-el commit posterior `bc539cb` solo versiona la evidencia, sin alterar la release aprobada.
+El manifiesto histórico de `4333a32` está en
+`reportes/entrega_final/manifest_release.json`; el commit posterior `bc539cb`
+solo versiona su evidencia. La release vigente y su manifiesto se identifican
+en [estado_release_actual.md](estado_release_actual.md); no se reutiliza el
+veredicto histórico para un candidato distinto.
 
 ## Nota sobre la cobertura previa
 

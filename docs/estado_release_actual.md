@@ -1,6 +1,6 @@
 # Estado de la release vigente — Pulso Pixel v2
 
-Actualizado el 26 de septiembre de 2026. Este registro resume resultados observados sin incluir direcciones de red, identificadores de infraestructura ni credenciales.
+Resultados de la release observados el 26 de septiembre de 2026; nota de auditoría añadida el 27. Este registro resume evidencia histórica sin incluir direcciones de red, identificadores de infraestructura ni credenciales. No constituye una consulta en vivo del estado de AWS.
 
 | Control | Resultado |
 |---|---|
@@ -14,4 +14,15 @@ Después del último verde y de la verificación del destino se respaldaron priv
 
 El diseño vigente se llama **Pulso Pixel** y usa arte arcade original, una portada de reseñas de videojuegos y una vista compacta para reseñas largas. El commit que archiva evidencias es posterior al commit aprobado; no sustituye su veredicto ni los identificadores de las imágenes.
 
-**Pendiente para la entrega académica:** incorporar capturas actuales de QA y Producción a la plantilla oficial; completar en primera persona la declaración de uso de IA y la autoevaluación. Este archivo no afirma que esas capturas ya estén adjuntas.
+**Revisión posterior:** se reprodujeron huecos en las exclusiones de secretos,
+la identificación automática de contenedores activos, la protección del destino
+de las pruebas QA y la aserción de comentarios T11. El
+[informe del 27 de septiembre](auditoria/revision_final_2026-09-27.md) contiene
+pruebas aisladas y criterios de cierre. Son pendientes técnicos; no demuestran
+que la release histórica fallara ni constituyen correcciones ya desplegadas.
+
+**Pendiente para la entrega académica:** atender los hallazgos, comprobar las
+configuraciones vivas de AWS indicadas en el informe, incorporar capturas de QA
+y Producción a la plantilla oficial, y completar en primera persona la
+declaración de uso de IA y la autoevaluación. Este archivo no afirma que esas
+capturas ya estén adjuntas.

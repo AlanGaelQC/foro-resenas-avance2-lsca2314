@@ -2,38 +2,29 @@
 
 ## Topología desplegada
 
-```mermaid
-flowchart TB
-  Usuario["Usuario / moderador"] --> QA_API
-  Usuario --> P_API
-  subgraph QA["EC2 QA · Avance 2"]
-    QA_API["API · sesiones y reseñas"] --> QA_MOD["Moderador · reglas y vista previa"]
-  end
-  subgraph PROD["EC2 Producción · nueva"]
-    P_API["API · versión aprobada"] --> P_MOD["Moderador · render seguro"]
-  end
-  QA_API --> QA_DB["Base QA en RDS"]
-  QA_API --> QA_S3["Prefijo QA en S3"]
-  P_API --> P_DB["Base Producción en RDS"]
-  P_API --> P_S3["Prefijo Producción en S3"]
-  QA_API --> GATE{"Pipeline QA · ocho etapas"}
-  QA_MOD --> GATE
-  GATE -->|"Verde y mismos Image IDs"| ART["Imágenes y manifiesto SHA-256"]
-  ART --> P_API
-  ART --> P_MOD
-```
+![Arquitectura de Pulso Pixel: dos EC2 y recursos compartidos](diagrama_arquitectura.png)
 
-El diagrama corresponde a **dos EC2 efectivamente creadas**: una de QA y otra de Producción. Los identificadores concretos se comprueban en las capturas privadas de AWS para la entrega académica. Los nodos `QA_DB` y `P_DB` son dos bases lógicamente separadas (`foro` y `foro_prod`) dentro del **mismo RDS**, y los dos nodos S3 son prefijos distintos dentro del **mismo bucket**, no servidores adicionales. La aplicación de Producción verificó sus conexiones a RDS y S3. El servicio moderador solo tiene acceso desde la red interna de Compose; la API es la frontera de autorización. El RDS no publica 5432 a Internet. Los adjuntos permanecen privados y la API genera URLs firmadas de duración limitada.
+[Versión vectorial editable](diagrama_arquitectura.svg). El diagrama corresponde a **dos EC2 efectivamente creadas**: una de QA y otra de Producción. Los identificadores se comprueban en las capturas privadas de AWS. Las bases `foro` y `foro_prod` están dentro del **mismo RDS**; los prefijos QA y Producción pertenecen al **mismo bucket**. No representan cuatro recursos independientes.
+
+Los registros de despliegue muestran conectividad de Producción con RDS y S3, RDS privado y PostgreSQL autorizado desde los grupos de las aplicaciones. El moderador no publica un puerto al host: recibe peticiones desde la red de Compose. La API controla la autorización; los adjuntos privados se entregan mediante URLs firmadas de duración limitada. Las comprobaciones históricas no sustituyen revisar las reglas y permisos actuales de AWS.
+
+La navegación del laboratorio usa **HTTP en 8080**, no HTTPS. Las bases y los prefijos distintos aportan separación lógica; no prueban por sí mismos aislamiento de permisos DB/IAM. Los límites y las lecturas pendientes constan en la [revisión final](auditoria/revision_final_2026-09-27.md).
+
+## Promoción de la misma imagen
+
+![Construcción y ocho etapas en QA, bloqueo o promoción y verificación en Producción](diagrama_promocion.png)
+
+[Versión vectorial editable](diagrama_promocion.svg). La transferencia y el despliegue fueron manuales: `promover.sh` verifica y empaqueta. SHA-256 permite comprobar integridad; la confianza en el manifiesto depende de su origen y del canal utilizado. Las comprobaciones manuales de los contenedores activos complementaron al verificador, que en la versión auditada solo inspecciona los tags cargados. El hallazgo A-02 explica cómo automatizar esa parte pendiente.
 
 ## Fronteras de confianza
 
 | Flujo | Control aplicado | Evidencia esperada |
 |---|---|---|
 | Autor → API → moderador | Toda reseña y comentario pasa por `/moderar` antes de publicarse; si falla la conexión, se bloquea la publicación | T5, T6b y el servicio saludable |
-| Autor → RDS → vista pública | Jinja escapa el texto; la portada obtiene hasta tres comentarios por reseña desde SQL | T6, T11 y capturas de 0/1/3/4 comentarios |
+| Autor → RDS → vista pública | Jinja escapa el texto; la portada obtiene hasta tres comentarios por reseña desde SQL | T6, T11 y capturas; A-04 documenta una aserción incompleta de T11 |
 | Moderador humano → API → moderador interno | Sesión, correo reservado y cuenta preaprovisionada; proxy con `resena_id` | T10, T10b y T10c |
 | Reseña guardada → HTML de vista previa | Escapar texto antes de generar negritas/saltos | XSS bloqueada en rojo y T10d/T10e verdes tras remediar |
-| QA → Producción | Veredicto completo, mismo commit, árbol limpio e Image IDs examinados por Trivy; comprobar SHA-256 al transferir | `veredicto.json`, `06_image_ids.json`, `manifest_release.json` y registros de EC2 nueva |
+| QA → Producción | Veredicto completo, mismo commit, árbol limpio e Image IDs examinados por Trivy; SHA-256 al transferir y comprobación manual de `.Image` de los contenedores | `veredicto.json`, `06_image_ids.json`, `manifest_release.json` y registros de EC2 nueva; automatización completa pendiente en A-02 |
 
 ## Secuencia que evalúa el profesor
 
@@ -47,7 +38,7 @@ El diagrama corresponde a **dos EC2 efectivamente creadas**: una de QA y otra de
 | Candidato completo | Ocho etapas ejecutadas sobre imagen y código final | Veredicto PERMITIDO, IDs de imágenes examinadas |
 | EC2 nueva | Solo artefactos de QA verde, configuración separada | Validación de salud, identidad y bitácora de problemas de despliegue |
 
-La aplicación desplegada en Producción terminó 12/12 comprobaciones del destino. La entrega académica aún requiere incorporar capturas comparables a la plantilla oficial. El diagrama ilustra la topología comprobada, pero no sustituye la captura de AWS que acredita los Instance IDs.
+La aplicación desplegada en Producción terminó 12/12 comprobaciones del destino. La entrega académica aún requiere incorporar las capturas a la plantilla oficial y atender los hallazgos de la revisión final. Los diagramas describen la arquitectura y el procedimiento documentados; no sustituyen capturas ni consultas de AWS.
 
 La selección de tres comentarios por reseña emplea la función de ventana
 [`row_number()` de SQLAlchemy 2.0](https://docs.sqlalchemy.org/en/20/tutorial/data_select.html#using-window-functions).
