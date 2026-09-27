@@ -1,8 +1,16 @@
 # Evidencia de Producción — Entrega Final
 
-**Estado verificado:** 26 de septiembre de 2026. Producción funciona en una **EC2 nueva**, distinta de la instancia de QA. Los identificadores de recursos y direcciones de acceso se conservan en las capturas privadas para la entrega académica.
+**Estado verificado:** 27 de septiembre de 2026. Producción funciona en una **EC2 nueva**, distinta de la instancia de QA. Los identificadores de recursos y direcciones de acceso se conservan en las capturas privadas para la entrega académica.
 
-## Tercera promoción: Pulso Pixel v2 (release actual)
+## Release actual: imágenes y formulario (a2123c5)
+
+El candidato `a2123c5ee46aed07dc066bb8cfd3ff62241f9184`, etiqueta `qa-verde-imagenes-a2123c5`, pasó las [ocho etapas y 27/27 pruebas en QA](../reportes/entrega_final/pipeline_imagenes_a2123c5.log), con árbol limpio y [veredicto PERMITIDO](../reportes/entrega_final/veredicto_imagenes_a2123c5.json). El [manifiesto](../reportes/entrega_final/manifest_imagenes_a2123c5.json) registra los Image IDs y hashes SHA-256 de ambos tar. Se transfirieron y verificaron estos artefactos y la etiqueta aprobada en la EC2 de Producción. Las imágenes se cargaron sin reconstrucción; el checkout quedó en el commit aprobado, y los contenedores `api` y `moderador` ejecutaron exactamente las imágenes examinadas en QA.
+
+El [log original de Producción](../reportes/entrega_final/verificacion_produccion_imagenes_a2123c5.log), copiado a QA, registra **16/16** controles: checkout e imágenes correspondientes al manifiesto, hashes de los tar, contenedores saludables, RDS, S3, moderador, autorización, portada, detalle y acceso anónimo a la imagen de una reseña publicada. La respuesta de `/salud` indicó `entorno=produccion`, base de datos y S3 `ok`. Permanecen disponibles los tar y el manifiesto de `8d1b742` como respaldo. El commit posterior de evidencias no sustituyó el código aprobado.
+
+Las mejoras de imagen y formulario no transfieren las publicaciones de QA a Producción: las bases de datos son distintas. El despliegue creó la tabla de control de envíos en la base de Producción; las reseñas existentes permanecieron. El verificador acredita lectura de una imagen pública; no sustituye una captura visual de las pantallas ni una prueba manual de publicación nueva.
+
+## Promoción histórica: Pulso Pixel v2 (0ec86bb)
 
 El candidato `0ec86bb`, fijado por la etiqueta `qa-verde-pulso-pixel-v2-0ec86bb`, pasó [ocho etapas y 19/19 pruebas en QA](../reportes/pipeline_verde_pulso_pixel_v2.txt), con árbol limpio y [veredicto PERMITIDO](../reportes/entrega_final/veredicto_pulso_pixel_v2.json). El [manifiesto](../reportes/entrega_final/manifest_pulso_pixel_v2.json) registra hashes SHA-256 e Image IDs de las dos imágenes. En el destino se verificaron los hashes de ambos archivos y que los contenedores activos usaran exactamente los Image IDs aprobados. No se reconstruyeron imágenes allí.
 

@@ -2,7 +2,7 @@
 
 Proyecto de **Herramientas de tecnologías de la información**, Tecmilenio (LSCA2314), tema 4: foro y reseñas. **Pulso Pixel** reúne opiniones de jugadores sobre videojuegos: cada persona puede escribir su reseña, calificarla de 1 a 5, añadir una imagen y conversar en los comentarios. Un segundo servicio aplica reglas de moderación antes de publicar. La Entrega Final introduce la vista previa enriquecida del moderador, demuestra y corrige una XSS suministrada en el parche del profesor, y añade una portada con extractos y tres comentarios por reseña. El título identifica el juego según lo escribe el autor; no existe catálogo de juegos ni puntuación agregada por videojuego.
 
-**Estado verificado:** la vulnerabilidad XSS del parche se detectó y corrigió en QA. Producción ejecuta el código `8d1b74236fe43913d1a37329bf05860e3b66b479`, cuya [verificación 15/15](reportes/entrega_final/verificacion_produccion_revision_final_8d1b742.log) quedó archivada. [Veredicto de QA](reportes/entrega_final/veredicto_revision_final.json) · [Manifiesto](reportes/entrega_final/manifest_revision_final.json) · [Estado resumido](docs/estado_release_actual.md). Las imágenes públicas de reseñas y las mejoras de formulario en esta rama son candidatas posteriores; requieren su propia validación y promoción antes de atribuirlas a Producción.
+**Estado verificado:** la vulnerabilidad XSS del parche se detectó y corrigió en QA. Producción ejecuta el código `a2123c5ee46aed07dc066bb8cfd3ff62241f9184`: [verificación 16/16](reportes/entrega_final/verificacion_produccion_imagenes_a2123c5.log), [veredicto de QA 8/8 y 27/27](reportes/entrega_final/veredicto_imagenes_a2123c5.json) y [manifiesto](reportes/entrega_final/manifest_imagenes_a2123c5.json). Consulta el [estado resumido](docs/estado_release_actual.md). Los commits posteriores archivan las evidencias sin cambiar el código aprobado.
 
 **Diseño desplegado:** identidad Pulso Pixel, arte arcade original, reseñas de videojuegos y lectura compacta expandible del contenido largo. El commit que archiva esta documentación es posterior al commit aprobado para las imágenes. Los resultados históricos de las releases anteriores permanecen en los reportes archivados.
 
@@ -10,7 +10,7 @@ Proyecto de **Herramientas de tecnologías de la información**, Tecmilenio (LSC
 
 **Alcance:** la experiencia se inspira en leer reseñas breves de videojuegos y abrirlas para ver todo el texto y la conversación, como ocurre en comunidades de jugadores. Es un foro propio: no usa cuentas, catálogo, votos de utilidad, horas jugadas ni API de Steam. Conserva la calificación de 1 a 5 del proyecto original.
 
-**Candidato en revisión:** el formulario exige 10 caracteres útiles en el cuerpo (el título no cuenta) y utiliza un identificador de envío para que reenviar exactamente el mismo formulario redirija al hilo creado. Las imágenes de reseñas publicadas también se muestran en «Mis publicaciones» y en los recuadros pequeños de la portada, manteniendo el fondo arcade. Estos cambios todavía no forman parte de la release verificada en Producción; las publicaciones duplicadas anteriormente no se borran automáticamente.
+**Funciones de la release actual:** el formulario exige 10 caracteres útiles en el cuerpo (el título no cuenta) y utiliza un identificador de envío para que reenviar exactamente el mismo formulario redirija al hilo creado. Las imágenes de reseñas publicadas también se muestran en «Mis publicaciones» y en los recuadros pequeños de la portada, manteniendo el fondo arcade. Las publicaciones duplicadas anteriormente no se borran automáticamente.
 
 ## Recorrido del usuario
 
@@ -31,7 +31,7 @@ La selección de tres comentarios ocurre en PostgreSQL mediante `ROW_NUMBER() ..
 | S3 | Adjuntos privados con URLs firmadas | Permisos de la instancia, sin claves AWS en el repositorio |
 | Pipeline de QA | Ocho controles; una decisión final bloqueante | Ejecutado sobre la instancia QA y el commit candidato |
 
-QA usa la instancia del Avance 2. Producción es una **EC2 distinta de QA**: recibió primero la release remediada `22ee1ec`, después `9424272` y finalmente `0ec86bb`, todas aprobadas en QA. Ambas instancias usan el mismo RDS y bucket: Producción se separó mediante base y usuario PostgreSQL `foro_prod` y prefijo S3 `produccion/adjuntos/`. Salud y conectividad se comprobaron en el destino; compartir servidor y bucket impone un límite de aislamiento. El diagrama y los flujos están en [docs/arquitectura.md](docs/arquitectura.md).
+QA usa la instancia del Avance 2. Producción es una **EC2 distinta de QA**; la release actual `a2123c5` siguió a las promociones históricas `22ee1ec`, `9424272`, `0ec86bb` y `8d1b742`, todas aprobadas en QA. Ambas instancias usan el mismo RDS y bucket: Producción se separó mediante base y usuario PostgreSQL `foro_prod` y prefijo S3 `produccion/adjuntos/`. Salud y conectividad se comprobaron en el destino; compartir servidor y bucket impone un límite de aislamiento. El diagrama y los flujos están en [docs/arquitectura.md](docs/arquitectura.md).
 
 ## Pipeline: la condición de promoción
 
@@ -60,9 +60,11 @@ El orquestador `pipeline/orquestador.sh` corre **las ocho etapas aunque alguna f
 | Interfaz genérica aprobada | `2e2b811` (etiqueta `qa-verde-interfaz-2e2b811`) | Ocho controles `OK`, árbol limpio y 19/19 pruebas; imágenes examinadas y empaquetadas |
 | Primera promoción: videojuegos | `22ee1ec` (etiqueta `qa-verde-videojuegos-22ee1ec`) | Ocho controles `OK`, 19/19 pruebas y manifiesto `reportes/entrega_final/manifest_videojuegos.json`; destino 12/12 |
 | Diseño gamer histórico | `9424272` (etiqueta `qa-verde-diseno-9424272`) | Ocho controles `OK`, 19/19 pruebas; destino 12/12 |
-| **Release actual: Pulso Pixel v2** | `0ec86bb` (etiqueta `qa-verde-pulso-pixel-v2-0ec86bb`) | Ocho controles `OK`, 19/19 pruebas; [manifiesto](reportes/entrega_final/manifest_pulso_pixel_v2.json) y verificación 12/12 del destino |
+| Pulso Pixel v2, histórica | `0ec86bb` (etiqueta `qa-verde-pulso-pixel-v2-0ec86bb`) | Ocho controles `OK`, 19/19 pruebas; [manifiesto](reportes/entrega_final/manifest_pulso_pixel_v2.json) y verificación 12/12 del destino |
+| Revisión final, histórica | `8d1b742` (etiqueta `qa-verde-revision-final-8d1b742`) | Ocho controles `OK`, 21/21 pruebas y verificación 15/15 del destino |
+| **Release actual: imágenes y formulario** | `a2123c5` (etiqueta `qa-verde-imagenes-a2123c5`) | Ocho controles `OK`, 27/27 pruebas; [manifiesto](reportes/entrega_final/manifest_imagenes_a2123c5.json) y [verificación 16/16](reportes/entrega_final/verificacion_produccion_imagenes_a2123c5.log) del destino |
 
-Estas corridas se ejecutaron en la EC2 de QA. El commit `bc539cb` archiva los reportes históricos del candidato `4333a32`; la evidencia verde de videojuegos se archivó en `72d64f4` después de aprobar y exportar el commit `22ee1ec`. **Cada veredicto y manifiesto certifica solo el commit que nombra**. A Producción llegaron exclusivamente las releases aprobadas `22ee1ec`, `9424272` y `0ec86bb`, nunca el parche vulnerable. Los commits posteriores `a3989da` y `d155815` archivan evidencias y no se usaron para reconstruir imágenes en el destino. Los problemas de configuración observados se registran en `docs/bitacora_produccion.md`; un futuro defecto de código tendría que volver a QA para otro ciclo completo.
+Estas corridas se ejecutaron en la EC2 de QA. El commit `bc539cb` archiva los reportes históricos del candidato `4333a32`; la evidencia verde de videojuegos se archivó en `72d64f4` después de aprobar y exportar el commit `22ee1ec`. **Cada veredicto y manifiesto certifica solo el commit que nombra**. A Producción llegaron exclusivamente releases aprobadas, nunca el parche vulnerable. Los commits de evidencias son posteriores a sus commits aprobados y no se usaron para reconstruir imágenes en el destino. Los problemas de configuración observados se registran en `docs/bitacora_produccion.md`; un futuro defecto de código tendría que volver a QA para otro ciclo completo.
 
 ## Configuración y ejecución
 
@@ -88,6 +90,6 @@ El orquestador carga la contraseña moderadora desde el `.env` local para su pru
 - `docs/evidencia_local/`: reproducción HTTP local de Claude; **no equivale** a evidencia de QA.
 - `docs/declaracion_ia.md`: plantilla para que Alan declare únicamente trabajo que hizo y verificó.
 
-**Entrega:** incorporar las capturas del antes/después de QA y de la Producción ya verificada a la plantilla oficial. Archivar el log final del destino y completar en primera persona `docs/declaracion_ia.md` y la autoevaluación. Los Image IDs y hashes de la release actual están en `reportes/entrega_final/manifest_pulso_pixel_v2.json`; los manifiestos anteriores se conservan como evidencia histórica.
+**Entrega:** incorporar las capturas del antes/después de QA y de la Producción ya verificada a la plantilla oficial, y completar en primera persona `docs/declaracion_ia.md` y la autoevaluación. El log final del destino está archivado; los Image IDs y hashes de la release actual están en `reportes/entrega_final/manifest_imagenes_a2123c5.json`. Los manifiestos anteriores se conservan como evidencia histórica.
 
 **Evolución propuesta (fuera de esta entrega):** respuestas enlazadas a comentarios concretos; cuentas verificadas de desarrolladores y una sección de noticias sin autocalificaciones. Esta función requeriría un tipo de publicación y reglas de autorización nuevos, migración de datos, pruebas de moderación y un ciclo QA → verde → promoción propio.
