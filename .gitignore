@@ -33,8 +33,15 @@ reportes/*
 !reportes/.gitkeep
 !reportes/corrida_roja.txt
 !reportes/corrida_verde.txt
+!reportes/pipeline_bloqueado.txt
+!reportes/pipeline_verde.txt
+!reportes/pipeline_verde_*.txt
 !reportes/sbom_cyclonedx.json
 !reportes/sbom_cyclonedx_moderador.json
+!reportes/entrega_final/
+!reportes/entrega_final/*.json
+!reportes/entrega_final/*.txt
+!reportes/entrega_final/*.log
 !reportes/evidencia_roja/
 !reportes/evidencia_roja/04_sast_semgrep.txt
 !reportes/evidencia_roja/08_pruebas_flujo.txt

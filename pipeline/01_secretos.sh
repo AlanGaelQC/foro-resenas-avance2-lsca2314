@@ -34,16 +34,17 @@ cd "$RAIZ_PROYECTO"
 
 # El historial y el arbol actual son superficies distintas: un archivo sin
 # seguimiento no aparece al recorrer commits, y un secreto borrado no aparece
-# al revisar solo el arbol. Cuando existe .git se ejecutan ambos modos.
+# al revisar solo el arbol. Incluso en un worktree (.git es un archivo) se
+# ejecutan ambos modos.
 JSON_ARBOL="$DIR_REPORTES/01_secretos_arbol.json"
 JSON_HISTORIAL="$DIR_REPORTES/01_secretos_historial.json"
 : > "$REPORTE"
 
 # El .env de QA contiene por necesidad la clave de sesion y la contrasena de
-# RDS. No se evalua su contenido (gitleaks lo redactaria pero lo marcaria como
-# fuga); se evalua el control que evita que llegue al repositorio. La exclusion
-# en .gitleaks.toml es segura solo porque estas tres condiciones son
-# obligatorias y cualquier incumplimiento bloquea.
+# RDS. En el arbol actual se excluye exactamente ese archivo mediante una
+# configuracion temporal; las evidencias, los .env anidados y el historial
+# completo siguen siendo objeto del escaneo. Si se rastrea el .env raiz, la
+# etapa bloquea y el historial lo detecta sin excepciones.
 CODIGO_ENV=0
 echo "=== Proteccion de .env de ejecucion ===" >> "$REPORTE"
 if [[ -e .env ]]; then
@@ -64,21 +65,33 @@ else
 fi
 echo "" >> "$REPORTE"
 
+# Gitleaks expresa las rutas como absolutas durante el escaneo de archivos.
+# La excepcion temporal del .env real no debe pasar al escaneo del historial.
+CONFIG_ARBOL="$(mktemp --suffix=.toml)" || exit 1
+trap 'rm -f "$CONFIG_ARBOL"' EXIT
+if ! python3 pipeline/config_gitleaks_arbol.py "$RAIZ_PROYECTO" "$CONFIG_ARBOL"; then
+  echo "ERROR: no se pudo preparar la excepcion limitada del .env local." >> "$REPORTE"
+  registrar_estado "$ETAPA" "$NOMBRE" "$HERRAMIENTA" "$ESTADO_ERROR" 2 "$BLOQUEANTE" \
+    "$REPORTE" "$UMBRAL" "$VERSION" "Configuracion temporal invalida"
+  resumir_resultado "$ESTADO_ERROR" 2 "$REPORTE"
+  exit 1
+fi
+
 echo "=== Arbol de trabajo ===" >> "$REPORTE"
 timeout "$TIEMPO_LIMITE_ETAPA" gitleaks detect \
-  --source . --no-git \
-  --config .gitleaks.toml \
+  --source "$RAIZ_PROYECTO" --no-git \
+  --config "$CONFIG_ARBOL" \
   --report-format json --report-path "$JSON_ARBOL" \
   --redact --verbose >> "$REPORTE" 2>&1
 CODIGO_ARBOL=$?
 
 CODIGO_HISTORIAL=0
-if [[ -d .git ]]; then
+if git rev-parse --is-inside-work-tree 2>/dev/null | grep -qx true; then
   MODO="arbol de trabajo + historial de git"
   echo "" >> "$REPORTE"
   echo "=== Historial de git ===" >> "$REPORTE"
   timeout "$TIEMPO_LIMITE_ETAPA" gitleaks detect \
-    --source . \
+    --source "$RAIZ_PROYECTO" --log-opts="--all" \
     --config .gitleaks.toml \
     --report-format json --report-path "$JSON_HISTORIAL" \
     --redact --verbose >> "$REPORTE" 2>&1

@@ -67,10 +67,10 @@ y `sbom_cyclonedx_moderador.json` para el moderador. El segundo incluye
 
 | Riesgo | Estado de la revisión final |
 |---|---|
-| Gitleaks excluye `.env` anidados/históricos y `reportes/` | A-01 reproduce la omisión con cadenas sintéticas. El barrido independiente de 60 commits sin esas exclusiones no detectó secretos. Corregir la cobertura requiere una nueva validación; conservar el rojo histórico no exige mantener el hueco |
-| El verificador inspecciona tags cargados; QA no vincula automáticamente las pruebas con los contenedores escaneados | A-02: las comprobaciones manuales cubrieron la promoción observada. Falta automatizar origen, identidad activa y completitud de los controles |
-| La suite QA continúa escribiendo si T1 identifica Producción | A-03: debe interrumpirse antes de cualquier escritura en un destino distinto de QA |
-| T11 acepta un feed sin los comentarios del hilo probado | A-04: exigir los tres recientes de su tarjeta y los cuatro en el detalle |
+| Gitleaks excluye `.env` anidados/históricos y `reportes/` | A-01 lo reprodujo; la rama de endurecimiento elimina esas exclusiones globales y limita `.env` al árbol local. Pruebas sintéticas pasan; falta corrida real de QA. |
+| El verificador inspecciona tags cargados; QA no vincula automáticamente las pruebas con los contenedores escaneados | A-02 ya comprueba checkout, contenedores activos, salud y 15 controles en la rama de endurecimiento; falta validarlo en QA. |
+| La suite QA continúa escribiendo si T1 identifica Producción | A-03 ahora termina antes del primer POST; falta validarlo en QA. |
+| T11 acepta un feed sin los comentarios del hilo probado | A-04 ahora cubre cero, uno y cuatro comentarios por tarjeta; falta validarlo en QA. |
 | QA y Producción del laboratorio publican HTTP:8080 con `COOKIE_SEGURA=false` | Cookie firmada sin protección de transporte. HTTPS y cookie Secure siguen pendientes; no atribuirlos a la infraestructura actual |
 
 Reproducciones, alcance y criterios de cierre en la

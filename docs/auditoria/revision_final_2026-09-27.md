@@ -4,6 +4,8 @@ Fecha: 27 de septiembre de 2026, UTC. Alcance: revisión del repositorio, fuente
 
 ## Conclusión
 
+**Estado de esta rama:** los cuatro parches descritos en A-01–A-04 ya están implementados localmente en `revision-final-quirurgica`, con pruebas sintéticas negativas que pasan. Aún no son un veredicto de QA ni una nueva promoción; requieren ejecutar el pipeline real en la instancia QA antes de incorporarse a `entrega-final`.
+
 La corrección de la XSS es real; la evidencia archivada vincula el rojo, la remediación, el verde y la promoción de la release `0ec86bb`. Las capturas recuperadas muestran la aplicación y dos EC2 distintas. Los Dockerfiles ya corrigen la observación del profesor: ambos HEALTHCHECK consultan `/salud`.
 
 Sin embargo, **no doy por cerrado el endurecimiento técnico**. Se reprodujeron cuatro familias de huecos: exclusiones demasiado amplias de secretos, verificación de imágenes cargadas en lugar de contenedores activos, pruebas de QA que continúan escribiendo aunque detecten Producción y una aserción incompleta de los comentarios del feed. Ninguno demuestra por sí mismo una fuga o que la release entregada esté equivocada; sí permiten errores futuros que el pipeline debería detener.
@@ -50,7 +52,9 @@ Se ejecutó Gitleaks 8.21.2 con la configuración real y una cadena **sintética
 
 **Estado real del repositorio:** un escaneo independiente de los 60 commits, incluyendo las rutas que el pipeline excluía, terminó sin secretos detectados. Esto es un resultado favorable del escaneo, no una garantía universal de ausencia de credenciales. No se encontró `.env`, `.pem`, `.tfstate` o `.tfvars` real versionado.
 
-**Cierre:** escanear todo el historial y las evidencias versionadas; limitar la excepción al `.env` local, ignorado, no rastreado y con permisos 600. Detectar repositorios mediante Git: `[[ -d .git ]]` omite el historial de un worktree porque allí `.git` es un archivo. Añadir pruebas negativas de secreto en reporte y secreto retirado del historial. No publicar valores sensibles en las salidas de las pruebas.
+**Cierre aplicado en esta rama:** la configuración base escanea historial y evidencias; el `.env` local se excluye solo en la configuración temporal del árbol, con comprobación de rastreo, ignore y permisos. La validación real en QA queda pendiente.
+
+**Criterio original:** escanear todo el historial y las evidencias versionadas; limitar la excepción al `.env` local, ignorado, no rastreado y con permisos 600. Detectar repositorios mediante Git: `[[ -d .git ]]` omite el historial de un worktree porque allí `.git` es un archivo. Añadir pruebas negativas de secreto en reporte y secreto retirado del historial. No publicar valores sensibles en las salidas de las pruebas.
 
 ### A-02 · Prioridad alta: identidad y completitud del verificador del destino
 
@@ -70,7 +74,9 @@ Con dobles de HTTP y Docker se reprodujeron estos resultados:
 
 **Alcance histórico:** durante el despliegue se hicieron comprobaciones manuales de `.Image` de los contenedores y de su salud, además del verificador. El hueco del script no demuestra que la promoción histórica fuera incorrecta. El log final sí terminó 12/12 con una reseña existente.
 
-**Cierre:** comprobar contenedores del proyecto Compose esperado, estado y salud, `.Image` de ambos servicios, commit del checkout frente al manifiesto y URL local prevista. Mantener un total explícito de controles; un requisito pendiente no debe producir un verde completo. Registrar fecha UTC, commit, IDs y hashes comparados, sin secretos, para que el resultado sea auditable por sí mismo.
+**Cierre aplicado en esta rama:** el verificador ahora comprueba el checkout contra el manifiesto, los Image ID de los contenedores activos, estado/health, hashes y un total explícito de 15 controles. La validación real en Producción queda pendiente.
+
+**Criterio original:** comprobar contenedores del proyecto Compose esperado, estado y salud, `.Image` de ambos servicios, commit del checkout frente al manifiesto y URL local prevista. Mantener un total explícito de controles; un requisito pendiente no debe producir un verde completo. Registrar fecha UTC, commit, IDs y hashes comparados, sin secretos, para que el resultado sea auditable por sí mismo.
 
 **Misma frontera en QA, comprobada por lectura:** la etapa 06 registra los tags escaneados y el HEAD actual; la 08 consulta una URL. No hay una comprobación automática que vincule el contenedor servido por esa URL con los IDs de la etapa 06, ni una prueba de que las imágenes existentes se construyeron con el código actual. Los comandos manuales de construcción cubrieron esa responsabilidad. Para cerrar la cadena automáticamente, registrar el origen de la construcción y verificar la identidad de los contenedores antes de las pruebas. Un label de commit por sí solo tampoco sustituye controlar el proceso de construcción.
 
@@ -82,7 +88,9 @@ T1 comprueba que `/salud` declare `entorno=qa`. Cuando devuelve `produccion`, ma
 
 La reproducción aislada devolvió `produccion` desde `/salud`: T1 falló y aun así se realizaron **19 llamadas POST sintéticas posteriores**, incluidas `/registro` y `/hilos`. No se enviaron solicitudes reales a ninguna EC2.
 
-**Cierre:** una comprobación previa obligatoria que termine antes del primer POST si el destino no es QA o su identidad no se puede establecer. La prueba negativa debe exigir cero escrituras para un destino Producción, salud inválida o error de conexión. Mantener el verificador de Producción separado de la suite que crea datos.
+**Cierre aplicado en esta rama:** T1 termina antes de cualquier POST si `/salud` no confirma QA, PostgreSQL, RDS y S3; una reproducción local confirmó cero escrituras. La validación real en QA queda pendiente.
+
+**Criterio original:** una comprobación previa obligatoria que termine antes del primer POST si el destino no es QA o su identidad no se puede establecer. La prueba negativa debe exigir cero escrituras para un destino Producción, salud inválida o error de conexión. Mantener el verificador de Producción separado de la suite que crea datos.
 
 ### A-04 · Prioridad media: T11 no garantiza los tres comentarios del hilo probado
 
@@ -92,7 +100,9 @@ La condición acepta `mostrados <= 3`, comprueba `Comentarios (4)` en toda la p�
 
 La consulta SQL de la aplicación sí usa `row_number()` por hilo y límite de tres; las capturas de Producción muestran tres comentarios en portada y cuatro en detalle. El defecto reproducido está en la capacidad de la prueba para detectar una regresión.
 
-**Cierre:** identificar la tarjeta del hilo probado y exigir exactamente sus tres comentarios recientes, su contador total, exclusión del cuarto antiguo y los cuatro en el detalle. Comprobar también 0 y 1 comentarios. No depender de textos de otras tarjetas ni alterar el umbral para obtener verde.
+**Cierre aplicado en esta rama:** T11a/T11b cubren cero y uno, y T11 identifica la tarjeta propia, exige tres recientes, contador cuatro y cuatro artículos en detalle. La validación real en QA queda pendiente.
+
+**Criterio original:** identificar la tarjeta del hilo probado y exigir exactamente sus tres comentarios recientes, su contador total, exclusión del cuarto antiguo y los cuatro en el detalle. Comprobar también 0 y 1 comentarios. No depender de textos de otras tarjetas ni alterar el umbral para obtener verde.
 
 ## 3. Calidad de evidencia y documentación
 
@@ -184,7 +194,8 @@ Las capturas son legibles al abrirlas a tamaño completo. Las de terminal tienen
 
 ## 9. Plan de cierre acotado
 
-1. Corregir A-01, A-02, A-03 y A-04 en una rama de trabajo; añadir pruebas negativas que fallen con el comportamiento anterior y pasen con el corregido. Mantener las ocho etapas y sus umbrales. Las reproducciones de esta auditoría describen el código anterior, no son esas futuras pruebas de regresión.
+1. **Hecho localmente:** A-01, A-02, A-03 y A-04 están corregidos en `revision-final-quirurgica` y las pruebas negativas locales pasan.
+2. Ejecutar el pipeline real en QA sobre ese commit; solo si queda verde se incorpora a la rama canónica. Mantener las ocho etapas y sus umbrales.
 2. Validar esas correcciones en QA. Si cambia el código operativo del pipeline/verificador, emitir un veredicto propio del nuevo commit. Si la aplicación no cambia, no reconstruir imágenes sin necesidad, pero verificar origen e identidad antes de probarlas.
 3. Si se adopta una nueva release, promover sus artefactos aprobados y verificar contenedores realmente activos en Producción. Conservar el último respaldo. Documentar cualquier incidencia concreta del destino.
 4. Archivar detalles originales disponibles por etapa y las nuevas salidas reales, con metadatos y revisión de secretos. Preservar intacto el rojo histórico.

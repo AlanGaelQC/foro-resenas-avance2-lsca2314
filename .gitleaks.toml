@@ -42,14 +42,11 @@ tags = ["sesion", "credencial"]
   ]
 
 [allowlist]
-description = "Marcadores de ejemplo y artefactos del propio pipeline"
+description = "Marcadores de ejemplo y herramientas locales no entregadas"
 paths = [
-  # El .env raiz es configuracion de ejecucion y contiene secretos reales por
-  # necesidad. La etapa 01 verifica por separado que este ignorado, no este
-  # rastreado por Git y tenga permisos 600 antes de excluirlo del contenido.
-  '''(^|/)\.env$''',
+  # El .env raiz solo se excluye en el escaneo del arbol actual, mediante una
+  # configuracion temporal de la etapa 01. En el historial no se excluye.
   '''\.herramientas/''',
-  '''reportes/''',
   '''\.git/''',
 ]
 regexes = [

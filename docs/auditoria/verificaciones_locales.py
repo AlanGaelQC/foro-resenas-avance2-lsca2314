@@ -5,7 +5,6 @@ Los dobles de HTTP/Docker prueban decisiones del código, no un despliegue real.
 """
 from __future__ import annotations
 
-import ast
 import contextlib
 import hashlib
 import importlib.util
@@ -114,10 +113,14 @@ def comprobar_verificador():
                     servicio = "api" if "api" in args[-1] else "moderador"
                     actual = manifest[f"imagen_{servicio}"]["image_id"]
                     if tag_incorrecto: actual = "sha256:" + "f" * 64
+                elif args[:1] == ["git"]:
+                    actual = "0ec86bb5498fc8f91090edf3ec4e77498586644d"
                 elif args[:3] == ["docker", "compose", "ps"]:
-                    actual = "contenedor-sintetico"
+                    actual = f"contenedor-{args[-1]}"
                 elif args[:2] == ["docker", "inspect"]:
-                    actual = "sha256:" + ("c" if contenedor_viejo else "a") * 64
+                    servicio = "moderador" if "moderador" in args[-1] else "api"
+                    letra = "c" if contenedor_viejo else ("b" if servicio == "moderador" else "a")
+                    actual = "sha256:" + letra * 64 + "|running|healthy"
                 else:
                     raise AssertionError(f"Comando no previsto: {args[0]}")
                 return subprocess.CompletedProcess(args, 0, actual + "\n", "")
@@ -129,14 +132,14 @@ def comprobar_verificador():
             return codigo, salida.getvalue(), comandos
 
         codigo, salida, _ = escenario()
-        assert codigo == 0 and "12/12" in salida
-        print("VERIFICADOR/control: escenario completo y coherente => 12/12, salida 0.")
+        assert codigo == 0 and "15/15" in salida
+        print("VERIFICADOR/control: escenario completo y coherente => 15/15, salida 0.")
         codigo, salida, comandos = escenario(contenedor_viejo=True)
-        assert codigo == 0 and not any(c[:2] == ["docker", "inspect"] for c in comandos)
-        print("VERIFICADOR/hueco: tag aprobado + contenedor anterior => 12/12, salida 0; no inspecciona contenedores.")
+        assert codigo == 1 and "13/15" in salida and any(c[:2] == ["docker", "inspect"] for c in comandos)
+        print("VERIFICADOR/control: contenedor anterior activo => bloqueo; inspección de identidad ejecutada.")
         codigo, salida, _ = escenario(sin_resenas=True)
-        assert codigo == 0 and "11/11" in salida and "[PENDIENTE]" in salida
-        print("VERIFICADOR/hueco: sin reseñas => detalle pendiente, 11/11, salida 0.")
+        assert codigo == 1 and "14/15" in salida and "PENDIENTE" not in salida
+        print("VERIFICADOR/control: sin reseñas => falta de detalle bloquea, 15/15 explícito.")
         codigo, _, _ = escenario(tag_incorrecto=True)
         assert codigo == 1
         print("VERIFICADOR/control: Image ID cargado distinto => salida 1.")
@@ -175,22 +178,29 @@ def comprobar_destino_etapa08():
     pruebas.MODERADOR_PASS = ""
     with contextlib.redirect_stdout(io.StringIO()):
         codigo = pruebas.main()
-    assert codigo == 1 and "/registro" in llamadas and "/hilos" in llamadas
-    print(f"ETAPA08/hueco: /salud dice produccion => T1 falla, pero realiza {len(llamadas)} POST sintéticos posteriores.")
+    assert codigo == 1 and not llamadas
+    print("ETAPA08/control: /salud dice produccion => T1 falla antes de cualquier POST.")
 
 
 def comprobar_t11():
-    fuente = (RAIZ / "pipeline/pruebas_flujo.py").read_text()
-    arbol = ast.parse(fuente)
-    llamada = next(n for n in ast.walk(arbol) if isinstance(n, ast.Call)
-                   and isinstance(n.func, ast.Name) and n.func.id == "registrar"
-                   and n.args and isinstance(n.args[0], ast.Constant)
-                   and str(n.args[0].value).startswith("T11 "))
-    expresion = compile(ast.Expression(llamada.args[1]), "criterio-T11", "eval")
-    datos = {"id_feed": "999", "mostrados": 0, "marcas_c": ["de-mi-hilo-c0"],
-             "portada_feed": '<article id="otro-hilo">Comentarios (4)</article>'}
-    assert eval(expresion, {"__builtins__": {}}, datos) is True
-    print("T11/hueco: cero comentarios del hilo probado + contador 4 en otro hilo => criterio actual verdadero.")
+    falso_http = types.ModuleType("httpx")
+    falso_http.Client = object
+    falso_http.Response = object
+    with patch.dict(sys.modules, {"httpx": falso_http}):
+        modulo = cargar("flujo_t11_auditado", RAIZ / "pipeline/pruebas_flujo.py")
+    marcas = [f"hilo-c{i}" for i in range(4)]
+    ajena = '<article class="tarjeta tarjeta-resena"><h3><a href="/hilos/otro">Otro</a></h3><h4>Comentarios (4)</h4></article>'
+    correcto, _ = modulo.comprobar_feed("999", marcas, ajena, 200, "")
+    assert correcto is False
+    tarjeta = '<article class="tarjeta tarjeta-resena"><h3><a href="/hilos/999">Feed</a></h3><h4>Comentarios (4)</h4>' + ''.join(
+        f'<p class="comentario-previo">{marca}</p>' for marca in marcas[1:]
+    ) + '</article>'
+    detalle = '<span class="contador">4</span>' + ''.join(
+        '<article class="tarjeta comentario"></article>' for _ in marcas
+    ) + ''.join(marcas)
+    correcto, cantidad = modulo.comprobar_feed("999", marcas, tarjeta, 200, detalle)
+    assert correcto is True and cantidad == 3
+    print("T11/control: los tres comentarios del hilo probado y los cuatro del detalle se exigen por tarjeta.")
 
 
 def comprobar_healthchecks():

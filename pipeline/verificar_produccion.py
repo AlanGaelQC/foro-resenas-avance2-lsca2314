@@ -1,16 +1,21 @@
 """Verificación de lectura en la EC2 nueva tras desplegar imágenes aprobadas.
 
 Ejecutar en Producción, donde están Docker, el manifiesto copiado de QA y el
-contenedor cargado. No modifica datos ni asume que la base de QA sea Prod.
+contenedor activo. No modifica datos ni asume que la base de QA sea Prod.
 """
 import argparse
+from datetime import datetime, timezone
 import hashlib
 import json
 import re
 import subprocess
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import httpx
+
+RAIZ = Path(__file__).resolve().parents[1]
+TOTAL_CONTROLES = 15
 
 
 def ejecutar() -> int:
@@ -19,8 +24,15 @@ def ejecutar() -> int:
     parser.add_argument("--manifest", required=True, type=Path, help="Manifest_release.json copiado desde QA")
     parser.add_argument("--tars", required=True, type=Path, help="Directorio con api.tar y moderador.tar descargados")
     args = parser.parse_args()
+    destino = urlsplit(args.url)
+    if (destino.scheme != "http" or destino.hostname not in {"127.0.0.1", "localhost", "::1"}
+            or destino.port != 8080 or destino.username or destino.password
+            or destino.path not in {"", "/"} or destino.query or destino.fragment):
+        print("[FALLA] La verificación debe apuntar a la API local de Producción en el puerto 8080.")
+        return 1
     base = args.url.rstrip("/")
     resultados = []
+    print(f"Verificación iniciada: {datetime.now(timezone.utc).isoformat()}")
 
     def anotar(nombre: str, ok: bool, detalle: str = "") -> None:
         resultados.append(ok)
@@ -29,6 +41,8 @@ def ejecutar() -> int:
     try:
         manifiesto = json.loads(args.manifest.read_text(encoding="utf-8"))
         commit = manifiesto["source_commit"]
+        if not isinstance(commit, str) or not re.fullmatch(r"[0-9a-f]{40}", commit):
+            raise ValueError("source_commit debe ser el SHA completo del candidato")
         for servicio in ("api", "moderador"):
             esperado = manifiesto[f"imagen_{servicio}"]
             if not esperado.get("tag") or not esperado.get("image_id") or not esperado.get("sha256_tar"):
@@ -36,7 +50,16 @@ def ejecutar() -> int:
     except (OSError, ValueError, KeyError, TypeError) as error:
         print(f"[FALLA] Manifiesto incompleto o ilegible: {error}")
         return 1
-    anotar("Manifiesto de release disponible", True, f"commit {str(commit)[:12]}")
+    anotar("Manifiesto de release disponible", True, f"commit {commit}")
+
+    try:
+        checkout = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=RAIZ,
+            capture_output=True, text=True, timeout=10, check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        checkout = "no disponible"
+    anotar("Checkout de Producción coincide con el manifiesto", checkout == commit)
 
     for servicio in ("api", "moderador"):
         datos = manifiesto[f"imagen_{servicio}"]
@@ -48,7 +71,32 @@ def ejecutar() -> int:
             actual = consulta.stdout.strip()
         except (OSError, subprocess.SubprocessError):
             actual = "imagen no disponible"
-        anotar(f"Image ID de {servicio} coincide con QA", actual == datos["image_id"])
+        anotar(f"Image ID de {servicio} coincide con QA", actual == datos["image_id"],
+               f"esperado {datos['image_id']}; cargado {actual}")
+
+        # Un tag puede apuntar a una imagen nueva mientras el contenedor
+        # continúa ejecutando la anterior. Se inspecciona el proceso activo.
+        imagen_activa, estado, salud_contenedor = "no disponible", "ausente", "desconocida"
+        try:
+            contenedor = subprocess.run(
+                ["docker", "compose", "ps", "-q", servicio], cwd=RAIZ,
+                capture_output=True, text=True, timeout=10, check=True,
+            ).stdout.strip()
+            if contenedor:
+                inspeccion = subprocess.run(
+                    ["docker", "inspect", "--format",
+                     "{{.Image}}|{{.State.Status}}|{{if .State.Health}}{{.State.Health.Status}}{{else}}sin-healthcheck{{end}}",
+                     contenedor],
+                    capture_output=True, text=True, timeout=10, check=True,
+                ).stdout.strip().split("|")
+                if len(inspeccion) == 3:
+                    imagen_activa, estado, salud_contenedor = inspeccion
+        except (OSError, subprocess.SubprocessError):
+            pass
+        anotar(f"Contenedor {servicio} ejecuta la imagen aprobada y está sano",
+               imagen_activa == datos["image_id"] and estado == "running"
+               and salud_contenedor == "healthy",
+               f"imagen {imagen_activa}; estado {estado}; salud {salud_contenedor}")
 
         ruta_tar = args.tars / f"{servicio}.tar"
         try:
@@ -59,7 +107,8 @@ def ejecutar() -> int:
             suma = hasher.hexdigest()
         except OSError:
             suma = "no disponible"
-        anotar(f"SHA-256 de {servicio}.tar coincide con QA", suma == datos["sha256_tar"])
+        anotar(f"SHA-256 de {servicio}.tar coincide con QA", suma == datos["sha256_tar"],
+               f"esperado {datos['sha256_tar']}; transferido {suma}")
 
     try:
         with httpx.Client(timeout=10, follow_redirects=False) as cliente:
@@ -82,12 +131,13 @@ def ejecutar() -> int:
                 detalle = cliente.get(base + coincidencia.group(1))
                 anotar("Detalle de reseña disponible", detalle.status_code == 200)
             else:
-                print("[PENDIENTE] La base de Producción no tiene reseñas para verificar el detalle.")
+                anotar("Detalle de reseña disponible", False,
+                       "no hay una reseña para comprobar el detalle")
     except (httpx.HTTPError, ValueError, TypeError) as error:
         anotar("Flujos HTTP de Producción", False, str(error))
 
-    print(f"Verificación: {sum(resultados)}/{len(resultados)} controles completados")
-    return 0 if all(resultados) else 1
+    print(f"Verificación: {sum(resultados)}/{TOTAL_CONTROLES} controles completados")
+    return 0 if len(resultados) == TOTAL_CONTROLES and all(resultados) else 1
 
 
 if __name__ == "__main__":

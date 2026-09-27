@@ -19,9 +19,15 @@ def main():
     args = parser.parse_args()
     binario = str(Path(args.gitleaks).resolve())
     original = (RAIZ / ".gitleaks.toml").read_text()
-    # Retirar únicamente las dos exclusiones que se están contrastando.
-    ampliado = original.replace("  '''(^|/)\\.env$''',", "").replace("  '''reportes/''',", "")
-    assert ampliado != original
+    # Reintroducir las dos exclusiones de la versión auditada para reproducir
+    # el hueco histórico. La configuración actual ya no contiene ninguna.
+    marcador_rutas = "paths = [\n"
+    historica = original.replace(
+        marcador_rutas,
+        "paths = [\n  '''(^|/)\\.env$''',\n  '''reportes/''',\n",
+        1,
+    )
+    assert historica != original
     # Nunca se usa esta cadena para una sesión, cuenta o conexión real.
     marcador = "CLAVE_" + "SESION=" + "SINTETICA_NO_CREDENCIAL_" + "A" * 32 + "\n"
 
@@ -47,7 +53,9 @@ def main():
                                 "commit", "--quiet", "-m", "Retira fixture del árbol"],
                                cwd=fuente, check=True, capture_output=True)
             config, reporte = base / "config.toml", base / "reporte.json"
-            config.write_text(ampliado if ampliar else original)
+            # ampliar=True representa el control actual; los demás casos
+            # reproducen la configuración histórica con las dos exclusiones.
+            config.write_text(original if ampliar else historica)
             comando = [binario, "detect", "--source", str(fuente), "--config", str(config),
                        "--report-format", "json", "--report-path", str(reporte), "--redact"]
             if not historico:

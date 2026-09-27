@@ -59,28 +59,69 @@ def id_desde_redireccion(respuesta: httpx.Response) -> str | None:
     return coincidencia.group(1) if coincidencia else None
 
 
+def tarjeta_de_hilo(portada: str, identificador: str | None) -> str:
+    """Extrae la tarjeta principal del hilo, sin mezclar comentarios de otros."""
+    if identificador is None:
+        return ""
+    tarjetas = re.findall(
+        r'<article class="tarjeta tarjeta-resena">(.*?)</article>',
+        portada, re.DOTALL,
+    )
+    return next((tarjeta for tarjeta in tarjetas
+                 if f'href="/hilos/{identificador}"' in tarjeta), "")
+
+
+def comentarios_visibles(tarjeta: str) -> list[str]:
+    return re.findall(r'<p class="comentario-previo">(.*?)</p>', tarjeta, re.DOTALL)
+
+
+def comprobar_feed(id_hilo: str | None, marcas: list[str], portada: str,
+                   codigo_detalle: int, detalle: str) -> tuple[bool, int]:
+    tarjeta = tarjeta_de_hilo(portada, id_hilo)
+    muestras = comentarios_visibles(tarjeta)
+    correcto = (
+        id_hilo is not None and len(marcas) == 4 and len(muestras) == 3
+        and all(marca in " ".join(muestras) for marca in marcas[1:])
+        and marcas[0] not in tarjeta and "Comentarios (4)" in tarjeta
+        and codigo_detalle == 200 and '<span class="contador">4</span>' in detalle
+        and all(marca in detalle for marca in marcas)
+        and len(re.findall(r'<article class="tarjeta comentario">', detalle)) == 4
+    )
+    return correcto, len(muestras)
+
+
 def main() -> int:
     print(f"Pruebas de flujo contra {URL_BASE}")
     if not esperar_aplicacion():
         registrar("La aplicacion responde", False, "no respondio /salud a tiempo")
         return 2
 
-    contrasena = secrets.token_urlsafe(24)
-
-    respuesta = httpx.get(f"{URL_BASE}/salud", timeout=TIEMPO_ESPERA)
     try:
+        respuesta = httpx.get(f"{URL_BASE}/salud", timeout=TIEMPO_ESPERA)
         salud = respuesta.json()
-    except ValueError:
-        salud = {}
-    registrar(
-        "T1 QA usa PostgreSQL/RDS y alcanza S3",
+        if not isinstance(salud, dict):
+            raise ValueError("respuesta de salud inválida")
+    except (httpx.HTTPError, ValueError, TypeError):
+        registrar("T1 QA usa PostgreSQL/RDS y alcanza S3", False,
+                  "no se pudo establecer la identidad del entorno antes de escribir")
+        return 2
+    qa_valida = (
         respuesta.status_code == 200
         and salud.get("entorno") == "qa"
         and salud.get("motor_base_datos") == "postgresql"
         and salud.get("base_datos") == "ok"
-        and salud.get("almacenamiento_s3") == "ok",
-        f"http {respuesta.status_code}; salud={salud}",
+        and salud.get("almacenamiento_s3") == "ok"
     )
+    registrar(
+        "T1 QA usa PostgreSQL/RDS y alcanza S3",
+        qa_valida,
+        f"http {respuesta.status_code}; entorno={salud.get('entorno')}",
+    )
+    if not qa_valida:
+        print("ALTO: la etapa 08 no escribe datos fuera de QA o sin salud confirmada.")
+        return 1
+
+    contrasena = secrets.token_urlsafe(24)
 
     dependencias = httpx.get(
         f"{URL_BASE}/salud/dependencias", timeout=TIEMPO_ESPERA
@@ -247,8 +288,40 @@ def main() -> int:
             and "X-Amz-" in adjunto.headers.get("location", ""),
         )
 
-        # T11 - Feed publico: con 4 comentarios, la portada muestra a lo sumo 3 y
-        # el total correcto. Se crea un hilo limpio y 4 comentarios validos.
+        # T11 - Feed publico: exige 3 comentarios recientes de ESTE hilo y 4
+        # en su detalle. Verifica tambien los casos de cero y uno sin depender
+        # del contador de otras tarjetas.
+        tarjeta_vacia = tarjeta_de_hilo(httpx.get(URL_BASE, timeout=TIEMPO_ESPERA).text, id_hilo)
+        detalle_vacio = usuario_a.get(f"{URL_BASE}/hilos/{id_hilo}") if id_hilo else None
+        registrar(
+            "T11a Un hilo nuevo muestra cero comentarios",
+            bool(tarjeta_vacia) and not comentarios_visibles(tarjeta_vacia)
+            and 'Ver reseña y 0 comentario(s)' in tarjeta_vacia
+            and detalle_vacio is not None and detalle_vacio.status_code == 200
+            and '<span class="contador">0</span>' in detalle_vacio.text,
+        )
+
+        if id_hilo:
+            marca_unica = uuid.uuid4().hex[:10]
+            respuesta_unica = usuario_a.post(
+                f"{URL_BASE}/hilos/{id_hilo}/comentarios",
+                data={"cuerpo": f"comentario de prueba {marca_unica}"},
+            )
+            tarjeta_unica = tarjeta_de_hilo(httpx.get(URL_BASE, timeout=TIEMPO_ESPERA).text, id_hilo)
+            detalle_unico = usuario_a.get(f"{URL_BASE}/hilos/{id_hilo}")
+            muestra_unica = comentarios_visibles(tarjeta_unica)
+            un_comentario = (
+                respuesta_unica.status_code == 303
+                and len(muestra_unica) == 1 and marca_unica in muestra_unica[0]
+                and 'Comentarios (1)' in tarjeta_unica
+                and detalle_unico.status_code == 200
+                and '<span class="contador">1</span>' in detalle_unico.text
+                and marca_unica in detalle_unico.text
+            )
+        else:
+            un_comentario = False
+        registrar("T11b Un comentario aparece en portada y detalle", un_comentario)
+
         marca_feed = uuid.uuid4().hex[:8]
         r_feed = usuario_a.post(
             f"{URL_BASE}/hilos",
@@ -269,14 +342,16 @@ def main() -> int:
                     data={"cuerpo": f"comentario de prueba numero {i} {mc}"},
                 )
         portada_feed = httpx.get(URL_BASE, timeout=TIEMPO_ESPERA).text
-        mostrados = sum(1 for mc in marcas_c if mc in portada_feed)
+        detalle_feed = usuario_a.get(f"{URL_BASE}/hilos/{id_feed}") if id_feed else None
+        feed_correcto, cantidad_muestra = comprobar_feed(
+            id_feed, marcas_c, portada_feed,
+            detalle_feed.status_code if detalle_feed else 0,
+            detalle_feed.text if detalle_feed else "",
+        )
         registrar(
-            "T11 El feed muestra <=3 comentarios por resena y el total correcto",
-            id_feed is not None
-            and mostrados <= 3
-            and f"Comentarios (4)" in portada_feed
-            and marcas_c[0] not in portada_feed,  # el mas viejo no se muestra
-            f"comentarios mostrados en portada: {mostrados}",
+            "T11 El feed muestra los 3 recientes de este hilo y 4 en detalle",
+            feed_correcto,
+            f"comentarios propios mostrados en portada: {cantidad_muestra}",
         )
 
     with httpx.Client(timeout=TIEMPO_ESPERA, follow_redirects=False) as usuario_b:

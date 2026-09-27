@@ -14,17 +14,17 @@ La navegación del laboratorio usa **HTTP en 8080**, no HTTPS. Las bases y los p
 
 ![Construcción y ocho etapas en QA, bloqueo o promoción y verificación en Producción](diagrama_promocion.png)
 
-[Versión vectorial editable](diagrama_promocion.svg). La transferencia y el despliegue fueron manuales: `promover.sh` verifica y empaqueta. SHA-256 permite comprobar integridad; la confianza en el manifiesto depende de su origen y del canal utilizado. Las comprobaciones manuales de los contenedores activos complementaron al verificador, que en la versión auditada solo inspecciona los tags cargados. El hallazgo A-02 explica cómo automatizar esa parte pendiente.
+[Versión vectorial editable](diagrama_promocion.svg). La transferencia y el despliegue fueron manuales: `promover.sh` verifica y empaqueta. SHA-256 permite comprobar integridad; la confianza en el manifiesto depende de su origen y del canal utilizado. La rama de endurecimiento añade al verificador la comprobación de los contenedores activos, su estado/salud, el checkout y un total explícito de 15 controles; su corrida real en QA/Producción aún debe ejecutarse. La evidencia histórica conserva el comportamiento anterior y no se reetiqueta.
 
 ## Fronteras de confianza
 
 | Flujo | Control aplicado | Evidencia esperada |
 |---|---|---|
 | Autor → API → moderador | Toda reseña y comentario pasa por `/moderar` antes de publicarse; si falla la conexión, se bloquea la publicación | T5, T6b y el servicio saludable |
-| Autor → RDS → vista pública | Jinja escapa el texto; la portada obtiene hasta tres comentarios por reseña desde SQL | T6, T11 y capturas; A-04 documenta una aserción incompleta de T11 |
+| Autor → RDS → vista pública | Jinja escapa el texto; la portada obtiene hasta tres comentarios por reseña desde SQL | T6, T11 y capturas; T11a/T11b/T11 documentan los casos de cero, uno y cuatro comentarios |
 | Moderador humano → API → moderador interno | Sesión, correo reservado y cuenta preaprovisionada; proxy con `resena_id` | T10, T10b y T10c |
 | Reseña guardada → HTML de vista previa | Escapar texto antes de generar negritas/saltos | XSS bloqueada en rojo y T10d/T10e verdes tras remediar |
-| QA → Producción | Veredicto completo, mismo commit, árbol limpio e Image IDs examinados por Trivy; SHA-256 al transferir y comprobación manual de `.Image` de los contenedores | `veredicto.json`, `06_image_ids.json`, `manifest_release.json` y registros de EC2 nueva; automatización completa pendiente en A-02 |
+| QA → Producción | Veredicto completo, mismo commit, árbol limpio e Image IDs examinados por Trivy; SHA-256 al transferir y comprobación manual de `.Image` de los contenedores | `veredicto.json`, `06_image_ids.json`, `manifest_release.json` y registros de EC2 nueva; automatización reforzada en la rama de endurecimiento; pendiente de validar en QA |
 
 ## Secuencia que evalúa el profesor
 

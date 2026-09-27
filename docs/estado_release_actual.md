@@ -18,10 +18,12 @@ El diseño vigente se llama **Pulso Pixel** y usa arte arcade original, una port
 la identificación automática de contenedores activos, la protección del destino
 de las pruebas QA y la aserción de comentarios T11. El
 [informe del 27 de septiembre](auditoria/revision_final_2026-09-27.md) contiene
-pruebas aisladas y criterios de cierre. Son pendientes técnicos; no demuestran
+pruebas aisladas y criterios de cierre. Los cuatro parches están preparados localmente en la rama `revision-final-quirurgica` y sus pruebas sintéticas pasan; todavía requieren una corrida real en QA. No demuestran
 que la release histórica fallara ni constituyen correcciones ya desplegadas.
 
-**Pendiente para la entrega académica:** atender los hallazgos, comprobar las
+**Pendiente operativo inmediato:** ejecutar en QA la rama de parches y, solo con verde, decidir una nueva promoción.
+
+**Pendiente para la entrega académica:** comprobar las
 configuraciones vivas de AWS indicadas en el informe, incorporar capturas de QA
 y Producción a la plantilla oficial, y completar en primera persona la
 declaración de uso de IA y la autoevaluación. Este archivo no afirma que esas
