@@ -15,7 +15,7 @@ from urllib.parse import urlsplit
 import httpx
 
 RAIZ = Path(__file__).resolve().parents[1]
-TOTAL_CONTROLES = 15
+TOTAL_CONTROLES = 16
 
 
 def ejecutar() -> int:
@@ -133,6 +133,28 @@ def ejecutar() -> int:
             else:
                 anotar("Detalle de reseña disponible", False,
                        "no hay una reseña para comprobar el detalle")
+            imagen = re.search(r'<img src="(/imagen/\d+)"', portada.text)
+            if imagen:
+                ruta_imagen = imagen.group(1)
+                id_imagen = ruta_imagen.rsplit("/", 1)[-1]
+                detalle_imagen = cliente.get(f"{base}/hilos/{id_imagen}")
+                archivo = cliente.get(base + ruta_imagen)
+                tipo = archivo.headers.get("content-type", "")
+                firmas = {
+                    "image/png": b"\x89PNG\r\n\x1a\n",
+                    "image/jpeg": b"\xff\xd8\xff",
+                    "image/webp": b"RIFF",
+                }
+                anotar("Imagen de reseña pública visible sin sesión",
+                       detalle_imagen.status_code == 200
+                       and f'<img src="{ruta_imagen}"' in detalle_imagen.text
+                       and archivo.status_code == 200
+                       and tipo in firmas and archivo.content.startswith(firmas.get(tipo, b"\0"))
+                       and archivo.headers.get("cache-control") == "no-store"
+                       and "location" not in archivo.headers)
+            else:
+                anotar("Imagen de reseña pública visible sin sesión", False,
+                       "no hay una reseña con imagen en la portada")
     except (httpx.HTTPError, ValueError, TypeError) as error:
         anotar("Flujos HTTP de Producción", False, str(error))
 

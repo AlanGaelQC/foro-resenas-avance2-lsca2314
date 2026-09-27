@@ -8,7 +8,7 @@ como rechazada -> comentarios sobre la resena, que pasan por la misma revision.
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, Form, Query, Request, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -24,6 +24,7 @@ from config import (
     MAX_BYTES_ADJUNTO,
     MODERADORES,
     MODERADOR_PASS,
+    PREFIJO_S3,
     URL_BASE_DATOS,
 )
 from db import obtener_sesion, crear_tablas
@@ -560,3 +561,20 @@ def ver_adjunto(hilo_id: int, peticion: Request, sesion: Session = Depends(obten
         return _redirigir(almacenamiento.url_prefirmada(hilo.clave_s3))
     except almacenamiento.ErrorDeAlmacenamiento as error:
         return JSONResponse({"error": str(error)}, status_code=503)
+
+
+@aplicacion.get("/imagen/{hilo_id}")
+def imagen_publicada(hilo_id: int, sesion: Session = Depends(obtener_sesion)):
+    """Sirve la imagen de una reseña publicada sin exponer S3 al navegador."""
+    hilo = sesion.get(Hilo, hilo_id)
+    if (hilo is None or hilo.estado != ESTADO_PUBLICADO or not hilo.clave_s3
+            or not hilo.clave_s3.startswith(PREFIJO_S3)):
+        return JSONResponse({"error": "No hay imagen publicada."}, status_code=404)
+    try:
+        contenido, tipo = almacenamiento.obtener_adjunto(hilo.clave_s3)
+    except almacenamiento.ErrorDeAlmacenamiento:
+        return JSONResponse({"error": "Imagen no disponible."}, status_code=503)
+    return Response(
+        content=contenido, media_type=tipo,
+        headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
+    )

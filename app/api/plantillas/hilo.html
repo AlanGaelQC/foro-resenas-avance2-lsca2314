@@ -5,6 +5,10 @@
   .detalle { max-width:720px; margin:0 auto; }
   .volver { display:inline-block; margin-bottom:16px; font-size:.89rem; font-weight:750; text-decoration:none; }
   .detalle .tarjeta { padding:clamp(18px,2.6vw,25px); margin-bottom:12px; }
+  .imagen-detalle { display:block; overflow:hidden; margin-bottom:18px;
+    border:1px solid #425269; border-radius:12px; background:#151e2a; }
+  .imagen-detalle img { display:block; width:100%; max-height:360px; object-fit:contain; }
+  .imagen-detalle:focus-visible { outline:3px solid var(--acento); outline-offset:3px; }
   .cabecera-detalle { display:flex; flex-wrap:wrap; align-items:center; gap:11px; }
   .calificacion-detalle { padding:6px 12px; border:1px solid #446c57; border-radius:100px;
     background:#294035; color:#b6f2ce; font-weight:800; }
@@ -38,6 +42,11 @@
 <div class="detalle">
   <a class="volver" href="/">← Volver a las reseñas</a>
   <article class="tarjeta publicado">
+    {% if hilo.clave_s3 %}
+      <a class="imagen-detalle" href="/imagen/{{ hilo.id }}" aria-label="Abrir imagen de {{ hilo.titulo }}">
+        <img src="/imagen/{{ hilo.id }}" alt="Imagen adjunta a la reseña {{ hilo.titulo }}" decoding="async">
+      </a>
+    {% endif %}
     <div class="cabecera-detalle">
       <span class="calificacion-detalle">★ {{ hilo.calificacion }}/5</span>
       <span class="meta">por {{ hilo.autor.nombre }} · {{ hilo.creado_en.strftime('%Y-%m-%d %H:%M') }}</span>
@@ -51,7 +60,6 @@
     {% else %}
       <p class="cuerpo-resena">{{ hilo.cuerpo }}</p>
     {% endif %}
-    {% if hilo.clave_s3 %}<p><a href="/adjunto/{{ hilo.id }}">Ver imagen adjunta →</a></p>{% endif %}
   </article>
   <div class="detalle-seccion">
     <h2>Comentarios de jugadores</h2><span class="contador">{{ comentarios | length }}</span>

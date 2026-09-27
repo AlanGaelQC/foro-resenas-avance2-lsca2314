@@ -2,9 +2,11 @@
 import os
 import re
 import secrets
+import struct
 import sys
 import time
 import uuid
+import zlib
 
 import httpx
 
@@ -28,6 +30,18 @@ def registrar(nombre: str, paso: bool, detalle: str = "") -> None:
 
 def nuevo_correo() -> str:
     return f"prueba-{uuid.uuid4().hex[:12]}@example.com"
+
+
+def imagen_png_prueba() -> bytes:
+    """PNG decodificable (32x16), para comprobar la imagen desde el navegador."""
+    def bloque(tipo: bytes, datos: bytes) -> bytes:
+        return (struct.pack(">I", len(datos)) + tipo + datos
+                + struct.pack(">I", zlib.crc32(tipo + datos)))
+
+    cabecera = struct.pack(">2I5B", 32, 16, 8, 2, 0, 0, 0)
+    filas = b"".join(b"\x00" + bytes((24, 156, 126)) * 32 for _ in range(16))
+    return (b"\x89PNG\r\n\x1a\n" + bloque(b"IHDR", cabecera)
+            + bloque(b"IDAT", zlib.compress(filas)) + bloque(b"IEND", b""))
 
 
 def esperar_aplicacion(intentos: int = 15) -> bool:
@@ -268,7 +282,7 @@ def main() -> int:
         )
 
         marca_s3 = uuid.uuid4().hex[:10]
-        png_minimo = b"\x89PNG\r\n\x1a\n" + b"evidencia-foro"
+        png_minimo = imagen_png_prueba()
         respuesta_s3 = usuario_a.post(
             f"{URL_BASE}/hilos",
             data={
@@ -286,6 +300,38 @@ def main() -> int:
             and adjunto is not None
             and adjunto.status_code == 303
             and "X-Amz-" in adjunto.headers.get("location", ""),
+        )
+
+        if id_s3:
+            portada_imagen = httpx.get(URL_BASE, timeout=TIEMPO_ESPERA).text
+            detalle_imagen = httpx.get(
+                f"{URL_BASE}/hilos/{id_s3}", timeout=TIEMPO_ESPERA
+            ).text
+            imagen_publica = httpx.get(
+                f"{URL_BASE}/imagen/{id_s3}", timeout=TIEMPO_ESPERA,
+                follow_redirects=False,
+            )
+            imagen_visible = (
+                f'<img src="/imagen/{id_s3}"' in tarjeta_de_hilo(portada_imagen, id_s3)
+                and f'<img src="/imagen/{id_s3}"' in detalle_imagen
+                and imagen_publica.status_code == 200
+                and imagen_publica.headers.get("content-type") == "image/png"
+                and imagen_publica.headers.get("cache-control") == "no-store"
+                and "location" not in imagen_publica.headers
+                and imagen_publica.content == png_minimo
+            )
+        else:
+            imagen_visible = False
+        registrar(
+            "T8c La imagen publicada aparece en portada y detalle sin sesion",
+            imagen_visible,
+        )
+        sin_imagen = httpx.get(
+            f"{URL_BASE}/imagen/{id_hilo}", timeout=TIEMPO_ESPERA
+        ) if id_hilo else None
+        registrar(
+            "T8d Un hilo sin imagen no publica un adjunto",
+            sin_imagen is not None and sin_imagen.status_code == 404,
         )
 
         # T11 - Feed publico: exige 3 comentarios recientes de ESTE hilo y 4

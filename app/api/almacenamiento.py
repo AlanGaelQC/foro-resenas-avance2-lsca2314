@@ -2,9 +2,9 @@
 Uso real de S3: los adjuntos de las resenas viven en el bucket, no en la base
 ni en el disco del contenedor.
 
-El bucket es privado y con acceso publico bloqueado, asi que la imagen no se
-sirve por URL publica: se entrega una URL prefirmada de corta duracion, generada
-solo para usuarios con sesion valida.
+El bucket es privado y con acceso publico bloqueado. /adjunto entrega una URL
+prefirmada solo a usuarios con sesion; /imagen sirve los bytes de adjuntos
+de resenas publicadas desde la API, sin revelar URL ni clave de S3 al navegador.
 """
 import uuid
 from pathlib import Path
@@ -113,6 +113,28 @@ def url_prefirmada(clave: str) -> str:
         )
     except (BotoCoreError, ClientError) as error:
         raise ErrorDeAlmacenamiento(f"No se pudo firmar la URL del adjunto: {error}") from error
+
+
+def obtener_adjunto(clave: str) -> tuple[bytes, str]:
+    """Descarga una imagen acotada desde el bucket privado para la ruta pública."""
+    if not ALMACENAMIENTO_ACTIVO:
+        raise ErrorDeAlmacenamiento("BUCKET_S3 no esta configurado.")
+    try:
+        objeto = _cliente().get_object(Bucket=BUCKET_S3, Key=clave)
+        cuerpo = objeto["Body"]
+        try:
+            tipo = objeto.get("ContentType", "")
+            if (tipo not in TIPOS_ADJUNTO_PERMITIDOS
+                    or objeto.get("ContentLength", 0) > MAX_BYTES_ADJUNTO):
+                raise ErrorDeAlmacenamiento("Tipo o tamaño inesperado del adjunto.")
+            contenido = cuerpo.read(MAX_BYTES_ADJUNTO + 1)
+            if not contenido or len(contenido) > MAX_BYTES_ADJUNTO:
+                raise ErrorDeAlmacenamiento("Tamaño inesperado del adjunto.")
+            return contenido, tipo
+        finally:
+            cuerpo.close()
+    except (BotoCoreError, ClientError, OSError) as error:
+        raise ErrorDeAlmacenamiento("No se pudo obtener el adjunto de S3.") from error
 
 
 def eliminar_adjunto(clave: str) -> None:
