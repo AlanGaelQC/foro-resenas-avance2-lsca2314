@@ -1,6 +1,6 @@
 # ADR-003 — Promoción de artefactos y entornos QA/Producción
 
-**Estado:** primera release de videojuegos `22ee1ec` aprobada y desplegada en la EC2 nueva `i-089d62a1e8fdea7bb`; promoción posterior del rediseño `9424272` (tag `qa-verde-diseno-9424272`) aprobada 8/8 y 19/19 en QA, verificada **12/12** en el destino el 26 de septiembre de 2026. Consultar [evidencia_produccion.md](evidencia_produccion.md) y [bitacora_produccion.md](bitacora_produccion.md).
+**Estado:** se promovieron únicamente releases aprobadas en QA. La actual, **Pulso Pixel v2** (`0ec86bb`, tag `qa-verde-pulso-pixel-v2-0ec86bb`), obtuvo **8/8 etapas y 19/19 pruebas en QA** y **12/12 controles en el destino**. Las releases anteriores `22ee1ec` y `9424272` permanecen como antecedentes y respaldo. Consultar [evidencia_produccion.md](evidencia_produccion.md) y [bitacora_produccion.md](bitacora_produccion.md).
 
 ## Contexto
 

@@ -1,6 +1,6 @@
 # Ejecución en QA · orden y evidencia
 
-**Estado:** ciclo completo observado en la instancia QA `i-05cc3223adae222ef` (Avance 2), incluida la corrida verde del candidato y el empaquetado. La base de datos persistente no se reinició para obtener el verde.
+**Estado:** ciclo completo observado en la instancia QA del Avance 2, incluida la corrida verde del candidato y el empaquetado. La base de datos persistente no se reinició para obtener el verde.
 
 ## Antes de actualizar QA
 
@@ -11,7 +11,7 @@
 
 ## Corridas en orden
 
-Cada cambio de commit requiere **reconstruir ambas imágenes y reiniciar** antes del pipeline:
+Si cambia el código o las plantillas de un servicio, reconstruye y reinicia el servicio afectado antes del pipeline; la etapa 06 examina ambas imágenes vigentes. Los cambios solo de documentación o del verificador no alteran por sí mismos los Image IDs:
 
 ```bash
 docker compose build
@@ -42,9 +42,12 @@ El orquestador ejecuta ocho etapas y crea `reportes/veredicto.json` y `reportes/
 | 2 | `git switch --detach 84443a4` | Regla Semgrep y T10d contra la reseña de un autor distinto del moderador. La corrida debe terminar BLOQUEADO por la XSS, con etapas 04 y/u 08 que lo demuestren. |
 | 3 | `git switch --detach 30a764b` | El formato seguro debe escapar `<script>` y conservar `<b>` y `<br>`. La detección XSS debe pasar. Este verde intermedio no autoriza producción porque falta la vista pública. |
 | 4 | `git switch entrega-final` | Candidato completo histórico: portada paginada y tres comentarios por reseña, T11, SBOM por servicio e identidad de las imágenes. Ejecuta el pipeline completo y guarda el verde de ocho etapas sobre este HEAD. |
-| 5 | `git switch diseno-gamer` | Release actual: interfaz rediseñada y verificador corregido en `9424272`. Conserva el verde completo 8/8, 19/19 y el tag `qa-verde-diseno-9424272` que fija exactamente el commit promovido. |
+| 5 | `git switch diseno-gamer` | Release histórica del diseño gamer y verificador corregido en `9424272`; conservó su verde 8/8 y 19/19. |
+| 6 | `git switch diseno-gamer-v2` | Release actual Pulso Pixel v2: `0ec86bb`, verde 8/8 y 19/19, etiqueta `qa-verde-pulso-pixel-v2-0ec86bb`; destino 12/12. |
 
 **Rediseño final, 26 de septiembre de 2026:** `f77c800` pasó ocho etapas y 19/19 en QA. Se corrigió en QA el verificador del destino para identificar la portada por `id="titulo-publicaciones"`; en `9424272` se repitió el pipeline completo con árbol limpio, ocho etapas `OK` y 19/19. El tag `qa-verde-diseno-9424272` señala la release aprobada. Evidencias: `reportes/pipeline_verde_diseno_gamer_9424272.txt`, `reportes/entrega_final/veredicto_diseno_gamer_9424272.json` y `manifest_diseno_gamer_9424272.json`. Se transfirieron **ambos tar del manifiesto nuevo** y el verificador en Producción pasó 12/12; [log archivado](../reportes/entrega_final/verificacion_produccion_diseno_gamer_9424272.log). Los commits posteriores que solo archivan reportes no cambian el commit de origen de las imágenes.
+
+**Release Pulso Pixel v2, 26 de septiembre de 2026:** sobre `0ec86bb`, [el pipeline completo](../reportes/pipeline_verde_pulso_pixel_v2.txt) terminó `PERMITIDO`, árbol limpio, ocho etapas `OK` y 19/19 pruebas. La corrida original fue archivada; el [veredicto](../reportes/entrega_final/veredicto_pulso_pixel_v2.json) y el [manifiesto](../reportes/entrega_final/manifest_pulso_pixel_v2.json) conservan el commit de origen. Después de promover las imágenes sin reconstruirlas en el destino, su [verificador](../reportes/entrega_final/verificacion_produccion_pulso_pixel_v2_0ec86bb.log) pasó 12/12. Los commits posteriores solo archivaron reportes y documentación. Tras la última corrida se respaldaron privadamente y retiraron 75 publicaciones y 45 comentarios de prueba de QA; las cuatro publicaciones ajenas permanecieron y los adjuntos de prueba privados se conservaron para recuperación.
 
 En cada paso verifica que `git status --short` está limpio. El script `pipeline/promover.sh` solo debe ejecutarse tras el último verde; guarda el manifiesto y las imágenes exportadas para transferir a la EC2 nueva cuando se conozca su inventario. Si cambias código, reconstruyes o cambias etiquetas de imágenes, vuelve a pasar las ocho etapas. Los Image IDs que se empaquetan deben coincidir con `reportes/06_image_ids.json`.
 
@@ -55,4 +58,4 @@ En cada paso verifica que `git status --short` está limpio. El script `pipeline
 - Completa `docs/clasificacion_hallazgo.md` y `docs/respuesta_incidente.md` con la etapa real, exit code y rutas de los archivos. La contención puede retirar temporalmente `MODERADORES`; la corrección es escapar el contenido conservando el formato.
 - Tras verificar QA, completa la plantilla oficial de evidencias con capturas y enlaces reales. La plantilla de declaración de IA requiere palabras y comprobaciones personales de Alan.
 
-**Inventario QA verificado:** instancia `i-05cc3223adae222ef`, tipo `t2.small`, perfil `LabInstanceProfile`, grupo `sg-0a2c36cea7fb012d7` y RDS `foro-resenas-qa` en la misma VPC; los datos de identificación de la release están en `reportes/entrega_final/`. **Producción verificada:** `i-089d62a1e8fdea7bb`, grupo `sg-0b8bb51b7c7c2e560`, base separada `foro_prod` y prefijo `produccion/adjuntos/`. Incorporar las capturas de QA y Producción a la plantilla de entrega; el saldo del Learner Lab no está documentado como verificado.
+**Inventario QA verificado:** una instancia QA y una EC2 nueva de Producción, con bases y prefijos S3 separados. Los datos de trazabilidad de la release están en `reportes/entrega_final/`. Incorporar las capturas de ambas instancias a la plantilla de entrega mediante el canal del curso; el saldo del Learner Lab no está documentado como verificado.
