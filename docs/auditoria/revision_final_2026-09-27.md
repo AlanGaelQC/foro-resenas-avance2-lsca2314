@@ -4,7 +4,7 @@ Fecha: 27 de septiembre de 2026, UTC. Alcance: revisión del repositorio, fuente
 
 ## Conclusión
 
-**Estado de esta rama:** los cuatro parches descritos en A-01–A-04 ya están implementados localmente en `revision-final-quirurgica`, con pruebas sintéticas negativas que pasan. Aún no son un veredicto de QA ni una nueva promoción; requieren ejecutar el pipeline real en la instancia QA antes de incorporarse a `entrega-final`.
+**Estado de esta rama:** los cuatro parches descritos en A-01–A-04 ya están implementados en el commit local `e61ade1` de `revision-final-quirurgica`, con pruebas sintéticas negativas que pasan. Aún no son un veredicto de QA ni una nueva promoción; requieren ejecutar el pipeline real en la instancia QA antes de incorporarse a `entrega-final`.
 
 La corrección de la XSS es real; la evidencia archivada vincula el rojo, la remediación, el verde y la promoción de la release `0ec86bb`. Las capturas recuperadas muestran la aplicación y dos EC2 distintas. Los Dockerfiles ya corrigen la observación del profesor: ambos HEALTHCHECK consultan `/salud`.
 
@@ -213,4 +213,4 @@ Las capturas son legibles al abrirlas a tamaño completo. Las de terminal tienen
 - [Promoción, PNG](../diagrama_promocion.png) · [SVG](../diagrama_promocion.svg).
 - [Generador de ambos diagramas](../generar_diagrama.py).
 
-Los cambios documentales se prepararon en la rama aislada `revision-final-quirurgica`; no constituyen una nueva aplicación desplegada. Esta revisión no garantiza una calificación ni la inexistencia de todos los defectos posibles: deja resultados reproducibles, límites concretos y criterios de cierre.
+Los cambios de endurecimiento y documentación están en la rama aislada `revision-final-quirurgica` (commit local `e61ade1`); no constituyen una nueva aplicación desplegada. Esta revisión no garantiza una calificación ni la inexistencia de todos los defectos posibles: deja resultados reproducibles, límites concretos y criterios de cierre.

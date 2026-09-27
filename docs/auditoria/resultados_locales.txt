@@ -1,6 +1,6 @@
 AUDITORÍA LOCAL REPRODUCIBLE · 2026-09-27 UTC
 Base auditada: 6f5f42d (rama remota antes de los parches)
-Estado de esta copia: rama revision-final-quirurgica; parches A-01–A-04 preparados localmente, todavía sin corrida real de QA.
+Estado de esta copia: rama revision-final-quirurgica en commit e61ade1; parches A-01–A-04 preparados y commitados localmente, todavía sin corrida real de QA.
 Estas salidas son pruebas sintéticas/locales; no certifican AWS ni sustituyen el pipeline.
 
 === verificaciones_locales.py ===
