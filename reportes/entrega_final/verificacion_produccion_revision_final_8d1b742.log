@@ -1,0 +1,17 @@
+Verificación iniciada: 2026-09-27T06:32:02.705660+00:00
+[PASA] Manifiesto de release disponible: commit 8d1b74236fe43913d1a37329bf05860e3b66b479
+[PASA] Checkout de Producción coincide con el manifiesto
+[PASA] Image ID de api coincide con QA: esperado sha256:fbb0a292991920d7d863ed162b004c4ae95b0cd24e6b1e4a15b1e41597e82cd9; cargado sha256:fbb0a292991920d7d863ed162b004c4ae95b0cd24e6b1e4a15b1e41597e82cd9
+[PASA] Contenedor api ejecuta la imagen aprobada y está sano: imagen sha256:fbb0a292991920d7d863ed162b004c4ae95b0cd24e6b1e4a15b1e41597e82cd9; estado running; salud healthy
+[PASA] SHA-256 de api.tar coincide con QA: esperado 802b982606e83fd1f88f814432735322ac65c166bba219dbdf3865cbcb608422; transferido 802b982606e83fd1f88f814432735322ac65c166bba219dbdf3865cbcb608422
+[PASA] Image ID de moderador coincide con QA: esperado sha256:34e2181a7df3797d8a0e4b5cca8d0a37a6caf75bd8eec1f8644c58e450c4e9c9; cargado sha256:34e2181a7df3797d8a0e4b5cca8d0a37a6caf75bd8eec1f8644c58e450c4e9c9
+[PASA] Contenedor moderador ejecuta la imagen aprobada y está sano: imagen sha256:34e2181a7df3797d8a0e4b5cca8d0a37a6caf75bd8eec1f8644c58e450c4e9c9; estado running; salud healthy
+[PASA] SHA-256 de moderador.tar coincide con QA: esperado 859796874f3133430c4436db67b52c1871e08c0b9309f94abdc3bcd3fc4712d5; transferido 859796874f3133430c4436db67b52c1871e08c0b9309f94abdc3bcd3fc4712d5
+[PASA] API identifica entorno Producción
+[PASA] RDS alcanzable
+[PASA] S3 alcanzable
+[PASA] Moderador alcanzable
+[PASA] Portada con reseñas disponible
+[PASA] Vista del moderador rechaza sesión anónima
+[PASA] Detalle de reseña disponible
+Verificación: 15/15 controles completados
