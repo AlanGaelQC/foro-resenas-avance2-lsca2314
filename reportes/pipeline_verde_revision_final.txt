@@ -1,0 +1,4 @@
+Veredicto PERMITIDO sobre el commit candidato 8d1b74236fe43913d1a37329bf05860e3b66b479.
+Imágenes escaneadas empaquetadas; manifiesto escrito en /home/ec2-user/foro-resenas-avance2/reportes/manifest_release.json
+[PENDIENTE-AWS] Transferencia y despliegue en Produccion: requiere IP/clave
+                de la EC2 nueva y el OK de Alan. Solo terminó el empaquetado.
