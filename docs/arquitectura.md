@@ -23,7 +23,7 @@ flowchart TB
   ART --> P_MOD
 ```
 
-El diagrama corresponde a **dos EC2 efectivamente creadas**: QA `i-05cc3223adae222ef` y Producción `i-089d62a1e8fdea7bb`. Los nodos `QA_DB` y `P_DB` son dos bases lógicamente separadas (`foro` y `foro_prod`) dentro del **mismo RDS**, y los dos nodos S3 son prefijos distintos dentro del **mismo bucket**, no servidores adicionales. La aplicación de Producción verificó sus conexiones a RDS y S3. El servicio moderador solo tiene acceso desde la red interna de Compose; la API es la frontera de autorización. El RDS no publica 5432 a Internet. Los adjuntos permanecen privados y la API genera URLs firmadas de duración limitada.
+El diagrama corresponde a **dos EC2 efectivamente creadas**: una de QA y otra de Producción. Los identificadores concretos se comprueban en las capturas privadas de AWS para la entrega académica. Los nodos `QA_DB` y `P_DB` son dos bases lógicamente separadas (`foro` y `foro_prod`) dentro del **mismo RDS**, y los dos nodos S3 son prefijos distintos dentro del **mismo bucket**, no servidores adicionales. La aplicación de Producción verificó sus conexiones a RDS y S3. El servicio moderador solo tiene acceso desde la red interna de Compose; la API es la frontera de autorización. El RDS no publica 5432 a Internet. Los adjuntos permanecen privados y la API genera URLs firmadas de duración limitada.
 
 ## Fronteras de confianza
 
