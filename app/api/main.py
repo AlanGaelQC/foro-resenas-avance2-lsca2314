@@ -6,6 +6,8 @@ opcional en S3) -> el servicio de moderacion decide si se publica o se marca
 como rechazada -> comentarios sobre la resena, que pasan por la misma revision.
 """
 from pathlib import Path
+import re
+import secrets
 
 from fastapi import Depends, FastAPI, File, Form, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
@@ -28,7 +30,7 @@ from config import (
     URL_BASE_DATOS,
 )
 from db import obtener_sesion, crear_tablas
-from modelos import Comentario, ESTADO_PUBLICADO, ESTADO_RECHAZADO, Hilo, Usuario
+from modelos import Comentario, EnvioHilo, ESTADO_PUBLICADO, ESTADO_RECHAZADO, Hilo, Usuario
 from seguridad import (
     NOMBRE_COOKIE,
     crear_token_sesion,
@@ -341,6 +343,7 @@ def portada(peticion: Request, pagina: int = Query(default=1, ge=1), sesion: Ses
         for hilo in hilos
     ]
 
+    usuario = usuario_actual(peticion, sesion)
     return _PLANTILLAS.TemplateResponse(
         peticion,
         "portada.html",
@@ -349,7 +352,8 @@ def portada(peticion: Request, pagina: int = Query(default=1, ge=1), sesion: Ses
             "pagina": pagina,
             "hay_siguiente": hay_siguiente,
             "promedio": round(promedio, 2) if promedio else None,
-            "usuario": usuario_actual(peticion, sesion),
+            "usuario": usuario,
+            "token_envio": secrets.token_urlsafe(24) if usuario else None,
         },
     )
 
@@ -386,13 +390,30 @@ async def crear_hilo(
     cuerpo: str = Form(...),
     calificacion: int = Form(...),
     adjunto: UploadFile | None = File(None),
+    solicitud_id: str | None = Form(None),
     sesion: Session = Depends(obtener_sesion),
 ):
     usuario = _exigir_sesion(peticion, sesion)
     if usuario is None:
         return JSONResponse({"error": "Necesitas iniciar sesion."}, status_code=401)
+    if solicitud_id is None or not re.fullmatch(r"[A-Za-z0-9_-]{32}", solicitud_id):
+        return JSONResponse({"error": "Abre de nuevo el formulario para publicar."}, status_code=400)
+
+    enviado = sesion.get(EnvioHilo, solicitud_id)
+    if enviado is not None:
+        if enviado.autor_id != usuario.id:
+            return JSONResponse({"error": "Formulario no disponible."}, status_code=409)
+        original = sesion.get(Hilo, enviado.hilo_id)
+        if original is None:
+            return JSONResponse({"error": "Publicacion original no disponible."}, status_code=409)
+        return _redirigir(
+            f"/hilos/{original.id}" if original.estado == ESTADO_PUBLICADO
+            else "/mis-publicaciones"
+        )
     if not 1 <= calificacion <= 5:
         return JSONResponse({"error": "La calificacion debe ir de 1 a 5."}, status_code=400)
+    if len(cuerpo.strip()) < 10 or not any(c.isalnum() for c in cuerpo):
+        return JSONResponse({"error": "La reseña debe tener al menos 10 caracteres y contenido legible."}, status_code=400)
 
     contenido_adjunto = None
     extension_adjunto = None
@@ -436,7 +457,22 @@ async def crear_hilo(
     )
     sesion.add(hilo)
     try:
+        sesion.flush()
+        sesion.add(EnvioHilo(token=solicitud_id, autor_id=usuario.id, hilo_id=hilo.id))
         sesion.commit()
+    except IntegrityError:
+        sesion.rollback()
+        if clave_s3:
+            almacenamiento.eliminar_adjunto(clave_s3)
+        enviado = sesion.get(EnvioHilo, solicitud_id)
+        if enviado is not None and enviado.autor_id == usuario.id:
+            original = sesion.get(Hilo, enviado.hilo_id)
+            if original is not None:
+                return _redirigir(
+                    f"/hilos/{original.id}" if original.estado == ESTADO_PUBLICADO
+                    else "/mis-publicaciones"
+                )
+        return JSONResponse({"error": "No se pudo guardar la publicacion."}, status_code=503)
     except SQLAlchemyError:
         sesion.rollback()
         if clave_s3:

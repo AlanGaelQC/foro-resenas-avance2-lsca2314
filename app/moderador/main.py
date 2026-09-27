@@ -63,9 +63,9 @@ def revisar(texto: str, titulo: str = "") -> RespuestaModeracion:
     reglas: list[str] = []
     motivos: list[str] = []
 
-    if len(completo) < LONGITUD_MINIMA:
+    if len(texto.strip()) < LONGITUD_MINIMA or not any(c.isalnum() for c in texto):
         reglas.append("texto_insuficiente")
-        motivos.append(f"El contenido debe tener al menos {LONGITUD_MINIMA} caracteres.")
+        motivos.append(f"La reseña debe tener al menos {LONGITUD_MINIMA} caracteres de contenido legible.")
 
     palabras = {palabra.lower() for palabra in _PATRON_PALABRA.findall(completo)}
     encontradas = sorted(palabras & LEXICO_PROHIBIDO)

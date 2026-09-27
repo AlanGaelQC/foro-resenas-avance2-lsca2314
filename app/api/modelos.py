@@ -63,6 +63,16 @@ class Hilo(Base):
     )
 
 
+class EnvioHilo(Base):
+    """Identifica un envío del formulario para no crear hilos por un reenvío."""
+
+    __tablename__ = "envios_hilos"
+
+    token = Column(String(32), primary_key=True)
+    autor_id = Column(Integer, ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False)
+    hilo_id = Column(Integer, ForeignKey("hilos.id", ondelete="CASCADE"), nullable=False)
+
+
 class Comentario(Base):
     __tablename__ = "comentarios"
 

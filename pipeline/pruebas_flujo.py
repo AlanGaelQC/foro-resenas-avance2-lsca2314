@@ -73,6 +73,18 @@ def id_desde_redireccion(respuesta: httpx.Response) -> str | None:
     return coincidencia.group(1) if coincidencia else None
 
 
+def publicar_hilo(cliente: httpx.Client, data: dict, files=None) -> tuple[httpx.Response, str]:
+    """Usa el formulario real; devuelve su token para probar un reenvío."""
+    formulario = cliente.get(URL_BASE)
+    token = re.search(r'name="solicitud_id" value="([A-Za-z0-9_-]{32})"', formulario.text)
+    if formulario.status_code != 200 or token is None:
+        raise RuntimeError("No se pudo obtener el formulario autenticado de publicación")
+    respuesta = cliente.post(
+        f"{URL_BASE}/hilos", data={**data, "solicitud_id": token.group(1)}, files=files,
+    )
+    return respuesta, token.group(1)
+
+
 def tarjeta_de_hilo(portada: str, identificador: str | None) -> str:
     """Extrae la tarjeta principal del hilo, sin mezclar comentarios de otros."""
     if identificador is None:
@@ -177,8 +189,8 @@ def main() -> int:
         )
 
         marca_limpia = uuid.uuid4().hex[:10]
-        respuesta_limpia = usuario_a.post(
-            f"{URL_BASE}/hilos",
+        respuesta_limpia, token_limpio = publicar_hilo(
+            usuario_a,
             data={
                 "titulo": f"Resena valida {marca_limpia}",
                 "cuerpo": "El servicio fue puntual y el trato correcto, lo recomiendo.",
@@ -195,9 +207,23 @@ def main() -> int:
             f"http {respuesta_limpia.status_code}",
         )
 
-        marca_sucia = uuid.uuid4().hex[:10]
-        respuesta_sucia = usuario_a.post(
+        reenvio = usuario_a.post(
             f"{URL_BASE}/hilos",
+            data={"solicitud_id": token_limpio, "titulo": f"Resena valida {marca_limpia}",
+                  "cuerpo": "El servicio fue puntual y el trato correcto, lo recomiendo.",
+                  "calificacion": "5"},
+        )
+        propias_reenvio = usuario_a.get(f"{URL_BASE}/mis-publicaciones").text
+        registrar(
+            "T4b Volver y reenviar el formulario no duplica la reseña",
+            id_hilo is not None and reenvio.status_code == 303
+            and id_desde_redireccion(reenvio) == id_hilo
+            and propias_reenvio.count(f"Resena valida {marca_limpia}") == 1,
+        )
+
+        marca_sucia = uuid.uuid4().hex[:10]
+        respuesta_sucia, _ = publicar_hilo(
+            usuario_a,
             data={
                 "titulo": f"Reclamo {marca_sucia}",
                 "cuerpo": "Esto es una estafa y son unos imbecil, no vuelvo nunca.",
@@ -221,8 +247,8 @@ def main() -> int:
 
         marca_xss = uuid.uuid4().hex[:10]
         carga_xss = f"<script>alert('{marca_xss}')</script> **muy buena** atencion en general"
-        respuesta_xss = usuario_a.post(
-            f"{URL_BASE}/hilos",
+        respuesta_xss, _ = publicar_hilo(
+            usuario_a,
             data={"titulo": f"Prueba render {marca_xss}", "cuerpo": carga_xss, "calificacion": "4"},
         )
         id_xss = id_desde_redireccion(respuesta_xss)
@@ -260,8 +286,8 @@ def main() -> int:
         else:
             registrar("T6b El moderador rechaza tambien comentarios", False, "sin hilo objetivo")
 
-        respuesta = usuario_a.post(
-            f"{URL_BASE}/hilos",
+        respuesta, _ = publicar_hilo(
+            usuario_a,
             data={"titulo": "Rango invalido", "cuerpo": "Texto suficientemente largo", "calificacion": "9"},
         )
         registrar(
@@ -270,8 +296,18 @@ def main() -> int:
             f"http {respuesta.status_code}",
         )
 
-        respuesta = usuario_a.post(
-            f"{URL_BASE}/hilos",
+        punto, _ = publicar_hilo(
+            usuario_a,
+            data={"titulo": "Minecraft", "cuerpo": ".", "calificacion": "5"},
+        )
+        registrar(
+            "T7b El título no cuenta para el mínimo del cuerpo de la reseña",
+            punto.status_code == 400,
+            f"http {punto.status_code}",
+        )
+
+        respuesta, _ = publicar_hilo(
+            usuario_a,
             data={"titulo": "Adjunto falso", "cuerpo": "Texto suficientemente largo", "calificacion": "3"},
             files={"adjunto": ("falsa.png", b"esto no es una imagen", "image/png")},
         )
@@ -283,8 +319,8 @@ def main() -> int:
 
         marca_s3 = uuid.uuid4().hex[:10]
         png_minimo = imagen_png_prueba()
-        respuesta_s3 = usuario_a.post(
-            f"{URL_BASE}/hilos",
+        respuesta_s3, _ = publicar_hilo(
+            usuario_a,
             data={
                 "titulo": f"Resena con imagen {marca_s3}",
                 "cuerpo": "Publicacion valida con un adjunto almacenado de forma privada.",
@@ -325,6 +361,16 @@ def main() -> int:
         registrar(
             "T8c La imagen publicada aparece en portada y detalle sin sesion",
             imagen_visible,
+        )
+        propias_imagen = usuario_a.get(f"{URL_BASE}/mis-publicaciones").text
+        registrar(
+            "T8e La imagen publicada aparece también en Mis publicaciones y en el destacado",
+            id_s3 is not None
+            and f'<img src="/imagen/{id_s3}"' in propias_imagen
+            and re.search(
+                r'<div class="escaparate-visual"[^>]*>\s*<img src="/imagen/'
+                + re.escape(id_s3) + r'"', portada_imagen,
+            ) is not None,
         )
         sin_imagen = httpx.get(
             f"{URL_BASE}/imagen/{id_hilo}", timeout=TIEMPO_ESPERA
@@ -369,8 +415,8 @@ def main() -> int:
         registrar("T11b Un comentario aparece en portada y detalle", un_comentario)
 
         marca_feed = uuid.uuid4().hex[:8]
-        r_feed = usuario_a.post(
-            f"{URL_BASE}/hilos",
+        r_feed, _ = publicar_hilo(
+            usuario_a,
             data={
                 "titulo": f"Feed {marca_feed}",
                 "cuerpo": "Resena limpia para probar el feed publico con comentarios.",
@@ -398,6 +444,12 @@ def main() -> int:
             "T11 El feed muestra los 3 recientes de este hilo y 4 en detalle",
             feed_correcto,
             f"comentarios propios mostrados en portada: {cantidad_muestra}",
+        )
+        registrar(
+            "T11c Una miniatura reciente usa la imagen del juego cuando existe",
+            id_s3 is not None
+            and re.search(r'<div class="mini-visual"[^>]*><img src="/imagen/'
+                          + re.escape(id_s3) + r'"', portada_feed) is not None,
         )
 
     with httpx.Client(timeout=TIEMPO_ESPERA, follow_redirects=False) as usuario_b:

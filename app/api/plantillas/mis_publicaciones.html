@@ -2,12 +2,19 @@
 {% block titulo %}Mis publicaciones{% endblock %}
 {% block contenido %}
 <h1>Mis publicaciones</h1>
-<p class="meta">Aqui aparece lo que el moderador rechazo, con el motivo.</p>
+<p class="meta">Consulta tus reseñas publicadas y las rechazadas con su motivo.</p>
 
 <h2>Resenas</h2>
 {% for hilo in hilos %}
   <div class="tarjeta {{ 'rechazado' if hilo.estado == 'rechazado' else 'publicado' }}">
-    <h3>{{ hilo.titulo }}</h3>
+    {% if hilo.estado == 'publicado' and hilo.clave_s3 %}
+      <a href="/hilos/{{ hilo.id }}" aria-label="Ver reseña {{ hilo.titulo }}">
+        <img src="/imagen/{{ hilo.id }}" alt="Imagen adjunta a la reseña {{ hilo.titulo }}"
+             loading="lazy" decoding="async"
+             style="display:block;max-width:100%;max-height:220px;margin-bottom:16px;border-radius:12px">
+      </a>
+    {% endif %}
+    <h3>{% if hilo.estado == 'publicado' %}<a href="/hilos/{{ hilo.id }}">{{ hilo.titulo }}</a>{% else %}{{ hilo.titulo }}{% endif %}</h3>
     <p class="meta">Estado: {{ hilo.estado }}{% if hilo.motivo_moderacion %} · {{ hilo.motivo_moderacion }}{% endif %}</p>
     <p>{{ hilo.cuerpo }}</p>
   </div>

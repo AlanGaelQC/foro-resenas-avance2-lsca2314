@@ -22,6 +22,7 @@
   .escaparate-visual { overflow:hidden; height:147px; border-radius:12px;
     border:1px solid #5a8d9d66; background:#18243b; }
   .escaparate-visual svg { display:block; width:100%; height:100%; }
+  .escaparate-visual img { display:block; width:100%; height:100%; object-fit:cover; }
   .escaparate .etiqueta { margin:17px 0 5px; color:var(--acento); font-size:.72rem;
     font-weight:800; text-transform:uppercase; letter-spacing:.1em; }
   .escaparate h2 { margin:0 0 7px; font-size:1.25rem; overflow-wrap:anywhere; }
@@ -43,8 +44,9 @@
   .mini-resena { display:flex; gap:14px; min-width:0; padding:15px;
     border:1px solid var(--linea); border-radius:13px; background:var(--papel); }
   .mini-visual { flex:0 0 60px; display:grid; place-items:center; height:65px; border-radius:9px;
-    background:linear-gradient(145deg,#2b6252,#334b63); color:#d9f5e8;
+    overflow:hidden; background:linear-gradient(145deg,#2b6252,#334b63); color:#d9f5e8;
     font-size:1.6rem; font-weight:900; }
+  .mini-visual img { width:100%; height:100%; object-fit:cover; }
   .mini-resena p { margin:1px 0 3px; color:var(--acento); font-size:.73rem; font-weight:800; }
   .mini-resena h3 { margin:0; font-size:.94rem; overflow-wrap:anywhere; }
   .mini-resena a { color:var(--tinta); text-decoration:none; }
@@ -148,7 +150,10 @@
     {% if vista_hilos and pagina == 1 %}
       {% set reciente = vista_hilos[0] %}
       <article class="escaparate">
-        <div class="escaparate-visual" aria-hidden="true"><svg viewBox="0 0 640 420" preserveAspectRatio="xMidYMid slice" focusable="false"><use href="#escena-arcade"/></svg></div>
+        <div class="escaparate-visual" aria-hidden="true">
+          {% if reciente.hilo.clave_s3 %}<img src="/imagen/{{ reciente.hilo.id }}" alt="" loading="lazy" decoding="async">
+          {% else %}<svg viewBox="0 0 640 420" preserveAspectRatio="xMidYMid slice" focusable="false"><use href="#escena-arcade"/></svg>{% endif %}
+        </div>
         <p class="etiqueta">Reseña reciente · ★ {{ reciente.hilo.calificacion }}/5</p>
         <h2><a href="/hilos/{{ reciente.hilo.id }}">{{ reciente.hilo.titulo }}</a></h2>
         <p class="meta">Compartida por {{ reciente.hilo.autor.nombre }}</p>
@@ -165,7 +170,7 @@
   <div class="franja-grid">
     {% for v in vista_hilos[1:4] %}
       <article class="mini-resena">
-        <div class="mini-visual" aria-hidden="true">{{ v.hilo.titulo[:1] | upper }}</div>
+        <div class="mini-visual" aria-hidden="true">{% if v.hilo.clave_s3 %}<img src="/imagen/{{ v.hilo.id }}" alt="" loading="lazy" decoding="async">{% else %}{{ v.hilo.titulo[:1] | upper }}{% endif %}</div>
         <div><p>★ {{ v.hilo.calificacion }}/5 · {{ v.hilo.autor.nombre }}</p>
           <h3><a href="/hilos/{{ v.hilo.id }}">{{ v.hilo.titulo }}</a></h3></div>
       </article>
@@ -220,8 +225,9 @@
         <p class="eyebrow">Tu partida cuenta</p>
         <h2>Publicar una reseña</h2>
         <form action="/hilos" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="solicitud_id" value="{{ token_envio }}">
           <label for="resena-titulo">Nombre del videojuego</label><input id="resena-titulo" type="text" name="titulo" required maxlength="160" placeholder="¿Qué juego reseñas?">
-          <label for="resena-cuerpo">¿Qué te pareció?</label><textarea id="resena-cuerpo" name="cuerpo" rows="4" required placeholder="Cuéntanos sobre la historia, las mecánicas o el rendimiento."></textarea>
+          <label for="resena-cuerpo">¿Qué te pareció? (mínimo 10 caracteres)</label><textarea id="resena-cuerpo" name="cuerpo" rows="4" required minlength="10" placeholder="Cuéntanos sobre la historia, las mecánicas o el rendimiento."></textarea>
           <label for="resena-calificacion">Tu calificación del juego</label>
           <select id="resena-calificacion" name="calificacion">
             {% for n in [5, 4, 3, 2, 1] %}<option value="{{ n }}">{{ n }}</option>{% endfor %}

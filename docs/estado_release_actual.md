@@ -1,27 +1,26 @@
-# Estado de la release vigente — Pulso Pixel v2
+# Estado de la release verificada — Pulso Pixel
 
-Resultados de la release observados el 26 de septiembre de 2026; nota de auditoría añadida el 27. Este registro resume evidencia histórica sin incluir direcciones de red, identificadores de infraestructura ni credenciales. No constituye una consulta en vivo del estado de AWS.
+Resultados documentados el 27 de septiembre de 2026. Este registro resume evidencia histórica sin direcciones de red, identificadores de infraestructura ni credenciales. No constituye una consulta en vivo de AWS.
 
 | Control | Resultado |
 |---|---|
-| Código aprobado | `0ec86bb5498fc8f91090edf3ec4e77498586644d`, etiqueta `qa-verde-pulso-pixel-v2-0ec86bb`. |
-| QA | Pipeline completo: **8/8 etapas OK**, **19/19 pruebas** y árbol limpio. [Log](../reportes/pipeline_verde_pulso_pixel_v2.txt) · [Veredicto](../reportes/entrega_final/veredicto_pulso_pixel_v2.json). |
-| Promoción | Se transfirieron las dos imágenes examinadas en QA sin reconstruirlas en el destino. [Manifiesto](../reportes/entrega_final/manifest_pulso_pixel_v2.json). |
-| Producción | Ambas imágenes coinciden con el manifiesto; API y moderador están sanos. [Verificación original del destino: 12/12](../reportes/entrega_final/verificacion_produccion_pulso_pixel_v2_0ec86bb.log). La portada y el detalle de una reseña existente respondieron HTTP 200. |
+| Código aprobado | `8d1b74236fe43913d1a37329bf05860e3b66b479`. |
+| QA | Pipeline completo: **8/8 etapas OK**, **21/21 pruebas** y árbol limpio. [Veredicto](../reportes/entrega_final/veredicto_revision_final.json) · [Pruebas](../reportes/entrega_final/08_pruebas_revision_final.txt). |
+| Promoción | Se transfirieron los artefactos examinados en QA sin reconstruirlos en el destino. [Manifiesto](../reportes/entrega_final/manifest_revision_final.json). |
+| Producción | Checkout, imágenes cargadas, contenedores activos y saludables, RDS, S3 y flujos HTTP contrastados con el manifiesto. [Verificación: 15/15](../reportes/entrega_final/verificacion_produccion_revision_final_8d1b742.log). |
 | Respaldo anterior | Se conservan los artefactos de las promociones anteriores para reversión; las evidencias históricas siguen archivadas. |
 
-Después del último verde y de la verificación del destino se respaldaron privadamente los datos generados por las pruebas de QA. Se eliminaron de la base de QA **75 publicaciones y 45 comentarios** identificados por cuenta y patrón de título; quedaron cuatro publicaciones ajenas a las pruebas. Los **17 adjuntos privados de prueba** se conservaron para que el respaldo siga siendo recuperable. La base de Producción no intervino en esta limpieza. El pipeline de QA generará nuevos datos de prueba si vuelve a ejecutarse.
+Tras una promoción anterior se respaldaron privadamente los datos de prueba de QA y se eliminaron **75 publicaciones y 45 comentarios** identificados por cuenta y patrón de título. Quedaron cuatro publicaciones ajenas a esas pruebas y los **17 adjuntos privados de prueba**. Las corridas posteriores del pipeline volvieron a generar datos de prueba en QA. La base de Producción no intervino en aquella limpieza.
 
-El diseño vigente se llama **Pulso Pixel** y usa arte arcade original, una portada de reseñas de videojuegos y una vista compacta para reseñas largas. El commit que archiva evidencias es posterior al commit aprobado; no sustituye su veredicto ni los identificadores de las imágenes.
+El diseño vigente se llama **Pulso Pixel** y usa arte arcade original, una portada de reseñas de videojuegos y una vista compacta para reseñas largas. Los commits que archivan evidencias son posteriores al commit aprobado; no sustituyen su veredicto ni los identificadores de las imágenes.
 
 **Revisión posterior:** se reprodujeron huecos en las exclusiones de secretos,
 la identificación automática de contenedores activos, la protección del destino
 de las pruebas QA y la aserción de comentarios T11. El
 [informe del 27 de septiembre](auditoria/revision_final_2026-09-27.md) contiene
-pruebas aisladas y criterios de cierre. Los cuatro parches están preparados localmente en la rama `revision-final-quirurgica` y sus pruebas sintéticas pasan; todavía requieren una corrida real en QA. No demuestran
-que la release histórica fallara ni constituyen correcciones ya desplegadas.
+pruebas aisladas y criterios de cierre. Los parches superaron la corrida completa de QA y la verificación reforzada en Producción; esto no implica que las releases anteriores incumplieran sus propios controles.
 
-**Pendiente operativo inmediato:** ejecutar en QA la rama de parches y, solo con verde, decidir una nueva promoción.
+**Candidatos posteriores:** imágenes públicas de reseñas y mejoras del formulario requieren un nuevo ciclo QA → veredicto verde → promoción → verificación del destino. La evidencia de `8d1b742` no certifica los cambios posteriores.
 
 **Pendiente para la entrega académica:** comprobar las
 configuraciones vivas de AWS indicadas en el informe, incorporar capturas de QA
