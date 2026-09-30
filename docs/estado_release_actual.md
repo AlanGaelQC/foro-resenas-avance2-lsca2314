@@ -22,8 +22,12 @@ pruebas aisladas y criterios de cierre. Los parches superaron la corrida complet
 
 **Release actual:** imágenes públicas de reseñas y mejoras del formulario siguieron un ciclo QA → veredicto verde → promoción → verificación del destino, registrado en las evidencias de `a2123c5`. La evidencia histórica de `8d1b742` solo certifica aquella release.
 
-**Pendiente para la entrega académica:** comprobar las
-configuraciones vivas de AWS indicadas en el informe, incorporar capturas de QA
-y Producción a la plantilla oficial, y completar en primera persona la
-declaración de uso de IA y la autoevaluación. Este archivo no afirma que esas
-capturas ya estén adjuntas.
+**Estado del documento académico:** la plantilla oficial se completó por separado
+con siete capturas, autoevaluación y respuestas personales para subirla en la
+plataforma; ese documento no forma parte de este repositorio. La declaración
+de uso de IA está completa en [declaracion_ia.md](declaracion_ia.md).
+
+**Límite de verificación:** los registros 27/27 y 16/16 prueban los controles
+indicados para la release `a2123c5`, pero no certifican el estado actual de AWS
+ni sustituyen la comprobación en vivo de cifrado y reglas de acceso señalada
+en el [informe de auditoría](auditoria/revision_final_2026-09-27.md).
