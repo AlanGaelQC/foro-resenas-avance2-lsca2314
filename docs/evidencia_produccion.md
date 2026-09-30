@@ -18,7 +18,7 @@ Tras el arranque, la comprobación de solo lectura observó ambos contenedores s
 
 Después de archivar la evidencia se limpiaron **75 reseñas y 45 comentarios** creados por el pipeline **solo en QA**; cuatro publicaciones ajenas permanecieron, entre ellas una reseña de videojuegos. Un respaldo privado y 17 adjuntos de prueba en S3 se conservaron para permitir recuperación. Esta limpieza no modificó los datos del destino ni el veredicto QA archivado.
 
-Las capturas nuevas de QA y Producción **todavía deben incorporarse a la plantilla académica**; el verificador no sustituye la inspección visual.
+Nota histórica de esa promoción: posteriormente se incorporaron capturas de QA y Producción al PDF académico entregado por separado. Son capturas del proceso, no una captura nueva de la release `a2123c5`; el verificador tampoco sustituye la inspección visual.
 
 ## Segunda promoción: diseño gamer (histórica)
 
@@ -32,7 +32,7 @@ El 26 de septiembre de 2026 se activó en la misma EC2 de Producción el commit 
 | Verificación | [`verificacion_produccion_diseno_gamer_9424272.log`](../reportes/entrega_final/verificacion_produccion_diseno_gamer_9424272.log) registra **12/12** controles con reseña y detalle existentes, incluidos integridad de imágenes, servicios y acceso anónimo denegado a la vista de moderador. El original permanece archivado en la EC2 de Producción. |
 | Respaldo | Se conservaron los tar y el manifiesto originales en el destino para la reversión. Durante esa segunda promoción, el checkout del destino fue el tag aprobado `qa-verde-diseno-9424272`; la rama de evidencias contiene commits posteriores. |
 
-La dirección pública puede cambiar tras reiniciar la EC2. Las capturas de la interfaz rediseñada aún deben incorporarse a la entrega; el resultado del verificador no sustituye esa comprobación visual.
+La dirección pública puede cambiar tras reiniciar la EC2. Esta nota pertenece a la promoción histórica: la plantilla académica recibió después capturas del proceso. El resultado del verificador no sustituye la comprobación visual de una versión concreta.
 
 ## Primera promoción: 22ee1ec (histórica)
 
@@ -54,7 +54,7 @@ La dirección pública puede cambiar tras reiniciar la EC2. Las capturas de la i
 - Captura inicial de Producción: portada antes de publicar una reseña.
 - Captura posterior: reseña de **Luis** sobre *Midnight Club 3* con cuerpo recortado; contador de **cuatro comentarios** y **solo tres visibles** en la tarjeta. Comentarios publicados por otra cuenta (**Angel**).
 - Captura de detalle: autor, calificación y cuerpo completo; contador de **cuatro comentarios**. La imagen enviada muestra el comienzo de la lista: para evidenciar los cuatro, adjuntar también una captura al desplazarse hasta el final.
-- Las capturas fueron proporcionadas durante la ejecución; **aún deben insertarse en la plantilla oficial o versionarse en `docs/evidencias/`** antes de afirmar que están adjuntas al repositorio. Para la evaluación, verificar los identificadores de las dos instancias directamente en la consola AWS o en capturas entregadas por el canal del curso.
+- Las capturas proporcionadas durante la ejecución se incorporaron después al PDF académico entregado por separado; no se versionaron como archivos de imagen en este repositorio. La captura de la aplicación en ese PDF corresponde a una release histórica, y los registros de QA y Producción documentan la promoción posterior de `a2123c5`. Para comprobar identificadores y estado actuales de las instancias, consultar la consola AWS.
 - La vista previa enriquecida autorizada y el escape de XSS fueron verificados en QA. En Producción se verificó el acceso anónimo denegado y se comprobó que ambos Image IDs son idénticos a los de QA; el verificador actual **no realiza una prueba autenticada de XSS en Producción**.
 - El sitio se sirvió por **HTTP** (`COOKIE_SEGURA=false`) en una IP efímera: hay un límite de transporte que debe indicarse en la entrega. El puerto 8080 está restringido a la IP cliente autorizada en el grupo de seguridad; HTTPS no se presenta como implementado.
 
